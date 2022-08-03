@@ -5,27 +5,176 @@
 #ifndef C_VERSION_VECTOR3_H
 #define C_VERSION_VECTOR3_H
 
-class Vector3 {
-public:
-    Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
-    double x, y, z;
+#include <valarray>
 
-    Vector3 operator*(Vector3 other) {
-        return Vector3(x * other.x, y * other.y, z * other.z);
-    }
-    Vector3 operator*(float other) {
-        return {x * other, y * other, z * other};
-    }
-    Vector3 operator*(double other) {
-        return {x * other, y * other, z * other};
-    }
-    Vector3 operator*(double other) const {
-        return {x * other, y * other, z * other};
+struct Vector {
+    Vector() = default;
+    constexpr Vector(long double x, long double y, long double z) noexcept : x{ x }, y{ y }, z{ z } {}
+
+    constexpr auto notNull() const noexcept
+    {
+        return x || y || z;
     }
 
-    Vector3 operator+(Vector3 other) const {
-        return {x + other.x, y + other.y, z + other.z};
+    friend constexpr auto operator==(const Vector& a, const Vector& b) noexcept
+    {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
     }
+
+    friend constexpr auto operator!=(const Vector& a, const Vector& b) noexcept
+    {
+        return !(a == b);
+    }
+
+    constexpr Vector& operator=(const long double array[3]) noexcept
+    {
+        x = array[0];
+        y = array[1];
+        z = array[2];
+        return *this;
+    }
+
+    constexpr Vector& operator+=(const Vector& v) noexcept
+    {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        return *this;
+    }
+
+    constexpr Vector& operator+=(long double f) noexcept
+    {
+        x += f;
+        y += f;
+        z += f;
+        return *this;
+    }
+
+    constexpr Vector& operator-=(const Vector& v) noexcept
+    {
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        return *this;
+    }
+
+    constexpr Vector& operator-=(long double f) noexcept
+    {
+        x -= f;
+        y -= f;
+        z -= f;
+        return *this;
+    }
+
+    friend constexpr auto operator-(const Vector& a, const Vector& b) noexcept
+    {
+        return Vector{ a.x - b.x, a.y - b.y, a.z - b.z };
+    }
+
+    friend constexpr auto operator+(const Vector& a, const Vector& b) noexcept
+    {
+        return Vector{ a.x + b.x, a.y + b.y, a.z + b.z };
+    }
+
+    friend constexpr auto operator*(const Vector& a, const Vector& b) noexcept
+    {
+        return Vector{ a.x * b.x, a.y * b.y, a.z * b.z };
+    }
+
+    constexpr Vector& operator/=(long double div) noexcept
+    {
+        x /= div;
+        y /= div;
+        z /= div;
+        return *this;
+    }
+
+    constexpr Vector& operator/(int div) noexcept
+    {
+        x /= div;
+        y /= div;
+        z /= div;
+        return *this;
+    }
+
+    constexpr Vector& operator/(Vector v) noexcept
+    {
+        x /= v.x;
+        y /= v.y;
+        z /= v.z;
+        return *this;
+    }
+
+    constexpr auto operator*(long double mul) const noexcept
+    {
+        return Vector{ x * mul, y * mul, z * mul };
+    }
+
+    constexpr auto operator-(long double sub) const noexcept
+    {
+        return Vector{ x - sub, y - sub, z - sub };
+    }
+
+    constexpr auto operator+(long double add) const noexcept
+    {
+        return Vector{ x + add, y + add, z + add };
+    }
+
+    Vector& normalize() noexcept
+    {
+        x = std::isfinite(x) ? std::remainder(x, 360.0f) : 0.0f;
+        y = std::isfinite(y) ? std::remainder(y, 360.0f) : 0.0f;
+        z = 0.0f;
+        return *this;
+    }
+
+    auto length() const noexcept
+    {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+
+    auto length2D() const noexcept
+    {
+        return std::sqrt(x * x + y * y);
+    }
+
+    constexpr auto squareLength() const noexcept
+    {
+        return x * x + y * y + z * z;
+    }
+
+    constexpr auto size() const noexcept
+    {
+        return x * y * z;
+    }
+
+    constexpr auto dotProduct(const Vector& v) const noexcept
+    {
+        return x * v.x + y * v.y + z * v.z;
+    }
+
+//    constexpr auto transform(const matrix3x4& mat) const noexcept;
+
+    auto distTo(const Vector& v) const noexcept
+    {
+        return (*this - v).length();
+    }
+
+//    auto toAngle() const noexcept
+//    {
+//        return Vector{ Helpers::rad2deg(std::atan2(-z, std::hypot(x, y))),
+//                       Helpers::rad2deg(std::atan2(y, x)),
+//                       0.0f };
+//    }
+//
+//    static auto fromAngle(const Vector& angle) noexcept
+//    {
+//        return Vector{ std::cos(Helpers::deg2rad(angle.x)) * std::cos(Helpers::deg2rad(angle.y)),
+//                       std::cos(Helpers::deg2rad(angle.x)) * std::sin(Helpers::deg2rad(angle.y)),
+//                       -std::sin(Helpers::deg2rad(angle.x)) };
+//    }
+
+    long double x, y, z;
 };
 
 #endif //C_VERSION_VECTOR3_H
