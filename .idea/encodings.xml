@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/TransformVertexShader.vertexshader" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/common/controls.cpp" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/cube.obj" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/tutorial06_keyboard_and_mouse" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/uvmap.DDS" charset="windows-1252" />
+  </component>
+</project>

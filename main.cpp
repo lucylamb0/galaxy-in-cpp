@@ -6,18 +6,9 @@
 #include "Star.h"
 #include "includes.h"
 #include "Region.h"
+#include "MilkshapeModel.h"
 
 std::vector<Star*> star_list = {};
-
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
 
 #include <filesystem>
 #include <io.h>
@@ -88,12 +79,12 @@ void getPointsRegions(Vector point = {-1, 5, 1}) {
 
     regions_we_are_in.push_back(index);
 
-    neighbour_above = -1;
-    neighbour_below = -1;
+//    neighbour_above = -1;
+//    neighbour_below = -1;
 
     if(remainder <= regionMatrix.overlap_factor) {
         // We are overlapping the below region
-        neighbour_below = index + (-1 * regionMatrix.divisions.z);
+//        neighbour_below = index + (-1 * regionMatrix.divisions.z);
 //        if(regionMatrix.regions.at(neighbour_below).contains_y(point)) {
 //            regions_we_are_in.push_back(neighbour_below);
 //            std::cout << "We are definetly overlapping the below region: " << neighbour_below << std::endl;
@@ -103,7 +94,7 @@ void getPointsRegions(Vector point = {-1, 5, 1}) {
     }
     else if (remainder >= 1 - regionMatrix.overlap_factor) {
         // We are overlapping the above region
-        neighbour_above = index + (regionMatrix.divisions.z);
+//        neighbour_above = index + (regionMatrix.divisions.z);
 //        if(regionMatrix.regions.at(neighbour_above).contains_y(point)) {
 //            regions_we_are_in.push_back(neighbour_above);
 //            std::cout << "We are definetly overlapping the above region: " << neighbour_above << std::endl;
@@ -119,12 +110,12 @@ void getPointsRegions(Vector point = {-1, 5, 1}) {
     index += (tmp2);
 
 
-    neighbour_above = -1;
-    neighbour_below = -1;
+//    neighbour_above = -1;
+//    neighbour_below = -1;
 
     if(remainder <= regionMatrix.overlap_factor) {
         // We are overlapping the below region
-        neighbour_below = index + -1;
+//        neighbour_below = index + -1;
 //        if(regionMatrix.regions.at(neighbour_below).contains_z(point)) {
 //            regions_we_are_in.push_back(neighbour_below);
 //            std::cout << "We are definetly overlapping the below region: " << neighbour_below << std::endl;
@@ -134,7 +125,7 @@ void getPointsRegions(Vector point = {-1, 5, 1}) {
     }
     else if (remainder >= 1 - regionMatrix.overlap_factor) {
         // We are overlapping the above region
-        neighbour_above = index + 1;
+//        neighbour_above = index + 1;
 //        if(regionMatrix.regions.at(neighbour_above).contains_z(point)) {
 //            regions_we_are_in.push_back(neighbour_above);
 //            std::cout << "We are definetly overlapping the above region: " << neighbour_above << std::endl;
@@ -171,7 +162,274 @@ void getPointsRegions(Vector point = {-1, 5, 1}) {
 //    }
 }
 
+static void glfw_error_callback(int error, const char* description) {
+    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+
+bool initialiseEngine() {
+    glfwSetErrorCallback(glfw_error_callback);
+    // Initialise GLFW
+    if( !glfwInit() )
+    {
+        fprintf( stderr, "Failed to initialize GLFW\n" );
+        getchar();
+        return -1;
+    }
+    std::cout << "GLFW initialised!" << std::endl;
+
+    // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+    // GL ES 2.0 + GLSL 100
+    const char* glsl_version = "#version 100";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+    // GL 3.2 + GLSL 150
+    const char* glsl_version = "#version 150";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+    // GL 3.0 + GLSL 130
+    const char* glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
+
+    std::cout << "GLSL version: " << glsl_version << std::endl;
+    std::cout << "GLFW window hints set!" << std::endl;
+
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
+    // Open a window and create its OpenGL context
+    window = glfwCreateWindow( globals->window_size.width, globals->window_size.height, "e", NULL, NULL);
+    if( window == NULL ){
+        fprintf( stderr, "Failed to open GLFW window.\n" );
+        glfwTerminate();
+        return -1;
+    }
+    globals->window = window;
+    std::cout << "GLFW window created!" << std::endl;
+
+    glfwMakeContextCurrent(window);
+    std::cout << "GLFW window context set!" << std::endl;
+
+    static bool vSync = true;
+    glfwSwapInterval(vSync); // Enable vsync
+    std::cout << "GLFW vsync " << (vSync ? "enabled!" : "disabled!") << std::endl;
+
+    std::cout << "Setting up IMGUI" << std::endl;
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    std::cout << "IMGUI initialised!" << std::endl;
+
+    // Initialize GLEW
+    glewExperimental = true; // Needed for core profile
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        getchar();
+        glfwTerminate();
+        return -1;
+    }
+    std::cout << "GLEW initialised!" << std::endl;
+
+    // Ensure we can capture the escape key being pressed below
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+    if(globals->mouse_captured) {
+        // Hide the mouse and enable unlimited movement
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    std::cout << "GLFW input modes set!" << std::endl;
+
+    // Set the mouse at the center of the screen
+    glfwPollEvents();
+    glfwSetCursorPos(window, globals->window_size.width/2, globals->window_size.height/2);
+    std::cout << "GLFW cursor set!" << std::endl;
+
+    // Dark blue background
+    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+
+    // Enable depth test
+    glEnable(GL_DEPTH_TEST);
+    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
+
+    // Cull triangles which normal is not towards the camera
+    glEnable(GL_CULL_FACE);
+
+    std::cout << "GL initialised!" << std::endl;
+}
+
+void cleanupEngine() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    glfwTerminate();
+}
+
 int main() {
+    initialiseEngine();
+
+//    GLuint VertexArrayID;
+//    glGenVertexArrays(1, &VertexArrayID);
+//    glBindVertexArray(VertexArrayID);
+//
+//    // Create and compile our GLSL program from the shaders
+//    GLuint programID = LoadShaders(
+//            "TransformVertexShader.vertexshader",
+//                                    "TextureFragmentShader.fragmentshader" );
+//
+//    // Get a handle for our "MVP" uniform
+//    GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+//
+//    // Load the texture
+//    GLuint Texture = loadDDS("uvmap.DDS");
+//
+//    // Get a handle for our "myTextureSampler" uniform
+//    GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+//
+//    // Read our .obj file
+//    std::vector<glm::vec3> vertices;
+//    std::vector<glm::vec2> uvs;
+//    std::vector<glm::vec3> normals; // Won't be used at the moment.
+//    bool res = loadOBJ("cube.obj", vertices, uvs, normals);
+//
+//    // Load it into a VBO
+//
+//    GLuint vertexbuffer;
+//    glGenBuffers(1, &vertexbuffer);
+//    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+//    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+//
+//    GLuint uvbuffer;
+//    glGenBuffers(1, &uvbuffer);
+//    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+//    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+
+    Model *pModel = NULL;   // Holds The Model Data
+    pModel = new MilkshapeModel();
+    if ( pModel->loadModelData( "dwarf1.ms3d" ) == false )
+    {
+        std::cout << "Couldn't load the model dwarf1.ms3d" << std::endl;
+        return 0;                                   // If Model Didn't Load, Quit
+    }
+
+    pModel->reloadTextures();
+
+    do{
+
+        // Clear the screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // feed inputs to dear imgui, start new frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // render your GUI
+        ImGui::Begin("Demo window");
+        ImGui::Text(globals->mouse_captured ? "Mouse captured" : "Mouse not captured");
+        ImGui::Checkbox("Mouse capture", &globals->mouse_captured);
+
+        ImGui::Text("Frame time: %.2fms", globals->frame_time);
+
+        ImGui::Text("Camera Angles: %.2f, %.2f", globals->camera_angles.pitch, globals->camera_angles.yaw);
+
+        ImGui::Button("Hello!");
+        ImGui::End();
+
+        // Render dear imgui into screen
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//
+////        gluLookAt( 75, 75, 75, 0, 0, 0, 0, 1, 0 );
+////
+////        glRotatef(0.5,0.0f,1.0f,0.0f);
+//
+//        // Use our shader
+//        glUseProgram(programID);
+//
+//        // Compute the MVP matrix from keyboard and mouse input
+        computeMatricesFromInputs();
+        glm::mat4 ProjectionMatrix = getProjectionMatrix();
+        glm::mat4 ViewMatrix = getViewMatrix();
+        glm::mat4 ModelMatrix = glm::mat4(1.0);
+        glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+//
+//        // Send our transformation to the currently bound shader,
+//        // in the "MVP" uniform
+//        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+//
+//        // Bind our texture in Texture Unit 0
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, Texture);
+//        // Set our "myTextureSampler" sampler to use Texture Unit 0
+//        glUniform1i(TextureID, 0);
+//
+//        // 1rst attribute buffer : vertices
+//        glEnableVertexAttribArray(0);
+//        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+//        glVertexAttribPointer(
+//                0,                  // attribute
+//                3,                  // size
+//                GL_FLOAT,           // type
+//                GL_FALSE,           // normalized?
+//                0,                  // stride
+//                (void*)0            // array buffer offset
+//        );
+//
+//        // 2nd attribute buffer : UVs
+//        glEnableVertexAttribArray(1);
+//        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+//        glVertexAttribPointer(
+//                1,                                // attribute
+//                2,                                // size
+//                GL_FLOAT,                         // type
+//                GL_FALSE,                         // normalized?
+//                0,                                // stride
+//                (void*)0                          // array buffer offset
+//        );
+//
+//        // Draw the triangle !
+//        glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
+//
+//        glDisableVertexAttribArray(0);
+//        glDisableVertexAttribArray(1);
+
+//        glLoadIdentity();                   // Reset The View
+
+        static float tmp = 0;
+        tmp += 0.1f;
+        gluLookAt(0,0,tmp, 0,0,0, 0,1,0);
+
+        static int yrot = 0;
+
+        glRotatef(180.f,0.0f,1.0f,0.0f);
+
+        pModel->draw();
+
+//        yrot+=1.0f;
+
+        // Swap buffers
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
+    } // Check if the ESC key was pressed or the window was closed
+    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+           glfwWindowShouldClose(window) == 0 );
+
+    cleanupEngine();
     std::cout << "Hello, World!" << std::endl;
     regionMatrix = RegionMatrix(playSpaceStart, playSpaceStop, Vector(2, 2, 2));
 
@@ -206,7 +464,7 @@ int main() {
 //        ++cnt; if(cnt > 10) break;
 
         std::istringstream iss(line);
-        auto split_str = split(line, ',');
+        auto split_str = Utils::split(line, ',');
 
         star_list.emplace_back( new Star(
                 std::stoi(split_str.at(0)),     // ID

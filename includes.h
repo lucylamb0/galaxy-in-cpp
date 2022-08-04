@@ -5,9 +5,39 @@
 #ifndef C_VERSION_INCLUDES_H
 #define C_VERSION_INCLUDES_H
 
+// Include standard headers
+#include <stdio.h>
+#include <stdlib.h>
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <sstream>
+
+// Include GLEW
+#include <GL/glew.h>
+
+// Include GLFW
+#include <GLFW/glfw3.h>
+GLFWwindow* window;
+
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+using namespace glm;
+
+// Include ImGUI
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+#include "Utils.h"
+#include <common/shader.hpp>
+#include <common/texture.hpp>
+#include <common/controls.hpp>
+#include "common/objloader.hpp"
+#include "Model.h"
+
+#include "globals.h"
 
 const long double PI = 3.14159265358979323846;
 const long double gravitationalConstant = 6.67408 * pow(10, -11);
