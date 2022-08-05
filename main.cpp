@@ -11,7 +11,7 @@
 std::vector<Star*> star_list = {};
 
 #include <filesystem>
-#include <io.h>
+//#include <io.h>
 #include <thread>
 
 void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
@@ -281,51 +281,41 @@ void cleanupEngine() {
 int main() {
     initialiseEngine();
 
-//    GLuint VertexArrayID;
-//    glGenVertexArrays(1, &VertexArrayID);
-//    glBindVertexArray(VertexArrayID);
-//
-//    // Create and compile our GLSL program from the shaders
-//    GLuint programID = LoadShaders(
-//            "TransformVertexShader.vertexshader",
-//                                    "TextureFragmentShader.fragmentshader" );
-//
-//    // Get a handle for our "MVP" uniform
-//    GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-//
-//    // Load the texture
-//    GLuint Texture = loadDDS("uvmap.DDS");
-//
-//    // Get a handle for our "myTextureSampler" uniform
-//    GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-//
-//    // Read our .obj file
-//    std::vector<glm::vec3> vertices;
-//    std::vector<glm::vec2> uvs;
-//    std::vector<glm::vec3> normals; // Won't be used at the moment.
-//    bool res = loadOBJ("cube.obj", vertices, uvs, normals);
-//
-//    // Load it into a VBO
-//
-//    GLuint vertexbuffer;
-//    glGenBuffers(1, &vertexbuffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-//
-//    GLuint uvbuffer;
-//    glGenBuffers(1, &uvbuffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-//    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
 
-    Model *pModel = NULL;   // Holds The Model Data
-    pModel = new MilkshapeModel();
-    if ( pModel->loadModelData( "dwarf1.ms3d" ) == false )
-    {
-        std::cout << "Couldn't load the model dwarf1.ms3d" << std::endl;
-        return 0;                                   // If Model Didn't Load, Quit
-    }
+    // Create and compile our GLSL program from the shaders
+    GLuint programID = LoadShaders(
+            "TransformVertexShader.vertexshader",
+                                    "TextureFragmentShader.fragmentshader" );
 
-    pModel->reloadTextures();
+    // Get a handle for our "MVP" uniform
+    GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+
+    // Load the texture
+    GLuint Texture = loadDDS("uvmap.DDS");
+
+    // Get a handle for our "myTextureSampler" uniform
+    GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+
+    // Read our .obj file
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec2> uvs;
+    std::vector<glm::vec3> normals; // Won't be used at the moment.
+    bool res = loadOBJ("cube.obj", vertices, uvs, normals);
+
+    // Load it into a VBO
+
+    GLuint vertexbuffer;
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+    GLuint uvbuffer;
+    glGenBuffers(1, &uvbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
     do{
 
@@ -352,74 +342,60 @@ int main() {
         // Render dear imgui into screen
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+//        gluLookAt( 75, 75, 75, 0, 0, 0, 0, 1, 0 );
 //
-////        gluLookAt( 75, 75, 75, 0, 0, 0, 0, 1, 0 );
-////
-////        glRotatef(0.5,0.0f,1.0f,0.0f);
-//
-//        // Use our shader
-//        glUseProgram(programID);
-//
-//        // Compute the MVP matrix from keyboard and mouse input
+//        glRotatef(0.5,0.0f,1.0f,0.0f);
+
+        // Use our shader
+        glUseProgram(programID);
+
+        //        // Compute the MVP matrix from keyboard and mouse input
         computeMatricesFromInputs();
         glm::mat4 ProjectionMatrix = getProjectionMatrix();
         glm::mat4 ViewMatrix = getViewMatrix();
         glm::mat4 ModelMatrix = glm::mat4(1.0);
         glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-//
-//        // Send our transformation to the currently bound shader,
-//        // in the "MVP" uniform
-//        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-//
-//        // Bind our texture in Texture Unit 0
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, Texture);
-//        // Set our "myTextureSampler" sampler to use Texture Unit 0
-//        glUniform1i(TextureID, 0);
-//
-//        // 1rst attribute buffer : vertices
-//        glEnableVertexAttribArray(0);
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//        glVertexAttribPointer(
-//                0,                  // attribute
-//                3,                  // size
-//                GL_FLOAT,           // type
-//                GL_FALSE,           // normalized?
-//                0,                  // stride
-//                (void*)0            // array buffer offset
-//        );
-//
-//        // 2nd attribute buffer : UVs
-//        glEnableVertexAttribArray(1);
-//        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-//        glVertexAttribPointer(
-//                1,                                // attribute
-//                2,                                // size
-//                GL_FLOAT,                         // type
-//                GL_FALSE,                         // normalized?
-//                0,                                // stride
-//                (void*)0                          // array buffer offset
-//        );
-//
-//        // Draw the triangle !
-//        glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
-//
-//        glDisableVertexAttribArray(0);
-//        glDisableVertexAttribArray(1);
 
-//        glLoadIdentity();                   // Reset The View
+        // Send our transformation to the currently bound shader,
+        // in the "MVP" uniform
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-        static float tmp = 0;
-        tmp += 0.1f;
-        gluLookAt(0,0,tmp, 0,0,0, 0,1,0);
+        // Bind our texture in Texture Unit 0
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, Texture);
+        // Set our "myTextureSampler" sampler to use Texture Unit 0
+        glUniform1i(TextureID, 0);
 
-        static int yrot = 0;
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+                0,                  // attribute
+                3,                  // size
+                GL_FLOAT,           // type
+                GL_FALSE,           // normalized?
+                0,                  // stride
+                (void*)0            // array buffer offset
+        );
 
-        glRotatef(180.f,0.0f,1.0f,0.0f);
+        // 2nd attribute buffer : UVs
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glVertexAttribPointer(
+                1,                                // attribute
+                2,                                // size
+                GL_FLOAT,                         // type
+                GL_FALSE,                         // normalized?
+                0,                                // stride
+                (void*)0                          // array buffer offset
+        );
 
-        pModel->draw();
+        // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
 
-//        yrot+=1.0f;
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
 
         // Swap buffers
         glfwSwapBuffers(window);
@@ -455,7 +431,8 @@ int main() {
     char tmp[256];
     getcwd(tmp, 256);
     std::cout << "Current working directory: " << tmp << std::endl;
-    std::ifstream infile(L"C:\\Users\\User\\Documents\\coding\\Star Stuff\\test\\C version\\star_data.csv");
+    std::ifstream infile;
+    infile.open("C:\\Users\\User\\Documents\\coding\\Star Stuff\\test\\C version\\star_data.csv");
     std::string line;
 
 //    int cnt = 0;

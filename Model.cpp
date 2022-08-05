@@ -11,10 +11,15 @@
 	This file may be used only as long as this copyright notice remains intact.
 */
 
-#include <windows.h>		// Header File For Windows
-#include <gl\gl.h>			// Header File For The OpenGL32 Library
-#include <iostream>
+#ifdef __linux__
+#include <GL/gl.h>
+#include <cstring>
+#elifdef _WIN32
+#include <windows.h>
+#include <gl/gl.h>
+#endif
 
+#include <iostream>
 #include "Model.h"
 //#include "peli.h"
 

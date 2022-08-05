@@ -11,12 +11,23 @@
 	This file may be used only as long as this copyright notice remains intact.
 */
 
-#include <windows.h>		// Header File For Windows
-#include <gl\gl.h>			// Header File For The OpenGL32 Library
+#ifdef __linux__
+#include <cstring>
+#include <GL/gl.h>
+#include <cstring>
+#elifdef _WIN32
+#include <windows.h>
+#include <gl/gl.h>
+#endif
 
 #include "MilkshapeModel.h"
-
 #include <fstream>
+
+
+
+
+#ifdef __linux__
+#endif
 
 MilkshapeModel::MilkshapeModel()
 {
@@ -114,7 +125,8 @@ struct MS3DKeyframe
 
 bool MilkshapeModel::loadModelData( const char *filename )
 {
-	std::ifstream inputFile( filename, std::ios::in | std::ios::binary/* | std::ios::nocreate*/ );
+	std::ifstream inputFile;
+    inputFile.open( filename, std::ios::in | std::ios::binary/* | std::ios::nocreate*/ );
 	if ( inputFile.fail())
 		return false;	// "Couldn't open the model file."
 
