@@ -6,9 +6,9 @@
 #include "Star.h"
 #include "includes.h"
 #include "Region.h"
-
+// TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 std::vector<Star*> star_list = {};
-
+// Not really sure what this does, probably made by Conni
 std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     std::stringstream ss(s);
@@ -22,7 +22,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 #include <filesystem>
 #include <io.h>
 #include <thread>
-
+// thread function
 void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
     int tasksComplete = 0;
     int myTasks = work_queue.at(threadID).size();
@@ -37,14 +37,16 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
         }
     }
 }
-
+// TODO: Put these variables somewhere else
 Vector playSpaceStart = Vector(-10,-10,-10);
 Vector playSpaceStop = Vector(10, 10, 10);
 RegionMatrix regionMatrix = RegionMatrix();
-void getPointsRegions(Vector point = {1, 5, 5}) {
+
+// This function is for finding which region a star is in and if it overlaps with any other regions
+void getPointsRegions(Vector point = {1, 5, 5}) { // point is the star location fyi
     std::cout << "point: " << point.x << ", " << point.y << ", " << point.z << std::endl;
     std::vector<int> regions_we_are_in = {};
-
+    // weird math that works to find the index of the region the star is in
     auto tmp = (point.x - playSpaceStart.x) / regionMatrix.step.x;
     auto tmp2 = std::floor(tmp);
     auto remainder = tmp - tmp2;
@@ -85,7 +87,7 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
         mode_neighbours *= 2;
     }
 
-
+// TODO: Will need to check weather the type of int/float work correctly when point and playspace are large
     tmp = (point.z - playSpaceStart.z) / regionMatrix.step.z;
     tmp2 = std::floor(tmp);
     remainder = tmp - tmp2;
@@ -107,7 +109,7 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
 
-
+// TODO: Remove std::couts after testing
     if (mode_neighbours == 1) {
         std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
         regions_we_are_in.push_back(index);
@@ -152,8 +154,6 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
             std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
         }
     }
-
-
     if (mode_neighbours == 8) {
         std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
@@ -191,8 +191,8 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
 
 
     int startingX = 0;
-//    startingX
-
+//    startingX ?
+// code for finding the region we are in i think the slow way? maybe? perchance?
     int x = 0;
     for(auto region : regionMatrix.regions) {
         std::cout << x << ": " << region.min.x << " " << region.min.y << " " << region.min.z << " --- " << region.max.x << " " << region.max.y << " " << region.max.z << std::endl;
@@ -207,7 +207,7 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
         ++p;
     }
     std::cout << "============================" << std::endl;
-
+// code for finding regions that point is in slow way
 //    for(int index : regions_we_are_in) {
 //        std::cout << "Overlapping region: " << index << std::endl;
 //        if(regionMatrix.regions.at(index).contains(point)) {
@@ -217,12 +217,13 @@ void getPointsRegions(Vector point = {1, 5, 5}) {
 }
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "Hello, World!" << std::endl; // classic hello world of course
+    // making region matrixies
     regionMatrix = RegionMatrix(playSpaceStart, playSpaceStop, Vector(4, 4, 4));
 
-    getPointsRegions();
+    getPointsRegions(); // TODO: remove this and the above region matrix to work more sustainably with the rest of the code now that we have the regioning system working
 
-    return 0;
+    // return 0;
 
 //    std::vector<Region> regions = regionMatrix.getRegions(point);
     std::cout << "Regions: " << regionMatrix.regions.size() << std::endl;
@@ -232,13 +233,14 @@ int main() {
 //    std::cout << regionMatrix.
 //    int outPointsXStartsAt =
 
-    Region region(Vector(-100, -100, -100), Vector(100, 100, 100));
+    Region region(Vector(-100, -100, -100), Vector(100, 100, 100)); // what the hell this doing? vibing i guess
     if(region.contains(Vector(0, 0, 0))) {
         std::cout << "Region contains origin" << std::endl;
     } else {
         std::cout << "Region does not contain origin" << std::endl;
     }
 
+    // for reading in data
     char tmp[256];
     getcwd(tmp, 256);
     std::cout << "Current working directory: " << tmp << std::endl;
@@ -246,6 +248,7 @@ int main() {
     std::string line;
 
 //    int cnt = 0;
+// I think this is making the list of stars from the file
     while (std::getline(infile, line))
     {
 //        ++cnt; if(cnt > 10) break;
@@ -262,24 +265,26 @@ int main() {
     }
 
     std::cout << "Finished reading file" << std::endl;
-
+// converting data to meters (for now)
+// TODO make program work with parsecs and parsecs per year
     for (auto star : star_list) {
         star->position = star->position * parsec;
         star->velocity = star->velocity * parsec_per_year;
         star->history_position.emplace_back(star->position.x, star->position.y, star->position.z);
     }
 
-    std::cout << "Finished converting data to parsecs" << std::endl;
-
+    std::cout << "Finished converting data from parsecs" << std::endl;
+// don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
 //    static long long averageAccelerationUpdateTime = -1;
     static long long averageStarUpdateTime = -1;
 
-    const int loops = 10000;
-    for (int i = 0; i < loops; ++i) {
+    const int loops = 10000; // number of loops to run
+    for (int i = 0; i < loops; ++i)
+    {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
 #define MULTI_THREADED 1
-
+// multi threading stuff
 #if MULTI_THREADED
         auto work_queue = std::vector<std::vector<Star*>>{};
         auto thread_count = std::thread::hardware_concurrency() - 1;
@@ -298,6 +303,7 @@ int main() {
         for (int threadID = 0; threadID < thread_count; ++threadID) {
             threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
         }
+        // don't know what this is
 //        for (int i = 0; i < thread_count; ++i) {
 //            threads.emplace_back(std::thread([&work_queue, i]() {
 //                int tasksComplete = 0;
@@ -319,6 +325,7 @@ int main() {
             thread.join();
         }
 #endif
+        // not multithreaded star updates
 #ifndef MULTI_THREADED
         for (auto star : star_list) {
             auto accelerationDuration = star.acceleration_update(star_list);
@@ -334,7 +341,7 @@ int main() {
             }
         }
 #endif
-
+        // updating star positions and velocities
         for (auto star : star_list) {
             star->velocity_update();
             star->position_update();

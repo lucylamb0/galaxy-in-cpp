@@ -17,6 +17,12 @@ public:
     Vector position, velocity, acceleration;
     std::vector<Vector> history_position = {};
 
+    // code for updating the acceleration of the star
+    // this is the most important part of the simulation
+    // TODO: make this use the regioning system to update stars only in their current and neighbouring regions
+    // TODO: When a star is overlapping regions it should update the acceleration using the other stars in the overlapping regions
+    // TODO: Make stars update using regions COM
+    // TODO: make this use parsecs instead of meters, years instead of seconds and parsecs/year instead of meters/second
     double acceleration_update(const std::vector<Star*>& current_star_positions) {
         auto accelerationStartTime = std::chrono::high_resolution_clock::now();
 

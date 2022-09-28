@@ -30,7 +30,8 @@ public:
                 v.z >= min.z && v.z <= max.z;
     }
 };
-
+// TODO: Give each region a COM
+// TODO: If a region has no stars set a flag to not calculate it and to skip it when calculating star accels
 class RegionMatrix {
 public:
     float overlap_factor = 0.1;
