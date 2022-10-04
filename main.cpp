@@ -40,16 +40,15 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
 }
 
 RegionMatrix regionMatrix = RegionMatrix(
-        Vector(-1000000,-1000000,-1000000),
-        Vector(1000000, 1000000, 1000000),
-    Vector(100, 100, 100)
+        Vector(-1000000,-1000000,-1000000), // Start position
+        Vector(1000000, 1000000, 1000000), // End position
+    Vector(100, 100, 100)               // Amount of divisions on the z, y, z
 );
 
 int main() {
-    // for specifing how many regions (will be cubed)
-    std::cout << "Hello, World!" << std::endl; // classic hello world of course
+    std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
 
-//    getPointsRegions(); // TODO: remove this and the above region matrix to work more sustainably with the rest of the code now that we have the regioning system working
+//    getPointsRegions(); /
 
     // return 0;
 

@@ -26,6 +26,7 @@ public:
     RegionMatrix* parent = nullptr;
 
     std::vector<int> find_regions(Vector playSpaceStart) {
+        // TODO: Put this debug flag somewhere global
         const bool DEBUG = false;
         if(DEBUG) std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
         // weird math that works to find the index of the region the star is in
@@ -90,8 +91,6 @@ public:
 //    std::list<int> neighbour_list = (neighbour_x, neighbour_y, neighbour_z);
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
-
-// TODO: Link debug flag to a global constant for logging
         if (mode_neighbours == 1) {
             if(DEBUG) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
             regions_we_are_in.push_back(index);
