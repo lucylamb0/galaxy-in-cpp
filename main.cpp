@@ -33,7 +33,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
     int tasksComplete = 0;
-    int myTasks = work_queue.at(threadID).size();
+    auto myTasks = work_queue.at(threadID).size();
     double averageTime = -1.0;
     for (auto star : work_queue.at(threadID)) {
         auto timeTaken = star->acceleration_update(star_list);
@@ -92,14 +92,14 @@ int main(int arg_count, char** args) {
     }
 
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
-    l.info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
+    logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
 
 //    getPointsRegions(); /
 
     // return 0;
 
 //    std::vector<Region> regions = regionMatrix.getRegions(point);
-    l.info("Regions: ", regionMatrix.regions.size());
+    logging::info("Regions: ", regionMatrix.regions.size());
 
 //    std::cout << regionMatrix.
 //    int outPointsXStartsAt =
@@ -115,10 +115,9 @@ int main(int arg_count, char** args) {
     infile.open(data_set_path);
     std::string line;
 
-    int cnt = 0;
+//    int cnt = 0;
 // I think this is making the list of stars from the file
     while (std::getline(infile, line))
-//    while (false)
     {
 //        ++cnt; if(cnt > 10000000) break;
 
@@ -135,10 +134,10 @@ int main(int arg_count, char** args) {
         )); // Mass
     }
 
-    l.info("Finished reading file", "");
-    l.info("Assigning regions.", "");
+    logging::info("Finished reading file", "");
+    logging::info("Assigning regions.", "");
 // converting data to meters (for now)
-    static float averageStarRegionCount = 0;
+    static unsigned long averageStarRegionCount = 0;
     for (auto star : star_list) {
 //        star->position = star->position * parsec;  // no longer need to convert to meters
 //        star->velocity = star->velocity * parsec_per_year;
@@ -150,17 +149,18 @@ int main(int arg_count, char** args) {
             region->stars_in_region.emplace_back(star->id);
 //             std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
 //            std::cout << "Stars in region: [";
-            for (int star_in_region : region->stars_in_region) {
-//                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
-            }
+//            for (int star_in_region : region->stars_in_region) {
+////                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
+//            }
         }
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
             auto progress = to_string(star->id) + "/" + to_string(star_list.size());
             auto percent = to_string((int)((float)star->id / (float)star_list.size() * 100));
-            auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +                     to_string(averageStarRegionCount) + " regions";
-            l.verbose(message, "");
+            auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
+                      to_string(averageStarRegionCount) + " regions";
+            logging::verbose(message, "");
 //            std::cout   << "[" << star->id << "] Finished assigning regions to " << 5000 << " stars out of " << star_list.size() << std::endl
 //                        << "---- stars in an average of " << averageStarRegionCount << " regions" <<  std::endl;
         }
@@ -180,7 +180,7 @@ int main(int arg_count, char** args) {
     thread_count /= 3;
 
     const int loops = 10000; // number of loops to run
-    for (int i = 0; i < loops; ++i)
+    for (int loopCnt = 0; loopCnt < loops; ++loopCnt)
     {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
@@ -209,7 +209,7 @@ int main(int arg_count, char** args) {
             {
                 int tasksComplete = 0;
                 int myTasks = work_queue.at(i).size();
-                int averageTime = -1;
+                double averageTime = -1;
                 for (auto star : work_queue.at(i)) {
                     auto timeTaken = star->acceleration_update(star_list);
                     averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
@@ -218,7 +218,7 @@ int main(int arg_count, char** args) {
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-                        l.verbose("[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
+                        logging::verbose("[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
                                   to_string(averageTime) + "ms", "");
                     }
                 }
@@ -264,8 +264,8 @@ int main(int arg_count, char** args) {
 //                regionMatrix.regions.at(region_index).stars_in_region.emplace_back(star->id);
 //            }
         }
-        if (i % 10 == 0) {
-            std::cout << (i / loops) * 100 << "% Complete - Stars" << std::endl;
+        if (loopCnt % 10 == 0) {
+            std::cout << (loopCnt / loops) * 100 << "% Complete - Stars" << std::endl;
         }
 
         auto starUpdateEndTime = std::chrono::high_resolution_clock::now();
@@ -276,7 +276,7 @@ int main(int arg_count, char** args) {
         } else {
             averageStarUpdateTime = (averageStarUpdateTime + starUpdateDuration) / 2;
         }
-        std::cout << "Finished a stars acceleration update: " << i << std::endl;
+        std::cout << "Finished a stars acceleration update: " << (loopCnt + 1) << std::endl;
     }
     return 0;
 }
