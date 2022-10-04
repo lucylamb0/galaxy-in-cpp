@@ -73,7 +73,7 @@ int main() {
     }
 
     std::ifstream infile;
-    infile.open(L"/Users/connibilham/CLionProjects/galaxy-in-cpp/star_data.csv");
+    infile.open("/Users/connibilham/CLionProjects/galaxy-in-cpp/star_data.csv");
     std::string line;
 
 //    int cnt = 0;
