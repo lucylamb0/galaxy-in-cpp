@@ -179,6 +179,17 @@ int main(int arg_count, char** args) {
 
     thread_count /= 3;
 
+    {
+
+        ofstream Test("testDump.txt");
+
+        for(auto star : star_list) {
+            Test << star->id << "," << star->position.x << "," << star->position.y << "," << star->position.z << std::endl;
+        }
+
+        Test.close();
+    }
+
     const int loops = 10000; // number of loops to run
     for (int loopCnt = 0; loopCnt < loops; ++loopCnt)
     {
