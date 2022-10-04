@@ -72,12 +72,13 @@ int main() {
         std::cout << "Region does not contain origin" << std::endl;
     }
 
-    std::ifstream infile(L"/Users/connibilham/CLionProjects/galaxy-in-cpp/star_data.csv");
+//    std::ifstream infile(L"/Users/connibilham/CLionProjects/galaxy-in-cpp/star_data.csv");
     std::string line;
 
 //    int cnt = 0;
 // I think this is making the list of stars from the file
-    while (std::getline(infile, line))
+//    while (std::getline(infile, line))
+    while (false)
     {
 //        ++cnt; if(cnt > 10) break;
 
