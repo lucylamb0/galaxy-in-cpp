@@ -50,7 +50,20 @@ RegionMatrix regionMatrix = RegionMatrix(
     Vector(100, 100, 100)               // Amount of divisions on the z, y, z
 );
 
-int main() {
+std::string data_set_path = "";
+int main(int arg_count, char** args) {
+
+    if(arg_count > 2) {
+        if(args[1][0] == '-' && args[1][1] == 'd') {
+            data_set_path = args[2];
+        }
+    }
+    else
+        return 1;
+    std::cout << "[" << args[1] << "]" << std::endl;
+    std::cout << "[" << args[2] << "]" << std::endl;
+    std::cout << "[" << data_set_path << "]" << std::endl;
+
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
 
 //    getPointsRegions(); /
@@ -73,7 +86,7 @@ int main() {
     }
 
     std::ifstream infile;
-    infile.open("/Users/connibilham/CLionProjects/galaxy-in-cpp/star_data.csv");
+    infile.open(data_set_path);
     std::string line;
 
 //    int cnt = 0;
