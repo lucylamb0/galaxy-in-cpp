@@ -26,7 +26,7 @@ jobs:
     - name: Install g++-11 for minimal required libstdc++
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update && sudo apt-get install -y g++ libg++
+        sudo apt-get update && sudo apt-get install -y g++
     - name: install
       run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libfreetype-dev ${{ matrix.compiler }}
     - name: configure
