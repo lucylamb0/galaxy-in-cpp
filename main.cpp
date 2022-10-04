@@ -10,6 +10,10 @@
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
 // Not really sure what this does, probably made by Conni
+// Yes it was made by me, and it splits a string by a delimiter.
+// Example:
+// Input: Hello, world!   ,
+// Output: ["Hello", "world!"]
 std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     std::stringstream ss(s);
@@ -21,9 +25,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 #include <filesystem>
-//#include <io.h>
 #include <thread>
-// thread function
+
 void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
     int tasksComplete = 0;
     int myTasks = work_queue.at(threadID).size();
