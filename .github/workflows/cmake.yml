@@ -27,5 +27,5 @@ jobs:
       
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --target C_version -- -j 6
+      run: cmake --build ${{github.workspace}}/build --target C_version -- -j 6 -std=c++11
       
