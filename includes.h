@@ -28,6 +28,7 @@ const long double starSurfaceVolume = 4.18879 * pow(10, 18);
 const long double starSurfaceArea = 5.670 * pow(10, -8);
 const long double starSurfaceMass = 1.98855 * pow(10, 30);
 const long double parsec = 3.08567758 * pow(10, 16);
+const long double parsec_to_km = 3.08567758 * pow(10, 13);
 const long double parsec_per_year = 9.785 * pow(10, 8);
 const long double yearInSeconds = 31536000;
 const long double gravitationalConstantFinal = gravitationalConstantParsec * pow(yearInSeconds, 2); // this very important constant is used in the calculations. It has units of parsec solarmasses^-1 (km/year)^2
