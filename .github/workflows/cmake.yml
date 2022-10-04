@@ -13,7 +13,7 @@ jobs:
         configuration: [Debug, Release]
         exclude:
           - os: ubuntu-20.04
-            compiler: g++-23
+            compiler: g++
         include:
           - os: ubuntu-22.04
             continue-on-error: true
