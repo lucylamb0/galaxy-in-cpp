@@ -6,6 +6,8 @@
 #include "Star.h"
 #include "includes.h"
 #include "Region.h"
+#include <iostream>
+
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
