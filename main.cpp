@@ -115,12 +115,12 @@ int main(int arg_count, char** args) {
     infile.open(data_set_path);
     std::string line;
 
-//    int cnt = 0;
+    int cnt = 0;
 // I think this is making the list of stars from the file
     while (std::getline(infile, line))
 //    while (false)
     {
-//        ++cnt; if(cnt > 10) break;
+//        ++cnt; if(cnt > 10000000) break;
 
         std::istringstream iss(line);
         auto split_str = split(line, ',');
@@ -166,16 +166,19 @@ int main(int arg_count, char** args) {
         }
     }
     // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
-    for(Region* region : regionMatrix.regions) {
-
-    }
+//    for(Region* region : regionMatrix.regions) {
+//
+//    }
 
     std::cout << "Finished assigning regions" << std::endl;
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
 //    static long long averageAccelerationUpdateTime = -1;
     static long long averageStarUpdateTime = -1;
 
-    auto thread_count = std::thread::hardware_concurrency() - 1;
+    int thread_count = std::thread::hardware_concurrency() - 1;
+
+    thread_count /= 3;
+
     const int loops = 10000; // number of loops to run
     for (int i = 0; i < loops; ++i)
     {
@@ -213,12 +216,10 @@ int main(int arg_count, char** args) {
                     ++tasksComplete;
 #define OUTPUT_EVERY_N_TASKS 100
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
-//                        std::cout << "Thread " << i << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-                        auto message = "[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
-                                       to_string(averageTime) + "ms";
-                        l.verbose(message, "");
+                        l.verbose("[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
+                                  to_string(averageTime) + "ms", "");
                     }
                 }
             }));
