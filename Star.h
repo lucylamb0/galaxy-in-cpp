@@ -21,11 +21,11 @@ public:
     float mass;
     Vector position, velocity, acceleration;
     std::vector<Vector> history_position = {};
-    std::vector<int> regions_we_are_in = {};
+    std::vector<Region*> regions_we_are_in = {};
 
     RegionMatrix* parent = nullptr;
 
-    std::vector<int> find_regions() {
+    std::vector<Region*> find_regions() {
 #ifdef _DEBUG
         std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
 #endif
@@ -93,7 +93,8 @@ public:
 
         if (mode_neighbours == 1) {
 //            if(this->parent->debug) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
-            regions_we_are_in.push_back(index);
+// getting the region object from the index
+            regions_we_are_in.push_back(this->parent->regions[index]);
         }
         if (mode_neighbours == 2) {
 //            if(this->parent->debug) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
@@ -104,8 +105,8 @@ public:
             tmp += neighbour_z;
 
 //            if(this->parent->debug) std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
-            regions_we_are_in.emplace_back(index);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[index]);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
         }
         if (mode_neighbours == 4) {
 //            if(this->parent->debug) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
@@ -115,23 +116,23 @@ public:
             tmp += (neighbour_y * this->parent->divisions.z);
             tmp += neighbour_z;
 
-            regions_we_are_in.emplace_back(index);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[index]);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
             if (neighbour_x != 0) {
                 tmp = (index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z));
-                regions_we_are_in.emplace_back(tmp);
+                regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
             if (neighbour_y != 0) {
                 tmp = (index + (neighbour_y * this->parent->divisions.z));
-                regions_we_are_in.emplace_back(tmp);
+                regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
             if (neighbour_z != 0) {
                 tmp = (index + neighbour_z);
-                regions_we_are_in.emplace_back(tmp);
+                regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
         }
@@ -140,32 +141,32 @@ public:
             tmp = index;
 
             tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z) + neighbour_z;
-            regions_we_are_in.emplace_back(index);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[index]);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_y * this->parent->divisions.z);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + neighbour_z;
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z);
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + neighbour_z;
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_y * this->parent->divisions.z) + neighbour_z;
-            regions_we_are_in.emplace_back(tmp);
+            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         }
@@ -178,11 +179,18 @@ public:
     // TODO: make this use the regioning system to update stars only in their current and neighbouring regions
     // TODO: When a star is overlapping regions it should update the acceleration using the other stars in the overlapping regions
     // TODO: Make stars update using regions COM
-    double acceleration_update(const std::vector<Star*>& current_star_positions) {
+    double acceleration_update_stars_in_region(bool clear_accel) { // current_star_positions is star list
+        std::vector<Star*> stars_nearby = {};
+        if (clear_accel) {
+            acceleration = Vector(0, 0, 0);
+        }
         auto accelerationStartTime = std::chrono::high_resolution_clock::now();
-
-        acceleration = Vector(0, 0, 0);
-        for (const auto& star : current_star_positions) {
+        for (auto region : this->regions_we_are_in){
+            for (auto star : region->stars_in_region){
+                stars_nearby.emplace_back(star);
+            }
+        }
+        for (auto star : stars_nearby) {
             if (star->id == id)
                 continue;
 
@@ -197,6 +205,28 @@ public:
         auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();
         return accelerationDuration;
     }
+
+    double acceleration_update_region_com(bool clear_accel) {
+        if (clear_accel) {
+            acceleration = Vector(0, 0, 0);
+        }
+        auto accelerationStartTime = std::chrono::high_resolution_clock::now();
+        for (auto region : this->parent->regions){
+            if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end()) { // Conni you might want to make this your way
+                continue;
+            }
+            long double r = this->position.distTo(region->com_position);
+            long double accel_from_region = (gravitationalConstantFinal * region->com_mass)/(pow(r, 2)); // Now gives acceleration in pc/year^2
+
+            this->acceleration.x += accel_from_region * ((region->com_position.x - this->position.x)/r);
+            this->acceleration.y += accel_from_region * ((region->com_position.y - this->position.y)/r);
+            this->acceleration.z += accel_from_region * ((region->com_position.z - this->position.z)/r);
+        }
+        auto accelerationEndTime = std::chrono::high_resolution_clock::now();
+        auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();
+        return accelerationDuration;
+    }
+
 
     inline void velocity_update() {
         this->velocity += this->acceleration * time_step;
