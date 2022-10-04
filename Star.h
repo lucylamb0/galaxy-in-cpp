@@ -184,8 +184,8 @@ public:
             acceleration = Vector(0, 0, 0);
         }
         auto accelerationStartTime = std::chrono::high_resolution_clock::now();
-        for (auto region : this->regions_we_are_in){
-            for (auto star : region->stars_in_region){
+        for (auto region : this->regions_we_are_in) {
+            for (auto star : region->stars_in_region) {
                 if (star->id == id)
                     continue;
 
@@ -197,9 +197,7 @@ public:
                 this->acceleration.z += accel_from_star * ((star->position.z - this->position.z)/r);
             }
         }
-        auto accelerationEndTime = std::chrono::high_resolution_clock::now();
-        auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();
-        return accelerationDuration;
+        return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
     }
 
     double acceleration_update_region_com(bool clear_accel) {
