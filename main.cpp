@@ -38,11 +38,12 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
         }
     }
 }
-// TODO: Put these variables somewhere else
-Vector playSpaceStart = Vector(-1000000,-1000000,-1000000);
-Vector playSpaceStop = Vector(1000000, 1000000, 1000000);
-long int no_of_region_div = 100;
-RegionMatrix regionMatrix = RegionMatrix(playSpaceStart, playSpaceStop, Vector(no_of_region_div, no_of_region_div, no_of_region_div));
+
+RegionMatrix regionMatrix = RegionMatrix(
+        Vector(-1000000,-1000000,-1000000),
+        Vector(1000000, 1000000, 1000000),
+    Vector(100, 100, 100)
+);
 
 int main() {
     // for specifing how many regions (will be cubed)
