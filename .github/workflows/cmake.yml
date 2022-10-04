@@ -17,8 +17,6 @@ jobs:
         include:
           - os: ubuntu-22.04
             continue-on-error: true
-          - os: ubuntu-20.04
-            continue-on-error: false
     steps:
     - uses: actions/checkout@v2
     - name: Install g++-11 for minimal required libstdc++
