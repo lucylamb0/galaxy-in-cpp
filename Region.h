@@ -11,8 +11,12 @@
 class Region {
 public:
     Vector min, max;
+    int index;
     Vector center;
-    Region(Vector min, Vector max) : min(min), max(max), center((min + max) / 2) {}
+    std::vector<int> stars_in_region = {};
+    Region(Vector min, Vector max) : min(min), max(max), center((min + max) / 2) {
+
+    }
 
     bool contains_x(Vector v) {
         return v.x >= min.x && v.x <= max.x;

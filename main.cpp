@@ -7,6 +7,7 @@
 #include "includes.h"
 #include "Region.h"
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
+// CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
 // Not really sure what this does, probably made by Conni
 std::vector<std::string> split(const std::string &s, char delim) {
@@ -38,190 +39,195 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
     }
 }
 // TODO: Put these variables somewhere else
-Vector playSpaceStart = Vector(-10,-10,-10);
-Vector playSpaceStop = Vector(10, 10, 10);
+Vector playSpaceStart = Vector(-1000000,-1000000,-1000000);
+Vector playSpaceStop = Vector(1000000, 1000000, 1000000);
 RegionMatrix regionMatrix = RegionMatrix();
 
 // This function is for finding which region a star is in and if it overlaps with any other regions
-void getPointsRegions(Vector point = {1, 5, 5}) { // point is the star location fyi
-    std::cout << "point: " << point.x << ", " << point.y << ", " << point.z << std::endl;
-    std::vector<int> regions_we_are_in = {};
-    // weird math that works to find the index of the region the star is in
-    auto tmp = (point.x - playSpaceStart.x) / regionMatrix.step.x;
-    auto tmp2 = std::floor(tmp);
-    auto remainder = tmp - tmp2;
-    int index = (tmp2) * regionMatrix.divisions.y * regionMatrix.divisions.z; //indexing works
-
-    std::cout << "index: " << index << std::endl;
-
-    int neighbour_x = 0;
-    int neighbour_y = 0;
-    int neighbour_z = 0;
-    int mode_neighbours = 1; // 1 = 1 region, 2 = 2 regions, 4 = 4 regions, 8 = 8 regions
-
-    if(remainder <= regionMatrix.overlap_factor) { // need to check all 3 directions to see if we are in a neighbour region
-        // We are overlapping the below region
-        neighbour_x = -1;
-        mode_neighbours *= 2;
-    }
-    else if (remainder >= 1 - regionMatrix.overlap_factor) {
-        // We are overlapping the above region
-        neighbour_x = 1;
-        mode_neighbours *= 2;
-    }
-
-    tmp = (point.y - playSpaceStart.y) / regionMatrix.step.y;
-    tmp2 = std::floor(tmp);
-    remainder = tmp - tmp2;
-    index += (tmp2) * regionMatrix.divisions.z;
-
-
-    if(remainder <= regionMatrix.overlap_factor) {
-        // We are overlapping the below region
-        neighbour_y = -1;
-        mode_neighbours *= 2;
-    }
-    else if (remainder >= 1 - regionMatrix.overlap_factor) {
-        // We are overlapping the above region
-        neighbour_y = 1;
-        mode_neighbours *= 2;
-    }
-
-// TODO: Will need to check weather the type of int/float work correctly when point and playspace are large
-    tmp = (point.z - playSpaceStart.z) / regionMatrix.step.z;
-    tmp2 = std::floor(tmp);
-    remainder = tmp - tmp2;
-    index += (tmp2);
-
-    if(remainder <= regionMatrix.overlap_factor) {
-        // We are overlapping the below region
-        neighbour_z = -1;
-        mode_neighbours *= 2;
-    }
-    else if (remainder >= 1 - regionMatrix.overlap_factor) {
-        // We are overlapping the above region
-        neighbour_z = 1;
-        mode_neighbours *= 2;
-    }
-
-
-//    std::list<int> neighbour_list = (neighbour_x, neighbour_y, neighbour_z);
-//    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
-
-
-// TODO: Remove std::couts after testing
-    if (mode_neighbours == 1) {
-        std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
-        regions_we_are_in.push_back(index);
-    }
-    if (mode_neighbours == 2) {
-        std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
-        tmp = index;
-
-        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
-        tmp += (neighbour_y * regionMatrix.divisions.z);
-        tmp += neighbour_z;
-
-        std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
-        regions_we_are_in.emplace_back(index);
-        regions_we_are_in.emplace_back(tmp);
-    }
-    if (mode_neighbours == 4) {
-        std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
-        tmp = index;
-
-        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
-        tmp += (neighbour_y * regionMatrix.divisions.z);
-        tmp += neighbour_z;
-
-        regions_we_are_in.emplace_back(index);
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
-
-        if (neighbour_x != 0) {
-            tmp = (index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z));
-            regions_we_are_in.emplace_back(tmp);
-            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
-        }
-        if (neighbour_y != 0) {
-            tmp = (index + (neighbour_y * regionMatrix.divisions.z));
-            regions_we_are_in.emplace_back(tmp);
-            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
-        }
-        if (neighbour_z != 0) {
-            tmp = (index + neighbour_z);
-            regions_we_are_in.emplace_back(tmp);
-            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
-        }
-    }
-    if (mode_neighbours == 8) {
-        std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
-        tmp = index;
-
-        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + (neighbour_y * regionMatrix.divisions.z) + neighbour_z;
-        regions_we_are_in.emplace_back(index);
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + (neighbour_y * regionMatrix.divisions.z);
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + neighbour_z;
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + (neighbour_y * regionMatrix.divisions.z);
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + neighbour_z;
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-        tmp = index + (neighbour_y * regionMatrix.divisions.z) + neighbour_z;
-        regions_we_are_in.emplace_back(tmp);
-        std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
-
-    }
-
-
-    int startingX = 0;
-//    startingX ?
-// code for finding the region we are in i think the slow way? maybe? perchance?
-    int x = 0;
-    for(auto region : regionMatrix.regions) {
-        std::cout << x << ": " << region.min.x << " " << region.min.y << " " << region.min.z << " --- " << region.max.x << " " << region.max.y << " " << region.max.z << std::endl;
-        ++x;
-    }
-    int p = 0;
-    std::cout << "We are in the following regions: " << std::endl;
-    for(auto region : regionMatrix.regions) {
-        if(region.contains(point)){
-            std::cout << "Point is def in region: " << p << std::endl;
-        }
-        ++p;
-    }
-    std::cout << "============================" << std::endl;
-// code for finding regions that point is in slow way
-//    for(int index : regions_we_are_in) {
-//        std::cout << "Overlapping region: " << index << std::endl;
-//        if(regionMatrix.regions.at(index).contains(point)) {
-//            std::cout << "Point is in region: " << index << std::endl;
+//void getPointsRegions(Vector point) { // point is the star location fyi
+//    std::cout << "point: " << point.x << ", " << point.y << ", " << point.z << std::endl;
+//    std::vector<int> regions_we_are_in = {};
+//    // weird math that works to find the index of the region the star is in
+//    auto tmp = (point.x - playSpaceStart.x) / regionMatrix.step.x;
+//    auto tmp2 = std::floor(tmp);
+//    auto remainder = tmp - tmp2;
+//    int index = (tmp2) * regionMatrix.divisions.y * regionMatrix.divisions.z; //indexing works
+//
+//    std::cout << "index: " << index << std::endl;
+//
+//    int neighbour_x = 0;
+//    int neighbour_y = 0;
+//    int neighbour_z = 0;
+//    int mode_neighbours = 1; // 1 = 1 region, 2 = 2 regions, 4 = 4 regions, 8 = 8 regions
+//
+//    if(remainder <= regionMatrix.overlap_factor) { // need to check all 3 directions to see if we are in a neighbour region
+//        // We are overlapping the below region
+//        neighbour_x = -1;
+//        mode_neighbours *= 2;
+//    }
+//    else if (remainder >= 1 - regionMatrix.overlap_factor) {
+//        // We are overlapping the above region
+//        neighbour_x = 1;
+//        mode_neighbours *= 2;
+//    }
+//
+//    tmp = (point.y - playSpaceStart.y) / regionMatrix.step.y;
+//    tmp2 = std::floor(tmp);
+//    remainder = tmp - tmp2;
+//    index += (tmp2) * regionMatrix.divisions.z;
+//
+//
+//    if(remainder <= regionMatrix.overlap_factor) {
+//        // We are overlapping the below region
+//        neighbour_y = -1;
+//        mode_neighbours *= 2;
+//    }
+//    else if (remainder >= 1 - regionMatrix.overlap_factor) {
+//        // We are overlapping the above region
+//        neighbour_y = 1;
+//        mode_neighbours *= 2;
+//    }
+//
+//// TODO: Will need to check weather the type of int/float work correctly when point and playspace are large
+//    tmp = (point.z - playSpaceStart.z) / regionMatrix.step.z;
+//    tmp2 = std::floor(tmp);
+//    remainder = tmp - tmp2;
+//    index += (tmp2);
+//
+//    if(remainder <= regionMatrix.overlap_factor) {
+//        // We are overlapping the below region
+//        neighbour_z = -1;
+//        mode_neighbours *= 2;
+//    }
+//    else if (remainder >= 1 - regionMatrix.overlap_factor) {
+//        // We are overlapping the above region
+//        neighbour_z = 1;
+//        mode_neighbours *= 2;
+//    }
+//
+//
+////    std::list<int> neighbour_list = (neighbour_x, neighbour_y, neighbour_z);
+////    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
+//
+//
+//// TODO: Remove std::couts after testing
+//    if (mode_neighbours == 1) {
+//        std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
+//        regions_we_are_in.push_back(index);
+//    }
+//    if (mode_neighbours == 2) {
+//        std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
+//        tmp = index;
+//
+//        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
+//        tmp += (neighbour_y * regionMatrix.divisions.z);
+//        tmp += neighbour_z;
+//
+//        std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
+//        regions_we_are_in.emplace_back(index);
+//        regions_we_are_in.emplace_back(tmp);
+//    }
+//    if (mode_neighbours == 4) {
+//        std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
+//        tmp = index;
+//
+//        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
+//        tmp += (neighbour_y * regionMatrix.divisions.z);
+//        tmp += neighbour_z;
+//
+//        regions_we_are_in.emplace_back(index);
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
+//
+//        if (neighbour_x != 0) {
+//            tmp = (index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z));
+//            regions_we_are_in.emplace_back(tmp);
+//            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
+//        }
+//        if (neighbour_y != 0) {
+//            tmp = (index + (neighbour_y * regionMatrix.divisions.z));
+//            regions_we_are_in.emplace_back(tmp);
+//            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
+//        }
+//        if (neighbour_z != 0) {
+//            tmp = (index + neighbour_z);
+//            regions_we_are_in.emplace_back(tmp);
+//            std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
 //        }
 //    }
-}
+//    if (mode_neighbours == 8) {
+//        std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
+//        tmp = index;
+//
+//        tmp += (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + (neighbour_y * regionMatrix.divisions.z) + neighbour_z;
+//        regions_we_are_in.emplace_back(index);
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z);
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + (neighbour_y * regionMatrix.divisions.z);
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + neighbour_z;
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + (neighbour_y * regionMatrix.divisions.z);
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + (neighbour_x * regionMatrix.divisions.y * regionMatrix.divisions.z) + neighbour_z;
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//        tmp = index + (neighbour_y * regionMatrix.divisions.z) + neighbour_z;
+//        regions_we_are_in.emplace_back(tmp);
+//        std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//
+//    }
+//
+
+
+
+//    int startingX = 0;
+////    startingX ?
+//// code for finding the region we are in i think the slow way? maybe? perchance?
+//    int x = 0;
+//    for(auto region : regionMatrix.regions) {
+//        std::cout << x << ": " << region.min.x << " " << region.min.y << " " << region.min.z << " --- " << region.max.x << " " << region.max.y << " " << region.max.z << std::endl;
+//        ++x;
+//    }
+//    int p = 0;
+//    std::cout << "We are in the following regions: " << std::endl;
+//    for(auto region : regionMatrix.regions) {
+//        if(region.contains(point)){
+//            std::cout << "Point is def in region: " << p << std::endl;
+//        }
+//        ++p;
+//    }
+//    std::cout << "============================" << std::endl;
+//// code for finding regions that point is in slow way
+////    for(int index : regions_we_are_in) {
+////        std::cout << "Overlapping region: " << index << std::endl;
+////        if(regionMatrix.regions.at(index).contains(point)) {
+////            std::cout << "Point is in region: " << index << std::endl;
+////        }
+////    }
+//}
+
 
 int main() {
+    // for specifing how many regions (will be cubed)
+    long int no_of_region_div = 100;
     std::cout << "Hello, World!" << std::endl; // classic hello world of course
     // making region matrixies
-    regionMatrix = RegionMatrix(playSpaceStart, playSpaceStop, Vector(4, 4, 4));
+    regionMatrix = RegionMatrix(playSpaceStart, playSpaceStop, Vector(no_of_region_div, no_of_region_div, no_of_region_div));
 
-    getPointsRegions(); // TODO: remove this and the above region matrix to work more sustainably with the rest of the code now that we have the regioning system working
+//    getPointsRegions(); // TODO: remove this and the above region matrix to work more sustainably with the rest of the code now that we have the regioning system working
 
     // return 0;
 
@@ -244,7 +250,7 @@ int main() {
     char tmp[256];
     getcwd(tmp, 256);
     std::cout << "Current working directory: " << tmp << std::endl;
-    std::ifstream infile(L"C:\\Users\\User\\Documents\\coding\\Star Stuff\\test\\C version\\star_data.csv");
+    std::ifstream infile(L"D:\\JET BRAINS\\galaxy-in-cpp\\star_data.csv");
     std::string line;
 
 //    int cnt = 0;
@@ -260,17 +266,25 @@ int main() {
                 std::stoi(split_str.at(0)),     // ID
     Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
     Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
-    Vector(0,0,0))); // Acceleration
+    Vector(0,0,0), // Acceleration
+    1.0f)); // Mass
 
     }
 
     std::cout << "Finished reading file" << std::endl;
 // converting data to meters (for now)
-// TODO make program work with parsecs and parsecs per year
     for (auto star : star_list) {
-        star->position = star->position * parsec;
-        star->velocity = star->velocity * parsec_per_year;
+//        star->position = star->position * parsec;  // no longer need to convert to meters
+//        star->velocity = star->velocity * parsec_per_year;
         star->history_position.emplace_back(star->position.x, star->position.y, star->position.z);
+        for (int region_index : star->find_regions(regionMatrix, playSpaceStart)) {
+            // add star to region
+            regionMatrix.regions.at(region_index).stars_in_region.emplace_back(star->id);
+            std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
+            for (int star_in_region : regionMatrix.regions.at(region_index).stars_in_region) {
+                std::cout << "Stars in region: "<< region_index << ":" << star_in_region << std::endl;
+            }
+        }
     }
 
     std::cout << "Finished converting data from parsecs" << std::endl;
@@ -303,23 +317,23 @@ int main() {
         for (int threadID = 0; threadID < thread_count; ++threadID) {
             threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
         }
-        // don't know what this is
-//        for (int i = 0; i < thread_count; ++i) {
-//            threads.emplace_back(std::thread([&work_queue, i]() {
-//                int tasksComplete = 0;
-//                int myTasks = work_queue.at(i).size();
-//                int averageTime = -1;
-//                for (auto star : work_queue.at(i)) {
-//                    auto timeTaken = star->acceleration_update(star_list);
-//                    averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
-//                    ++tasksComplete;
-//#define OUTPUT_EVERY_N_TASKS 100
-//                    if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
-//                        std::cout << "Thread " << i << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
-//                    }
-//                }
-//            }));
-//        }
+//         don't know what this is
+        for (int i = 0; i < thread_count; ++i) {
+            threads.emplace_back(std::thread([&work_queue, i]() {
+                int tasksComplete = 0;
+                int myTasks = work_queue.at(i).size();
+                int averageTime = -1;
+                for (auto star : work_queue.at(i)) {
+                    auto timeTaken = star->acceleration_update(star_list);
+                    averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
+                    ++tasksComplete;
+#define OUTPUT_EVERY_N_TASKS 100
+                    if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
+                        std::cout << "Thread " << i << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
+                    }
+                }
+            }));
+        }
 
         for (auto &thread : threads) {
             thread.join();
@@ -341,10 +355,19 @@ int main() {
             }
         }
 #endif
-        // updating star positions and velocities
+        // Clear the stars in the regions
+        for (auto region : regionMatrix.regions) {
+            region.stars_in_region.clear();
+        }
+        // updating star positions and velocities and adding them to the regions
         for (auto star : star_list) {
             star->velocity_update();
             star->position_update();
+            star->find_regions(regionMatrix, playSpaceStart);
+            for (int region_index : star->find_regions(regionMatrix, playSpaceStart)) {
+                // add star to region
+                regionMatrix.regions.at(region_index).stars_in_region.emplace_back(star->id); // TODO: use regions to speed up acceleration update
+            }
         }
         if (i % 10 == 0) {
             std::cout << (i / loops) * 100 << "% Complete - Stars" << std::endl;
