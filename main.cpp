@@ -8,6 +8,8 @@
 #include "Region.h"
 #include <iostream>
 
+#include "logging.h"
+
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
@@ -37,54 +39,77 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
         auto timeTaken = star->acceleration_update(star_list);
         averageTime = averageTime == -1.0 ? timeTaken : (averageTime + timeTaken) / 2;
         ++tasksComplete;
-        if(tasksComplete % (1000 + (threadID * 100)) == 0) {
-            std::cout << "Thread " << threadID << ": " << tasksComplete << "/" << myTasks <<
-                      " - Average Time Taken: " << averageTime << "ms" << std::endl;
+        if(tasksComplete % (100 + (threadID * 100)) == 0) {
+//            auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
+//            auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
+//            auto message = "[Thread " + to_string(threadID) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
+//                    to_string(averageTime) + "ms";
+//            l.verbose(message, "");
+
+            std::cout << "Thread " << threadID << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
         }
     }
 }
 
-RegionMatrix regionMatrix = RegionMatrix(
-        Vector(-1000000,-1000000,-1000000), // Start position
-        Vector(1000000, 1000000, 1000000), // End position
-    Vector(100, 100, 100)               // Amount of divisions on the z, y, z
-);
+RegionMatrix regionMatrix;
 
-std::string data_set_path = "";
 int main(int arg_count, char** args) {
-
-    if(arg_count > 2) {
-        if(args[1][0] == '-' && args[1][1] == 'd') {
-            data_set_path = args[2];
-        }
+    std::string data_set_path; // = args[1];
+    if(arg_count == 2) {
+        data_set_path = args[1];
     }
-    else
-        return 1;
+    if(arg_count > 2) {
+        data_set_path = args[1];
 
-    std::cout << "[" << args[1] << "]" << std::endl;
-    std::cout << "[" << args[2] << "]" << std::endl;
-    std::cout << "[" << data_set_path << "]" << std::endl;
+        std::cout << "[ Data Set Path ]    [" << data_set_path << "]" << std::endl;
+
+        Vector startPosition = Vector(std::stof(args[2]), std::stof(args[3]), std::stof(args[4]));
+        std::cout << "[ Start Position X ] [" << startPosition.x << "]" << std::endl;
+        std::cout << "[ Start Position Y ] [" << startPosition.y << "]" << std::endl;
+        std::cout << "[ Start Position Z ] [" << startPosition.z << "]" << std::endl;
+
+        Vector endPosition = Vector(std::stof(args[5]), std::stof(args[6]), std::stof(args[7]));
+        std::cout << "[ End Position X ]   [" << endPosition.x << "]" << std::endl;
+        std::cout << "[ End Position Y ]   [" << endPosition.y << "]" << std::endl;
+        std::cout << "[ End Position Z ]   [" << endPosition.z << "]" << std::endl;
+
+        Vector divisions = Vector(std::stof(args[8]), std::stof(args[9]), std::stof(args[10]));
+        std::cout << "[ divisions X ]      [" << divisions.x << "]" << std::endl;
+        std::cout << "[ divisions Y ]      [" << divisions.y << "]" << std::endl;
+        std::cout << "[ divisions Z ]      [" << divisions.z << "]" << std::endl;
+
+        regionMatrix = RegionMatrix(
+                startPosition, // Start position
+                endPosition, // End position
+                divisions               // Amount of divisions on the z, y, z
+        );
+    } else {
+        regionMatrix = RegionMatrix(
+                Vector(-1000000,-1000000,-1000000), // Start position
+                Vector(1000000, 1000000, 1000000), // End position
+                Vector(100, 100, 100)               // Amount of divisions on the z, y, z
+        );
+    }
 
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
+    l.info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
 
 //    getPointsRegions(); /
 
     // return 0;
 
 //    std::vector<Region> regions = regionMatrix.getRegions(point);
-    std::cout << "Regions: " << regionMatrix.regions.size() << std::endl;
-
-    std::cout << regionMatrix.regions.size() << std::endl;
+    l.info("Regions: ", regionMatrix.regions.size());
 
 //    std::cout << regionMatrix.
 //    int outPointsXStartsAt =
 
-    Region region(Vector(-100, -100, -100), Vector(100, 100, 100)); // what the hell this doing? vibing i guess
-    if(region.contains(Vector(0, 0, 0))) {
-        std::cout << "Region contains origin" << std::endl;
-    } else {
-        std::cout << "Region does not contain origin" << std::endl;
-    }
+//    Region region(Vector(-100, -100, -100), Vector(100, 100, 100)); // what the hell this doing? vibing i guess
+//    if(region.contains(Vector(0, 0, 0))) {
+//        std::cout << "Region contains origin" << std::endl;
+//    } else {
+//        std::cout << "Region does not contain origin" << std::endl;
+//    }
 
     std::ifstream infile;
     infile.open(data_set_path);
@@ -110,8 +135,8 @@ int main(int arg_count, char** args) {
         )); // Mass
     }
 
-    std::cout << "Finished reading file" << std::endl
-              << "Assigning regions." << std::endl;
+    l.info("Finished reading file", "");
+    l.info("Assigning regions.", "");
 // converting data to meters (for now)
     static float averageStarRegionCount = 0;
     for (auto star : star_list) {
@@ -131,8 +156,13 @@ int main(int arg_count, char** args) {
         }
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
-            std::cout   << "[" << star->id << "] Finished assigning regions to " << 5000 << " stars out of " << star_list.size() << std::endl
-                        << "---- stars in an average of " << averageStarRegionCount << " regions" <<  std::endl;
+
+            auto progress = to_string(star->id) + "/" + to_string(star_list.size());
+            auto percent = to_string((int)((float)star->id / (float)star_list.size() * 100));
+            auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +                     to_string(averageStarRegionCount) + " regions";
+            l.verbose(message, "");
+//            std::cout   << "[" << star->id << "] Finished assigning regions to " << 5000 << " stars out of " << star_list.size() << std::endl
+//                        << "---- stars in an average of " << averageStarRegionCount << " regions" <<  std::endl;
         }
     }
     // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
@@ -167,12 +197,13 @@ int main(int arg_count, char** args) {
             }
         }
         auto threads = std::vector<std::thread>{};
-        for (int threadID = 0; threadID < thread_count; ++threadID) {
-            threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
-        }
+//        for (int threadID = 0; threadID < thread_count; ++threadID) {
+//            threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
+//        }
 //         don't know what this is
         for (int i = 0; i < thread_count; ++i) {
-            threads.emplace_back(std::thread([&work_queue, i]() {
+            threads.emplace_back(std::thread([&work_queue, i]()
+            {
                 int tasksComplete = 0;
                 int myTasks = work_queue.at(i).size();
                 int averageTime = -1;
@@ -182,7 +213,12 @@ int main(int arg_count, char** args) {
                     ++tasksComplete;
 #define OUTPUT_EVERY_N_TASKS 100
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
-                        std::cout << "Thread " << i << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
+//                        std::cout << "Thread " << i << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
+                        auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
+                        auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
+                        auto message = "[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
+                                       to_string(averageTime) + "ms";
+                        l.verbose(message, "");
                     }
                 }
             }));

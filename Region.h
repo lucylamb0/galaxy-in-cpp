@@ -41,7 +41,7 @@ public:
     bool debug = false;
 
     // TODO: Fine tune a decent overlap factor - higher == more overlaps for stars == longer runtimes == higher == greater accuracy?
-    float overlap_factor = 0.002;
+    float overlap_factor = 0.0002;
     int region_count;
     std::vector<Region*> regions;
     Vector step, overlap, divisions;
@@ -53,7 +53,7 @@ public:
         step = (max - min) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
 //        overlap = Vector(0, 0, 0);
-        std::cout << "Amount of regions: " << divisions.size() << std::endl;
+//        std::cout << "Amount of regions: " << divisions.size() << std::endl;
 
         for (int i = 0; i < divisions.x; i++) {
             for (int j = 0; j < divisions.y; j++) {

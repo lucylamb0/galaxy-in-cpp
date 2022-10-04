@@ -18,7 +18,7 @@ endif()
 message(STATUS ${CMAKE_HOST_SYSTEM})
 
 find_package(Threads REQUIRED)
-add_executable(GalaxySimulation main.cpp Vector3.h Star.h includes.h Region.h)
+add_executable(GalaxySimulation main.cpp Vector3.h Star.h includes.h Region.h logging.h)
 if(TARGET Threads::Threads)
     target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
 endif()
