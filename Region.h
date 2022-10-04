@@ -7,15 +7,17 @@
 
 #include <iostream>
 #include "Vector3.h"
-
+class Star;
 class Region {
 public:
     Vector min, max;
+    Vector com_position = Vector(0, 0, 0);
+    float com_mass = 0;
 
     Vector center;
 //    long double totalMass;
 
-    std::vector<int> stars_in_region = {};
+    std::vector<Star*> stars_in_region = {};
     Region(Vector min, Vector max) : min(min), max(max), center((min + max) / 2) {}
 
     bool contains_x(Vector v) const {

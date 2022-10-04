@@ -31,12 +31,24 @@ std::vector<std::string> split(const std::string &s, char delim) {
 #include <filesystem>
 #include <thread>
 
+void compute_region_com(Region* region) {
+    Vector com_position = Vector(0, 0, 0);
+    float com_mass = 0;
+    for (Star* star : region->stars_in_region) {
+        com_position += star->position;
+        com_mass += star->mass;
+    }
+    region->com_position = com_position;
+    region->com_mass = com_mass;
+}
+
 void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
     int tasksComplete = 0;
     auto myTasks = work_queue.at(threadID).size();
     double averageTime = -1.0;
     for (auto star : work_queue.at(threadID)) {
-        auto timeTaken = star->acceleration_update(star_list);
+        auto timeTaken = star->acceleration_update_region_com(true);
+        timeTaken += star->acceleration_update_stars_in_region(false);
         averageTime = averageTime == -1.0 ? timeTaken : (averageTime + timeTaken) / 2;
         ++tasksComplete;
         if(tasksComplete % (100 + (threadID * 100)) == 0) {
@@ -143,10 +155,9 @@ int main(int arg_count, char** args) {
 //        star->velocity = star->velocity * parsec_per_year;
 
         // On star initialisation region all the stars
-        for (int region_index : star->find_regions()) {
-            Region* region = regionMatrix.regions.at(region_index);
+        for (Region* region : star->find_regions()) {
             // add star to region
-            region->stars_in_region.emplace_back(star->id);
+            region->stars_in_region.emplace_back(star);
 //             std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
 //            std::cout << "Stars in region: [";
 //            for (int star_in_region : region->stars_in_region) {
@@ -222,7 +233,8 @@ int main(int arg_count, char** args) {
                 int myTasks = work_queue.at(i).size();
                 double averageTime = -1;
                 for (auto star : work_queue.at(i)) {
-                    auto timeTaken = star->acceleration_update(star_list);
+                    auto timeTaken = star->acceleration_update_region_com(true);
+                    timeTaken += star->acceleration_update_stars_in_region(false);
                     averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
                     ++tasksComplete;
 #define OUTPUT_EVERY_N_TASKS 100
@@ -243,7 +255,8 @@ int main(int arg_count, char** args) {
         // not multithreaded star updates
 #ifndef MULTI_THREADED
         for (auto star : star_list) {
-            auto accelerationDuration = star.acceleration_update(star_list);
+            auto accelerationDuration = star->acceleration_update_region_com(true);
+            accelerationDuration += star->acceleration_update_stars_in_region(false);;
 
             if (averageAccelerationUpdateTime == -1) {
                 averageAccelerationUpdateTime = accelerationDuration;
@@ -263,17 +276,12 @@ int main(int arg_count, char** args) {
         // updating star positions and velocities and adding them to the regions
         for (auto star : star_list) {
             star->velocity_update(); // Update the stars veloctiy
-            star->position_update();
-
-            // I believe this should be moved inside the acceleration updater.
-//            star->find_regions(regionMatrix, playSpaceStart);
-//            for (int region_index : star->find_regions(regionMatrix, playSpaceStart)) {
-//                // add star to region
-//
-//                // TODO: use regions to speed up acceleration update
-//                // TODO: Check we are not already within the region
-//                regionMatrix.regions.at(region_index).stars_in_region.emplace_back(star->id);
-//            }
+            star->position_update(); // Update the stars position
+            // star->find_regions();
+            for (Region* region : star->find_regions()) {
+                // add star to region
+                region->stars_in_region.emplace_back(star);
+            }
         }
         if (loopCnt % 10 == 0) {
             std::cout << (loopCnt / loops) * 100 << "% Complete - Stars" << std::endl;
