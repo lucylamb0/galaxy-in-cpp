@@ -94,8 +94,6 @@ int main() {
              1.0f,
  &regionMatrix // Parent region matrix
         )); // Mass
-
-
     }
 
     std::cout << "Finished reading file" << std::endl
