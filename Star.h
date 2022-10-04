@@ -180,26 +180,22 @@ public:
     // TODO: When a star is overlapping regions it should update the acceleration using the other stars in the overlapping regions
     // TODO: Make stars update using regions COM
     double acceleration_update_stars_in_region(bool clear_accel) { // current_star_positions is star list
-        std::vector<Star*> stars_nearby = {};
         if (clear_accel) {
             acceleration = Vector(0, 0, 0);
         }
         auto accelerationStartTime = std::chrono::high_resolution_clock::now();
         for (auto region : this->regions_we_are_in){
             for (auto star : region->stars_in_region){
-                stars_nearby.emplace_back(star);
+                if (star->id == id)
+                    continue;
+
+                long double r = this->position.distTo(star->position);
+                long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r, 2)); // Now gives acceleration in pc/year^2
+
+                this->acceleration.x += accel_from_star * ((star->position.x - this->position.x)/r);
+                this->acceleration.y += accel_from_star * ((star->position.y - this->position.y)/r);
+                this->acceleration.z += accel_from_star * ((star->position.z - this->position.z)/r);
             }
-        }
-        for (auto star : stars_nearby) {
-            if (star->id == id)
-                continue;
-
-            long double r = this->position.distTo(star->position);
-            long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r, 2)); // Now gives acceleration in pc/year^2
-
-            this->acceleration.x += accel_from_star * ((star->position.x - this->position.x)/r);
-            this->acceleration.y += accel_from_star * ((star->position.y - this->position.y)/r);
-            this->acceleration.z += accel_from_star * ((star->position.z - this->position.z)/r);
         }
         auto accelerationEndTime = std::chrono::high_resolution_clock::now();
         auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();

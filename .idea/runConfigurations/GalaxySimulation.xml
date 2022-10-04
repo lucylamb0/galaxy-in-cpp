@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="GalaxySimulation" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$ContentRoot$/star_data.csv" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="GalaxySimulation" TARGET_NAME="GalaxySimulation" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="GalaxySimulation" RUN_TARGET_NAME="GalaxySimulation">
+  <configuration default="false" name="GalaxySimulation" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="$FileDir$/star_data.csv" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="GalaxySimulation" TARGET_NAME="GalaxySimulation" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="GalaxySimulation" RUN_TARGET_NAME="GalaxySimulation">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>
