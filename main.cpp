@@ -66,11 +66,11 @@ void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
 RegionMatrix regionMatrix;
 
 int main(int arg_count, char** args) {
-    std::string data_set_path; // = args[1];
+    std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
     if(arg_count == 2) {
-        data_set_path = args[1];
+    //    data_set_path = args[1];
     }
-    if(arg_count > 2) {
+    if(arg_count > 4) {
         data_set_path = args[1];
 
         std::cout << "[ Data Set Path ]    [" << data_set_path << "]" << std::endl;
@@ -99,7 +99,7 @@ int main(int arg_count, char** args) {
         regionMatrix = RegionMatrix(
                 Vector(-1000000,-1000000,-1000000), // Start position
                 Vector(1000000, 1000000, 1000000), // End position
-                Vector(100, 100, 100)               // Amount of divisions on the z, y, z
+                Vector(10, 10, 10)               // Amount of divisions on the z, y, z
         );
     }
 
@@ -164,6 +164,11 @@ int main(int arg_count, char** args) {
 ////                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
 //            }
         }
+        // compute region coms
+        for (Region* region : regionMatrix.regions) {
+            compute_region_com(region);
+        }
+
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
@@ -272,6 +277,10 @@ int main(int arg_count, char** args) {
                 region->stars_in_region.emplace_back(star);
             }
         }
+        for (auto region : regionMatrix.regions) {
+            compute_region_com(region);
+        }
+
         if (loopCnt % 10 == 0) {
             std::cout << (loopCnt / loops) * 100 << "% Complete - Stars" << std::endl;
         }

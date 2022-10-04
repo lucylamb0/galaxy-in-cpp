@@ -43,7 +43,7 @@ public:
     bool debug = false;
 
     // TODO: Fine tune a decent overlap factor - higher == more overlaps for stars == longer runtimes == higher == greater accuracy?
-    float overlap_factor = 0.0002;
+    float overlap_factor = 0.00002;
     int region_count;
     std::vector<Region*> regions;
     Vector step, overlap, divisions;
