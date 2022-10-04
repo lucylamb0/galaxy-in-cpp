@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(C_version)
+project(GalaxySimulation)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,7 +18,7 @@ endif()
 message(STATUS ${CMAKE_HOST_SYSTEM})
 
 find_package(Threads REQUIRED)
-add_executable(C_version main.cpp Vector3.h Star.h includes.h Region.h)
+add_executable(GalaxySimulation main.cpp Vector3.h Star.h includes.h Region.h)
 if(TARGET Threads::Threads)
-    target_link_libraries(C_version PRIVATE Threads::Threads)
+    target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
 endif()

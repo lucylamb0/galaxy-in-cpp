@@ -2,6 +2,6 @@ sudo apt-get update && sudo apt-get install -y libsdl2-dev libfreetype-dev g++
 
 cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S ./ -B ./Build
 
-cmake --build ./Build --target C_version -- -j 6
+cmake --build ./Build --target GalaxySimulation -- -j 6
 
-chmod 777 ./Build/C_version
+chmod 777 ./Build/GalaxySimulation

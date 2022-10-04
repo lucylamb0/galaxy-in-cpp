@@ -60,6 +60,7 @@ int main(int arg_count, char** args) {
     }
     else
         return 1;
+
     std::cout << "[" << args[1] << "]" << std::endl;
     std::cout << "[" << args[2] << "]" << std::endl;
     std::cout << "[" << data_set_path << "]" << std::endl;
