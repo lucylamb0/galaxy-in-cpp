@@ -9,13 +9,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-        compiler: [g++-12]
+        compiler: [g++-23]
         configuration: [Debug, Release]
         exclude:
           - os: ubuntu-20.04
-            compiler: g++-12
+            compiler: g++-23
           - os: ubuntu-20.04
-            compiler: clang++-14
+            compiler: clang++-23
         include:
           - os: ubuntu-22.04
             continue-on-error: true
@@ -26,7 +26,7 @@ jobs:
     - name: Install g++-11 for minimal required libstdc++
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update && sudo apt-get install -y g++-11
+        sudo apt-get update && sudo apt-get install -y g++ libg++
     - name: install
       run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libfreetype-dev ${{ matrix.compiler }}
     - name: configure
