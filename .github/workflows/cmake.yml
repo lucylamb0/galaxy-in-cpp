@@ -1,31 +1,37 @@
-name: CMake
+name: Linux
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+on: [push, pull_request]
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+        compiler: [g++]
+        configuration: [Debug, Release]
+        exclude:
+          - os: ubuntu-20.04
+            compiler: g++
+        include:
+          - os: ubuntu-22.04
+            continue-on-error: true
+          - os: ubuntu-20.04
+            continue-on-error: false
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S ${{github.workspace}} -B ${{github.workspace}}/build
-      
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --target C_version -- -j 6 -std=c++11
-      
+    - uses: actions/checkout@v2
+    - name: Install g++-11 for minimal required libstdc++
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update && sudo apt-get install -y g++
+    - name: install
+      run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libfreetype-dev ${{ matrix.compiler }}
+    - name: configure
+      run: cmake -D CMAKE_BUILD_TYPE=${{ matrix.configuration }} -D CMAKE_CXX_COMPILER=${{ matrix.compiler }} -S . -B ${{ matrix.configuration }}
+    - name: build
+      run: cmake --build ${{ matrix.configuration }} -j $(nproc --all)
+    - name: run unit tests
+      run: |
+        cd ${{ matrix.configuration }}
+        ctest --output-on-failure --schedule-random -j $(nproc --all)
