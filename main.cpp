@@ -193,7 +193,18 @@ int main(int arg_count, char** args) {
 
     int thread_count = std::thread::hardware_concurrency() - 1;
 
-    thread_count /= 3;
+//    thread_count /= 3;
+
+//    {
+//
+//        ofstream Test("testDump.txt");
+//
+//        for(auto star : star_list) {
+//            Test << star->id << "," << star->position.x << "," << star->position.y << "," << star->position.z << std::endl;
+//        }
+//
+//        Test.close();
+//    }
 
     const int loops = 10000; // number of loops to run
     for (int loopCnt = 0; loopCnt < loops; ++loopCnt)
@@ -272,10 +283,10 @@ int main(int arg_count, char** args) {
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
             // star->find_regions();
-            for (Region* region : star->find_regions()) {
-                // add star to region
-                region->stars_in_region.emplace_back(star);
-            }
+//            for (Region* region : star->find_regions()) {
+//                // add star to region
+//                region->stars_in_region.emplace_back(star);
+//            }
         }
         for (auto region : regionMatrix.regions) {
             compute_region_com(region);
