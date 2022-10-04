@@ -94,25 +94,30 @@ int main() {
     std::cout << "Finished reading file" << std::endl
               << "Assigning regions." << std::endl;
 // converting data to meters (for now)
+    static float averageStarRegionCount = 0;
     for (auto star : star_list) {
 //        star->position = star->position * parsec;  // no longer need to convert to meters
 //        star->velocity = star->velocity * parsec_per_year;
 
         // On star initialisation region all the stars
-        for (int region_index : star->find_regions(playSpaceStart)) {
-            Region* region = &regionMatrix.regions.at(region_index);
+        for (int region_index : star->find_regions()) {
+            Region* region = regionMatrix.regions.at(region_index);
             // add star to region
             region->stars_in_region.emplace_back(star->id);
 //             std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
 //            std::cout << "Stars in region: [";
             for (int star_in_region : region->stars_in_region) {
-                std::cout << "(" << region_index << ", " << star_in_region << ")";
+//                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
             }
-//            std::cout << "]" << std::endl;
+        }
+        if(star->id % 5000 == 0) {
+            averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
+            std::cout   << "[" << star->id << "] Finished assigning regions to " << 5000 << " stars out of " << star_list.size() << std::endl
+                        << "---- stars in an average of " << averageStarRegionCount << " regions" <<  std::endl;
         }
     }
     // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
-    for(Region region : regionMatrix.regions) {
+    for(Region* region : regionMatrix.regions) {
 
     }
 
@@ -121,6 +126,7 @@ int main() {
 //    static long long averageAccelerationUpdateTime = -1;
     static long long averageStarUpdateTime = -1;
 
+    auto thread_count = std::thread::hardware_concurrency() - 1;
     const int loops = 10000; // number of loops to run
     for (int i = 0; i < loops; ++i)
     {
@@ -130,7 +136,6 @@ int main() {
 // multi threading stuff
 #if MULTI_THREADED
         auto work_queue = std::vector<std::vector<Star*>>{};
-        auto thread_count = std::thread::hardware_concurrency() - 1;
         auto star_count = star_list.size();
         auto star_per_thread = star_count / thread_count;
         std::cout << "Star count: " << star_count << std::endl;
@@ -186,7 +191,7 @@ int main() {
 #endif
         // Clear the stars in the regions
         for (auto region : regionMatrix.regions) {
-            region.stars_in_region.clear();
+            region->stars_in_region.clear();
         }
         // updating star positions and velocities and adding them to the regions
         for (auto star : star_list) {

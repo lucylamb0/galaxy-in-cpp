@@ -25,17 +25,17 @@ public:
 
     RegionMatrix* parent = nullptr;
 
-    std::vector<int> find_regions(Vector playSpaceStart) {
-        // TODO: Put this debug flag somewhere global
-        const bool DEBUG = false;
-        if(DEBUG) std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
+    std::vector<int> find_regions() {
+#ifdef _DEBUG
+        std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
+#endif
         // weird math that works to find the index of the region the star is in
-        auto tmp = (this->position.x - playSpaceStart.x) / this->parent->step.x;
+        auto tmp = (this->position.x - this->parent->simulationSpaceStart.x) / this->parent->step.x;
         auto tmp2 = std::floor(tmp);
         auto remainder = tmp - tmp2;
         int index = (tmp2) * this->parent->divisions.y * this->parent->divisions.z; //indexing works
 
-        if(DEBUG) std::cout << "index: " << index << std::endl;
+//        if(this->parent->debug) std::cout << "index: " << index << std::endl;
 
         int neighbour_x = 0;
         int neighbour_y = 0;
@@ -53,7 +53,7 @@ public:
             mode_neighbours *= 2;
         }
 
-        tmp = (this->position.y - playSpaceStart.y) / this->parent->step.y;
+        tmp = (this->position.y - this->parent->simulationSpaceStart.y) / this->parent->step.y;
         tmp2 = std::floor(tmp);
         remainder = tmp - tmp2;
         index += (tmp2) * this->parent->divisions.z;
@@ -71,7 +71,7 @@ public:
         }
 
 // TODO: Will need to check weather the type of int/float work correctly when Star pos and playspace are large
-        tmp = (this->position.z - playSpaceStart.z) / this->parent->step.z;
+        tmp = (this->position.z - this->parent->simulationSpaceStart.z) / this->parent->step.z;
         tmp2 = std::floor(tmp);
         remainder = tmp - tmp2;
         index += (tmp2);
@@ -92,23 +92,23 @@ public:
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
         if (mode_neighbours == 1) {
-            if(DEBUG) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
+//            if(this->parent->debug) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
             regions_we_are_in.push_back(index);
         }
         if (mode_neighbours == 2) {
-            if(DEBUG) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
+//            if(this->parent->debug) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
             tmp = index;
 
             tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
             tmp += (neighbour_y * this->parent->divisions.z);
             tmp += neighbour_z;
 
-            if(DEBUG) std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
             regions_we_are_in.emplace_back(index);
             regions_we_are_in.emplace_back(tmp);
         }
         if (mode_neighbours == 4) {
-            if(DEBUG) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
+//            if(this->parent->debug) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
             tmp = index;
 
             tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
@@ -117,56 +117,56 @@ public:
 
             regions_we_are_in.emplace_back(index);
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
             if (neighbour_x != 0) {
                 tmp = (index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z));
                 regions_we_are_in.emplace_back(tmp);
-                if(DEBUG) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
+//                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
             if (neighbour_y != 0) {
                 tmp = (index + (neighbour_y * this->parent->divisions.z));
                 regions_we_are_in.emplace_back(tmp);
-                if(DEBUG) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
+//                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
             if (neighbour_z != 0) {
                 tmp = (index + neighbour_z);
                 regions_we_are_in.emplace_back(tmp);
-                if(DEBUG) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
+//                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
             }
         }
         if (mode_neighbours == 8) {
-            if(DEBUG) std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
+//            if(this->parent->debug) std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
             tmp = index;
 
             tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z) + neighbour_z;
             regions_we_are_in.emplace_back(index);
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_y * this->parent->divisions.z);
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + neighbour_z;
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z);
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + neighbour_z;
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
             tmp = index + (neighbour_y * this->parent->divisions.z) + neighbour_z;
             regions_we_are_in.emplace_back(tmp);
-            if(DEBUG) std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
+//            if(this->parent->debug) std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         }
 
