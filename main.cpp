@@ -32,14 +32,11 @@ std::vector<std::string> split(const std::string &s, char delim) {
 #include <thread>
 
 void compute_region_com(Region* region) {
-    Vector com_position = Vector(0, 0, 0);
-    float com_mass = 0;
     for (Star* star : region->stars_in_region) {
-        com_position += star->position;
-        com_mass += star->mass;
+        // TODO: Should consider the mass of the star when calculating the COM
+        region->com_position = region->com_position.x == 0 ? star->position : (region->com_position + star->position) / 2;
+        region->com_mass += star->mass;
     }
-    region->com_position = com_position;
-    region->com_mass = com_mass;
 }
 
 RegionMatrix regionMatrix;
@@ -146,7 +143,6 @@ int main(int arg_count, char** args) {
 //            Vector(10, 10, 10)               // Amount of divisions on the z, y, z
 //    );
 
-    logging::info("Finished reading file", "");
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
@@ -185,7 +181,7 @@ int main(int arg_count, char** args) {
 //
 //    }
 
-    std::cout << "Finished assigning regions" << std::endl;
+    logging::info("Finished assigning regions", "");
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
 //    static long long averageAccelerationUpdateTime = -1;
     static long long averageStarUpdateTime = -1;
@@ -205,6 +201,13 @@ int main(int arg_count, char** args) {
 //        Test.close();
 //    }
 
+    auto work_queue = std::vector<std::vector<Star*>>{};
+    auto star_count = star_list.size();
+    auto star_per_thread = star_count / thread_count;
+    logging::info("Star count: ", star_count);
+    logging::info("Thread count: ", thread_count);
+    logging::info("Star per thread: ", star_per_thread);
+
     const int loops = 10000; // number of loops to run
     for (int loopCnt = 0; loopCnt < loops; ++loopCnt)
     {
@@ -213,12 +216,7 @@ int main(int arg_count, char** args) {
 #define MULTI_THREADED 1
 // multi threading stuff
 #if MULTI_THREADED
-        auto work_queue = std::vector<std::vector<Star*>>{};
-        auto star_count = star_list.size();
-        auto star_per_thread = star_count / thread_count;
-        std::cout << "Star count: " << star_count << std::endl;
-        std::cout << "Thread count: " << thread_count << std::endl;
-        std::cout << "Star per thread: " << star_per_thread << std::endl;
+
         for (int i = 0; i < thread_count; ++i) {
             work_queue.emplace_back(std::vector<Star*>{});
             for (int j = 0; j < star_per_thread; ++j) {
@@ -242,11 +240,11 @@ int main(int arg_count, char** args) {
                     timeTaken += star->acceleration_update_stars_in_region(false);
                     averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
                     ++tasksComplete;
-#define OUTPUT_EVERY_N_TASKS 100
+#define OUTPUT_EVERY_N_TASKS 1000
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-                        logging::verbose("[Thread " + to_string(i) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
+                        logging::verbose("Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
                                   to_string(averageTime) + "ms", "");
                     }
                 }
@@ -279,7 +277,17 @@ A:
             region->stars_in_region.clear();
         }
         // updating star positions and velocities and adding them to the regions
+        static Vector average_velocity = Vector(0, 0, 0);
+        static Vector average_acceleration = Vector(0, 0, 0);
         for (auto star : star_list) {
+            if(!star->acceleration.x || !star->acceleration.y || !star->acceleration.z) {
+                std::cout << "Acceleration is NaN for star " << star->id << std::endl;
+                continue;
+            }
+            std::cout << "Old Average: " << average_acceleration << " --- " << star->acceleration  << std::endl;
+            average_velocity = average_velocity.x == 0 ? star->velocity : (average_velocity + star->velocity) / 2;
+            average_acceleration = average_acceleration.x == 0 ? star->acceleration : (average_acceleration + star->acceleration) / 2;
+
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
             // star->find_regions();
@@ -288,6 +296,8 @@ A:
                 region->stars_in_region.emplace_back(star);
             }
         }
+        logging::info("Average Velocity: ", average_velocity);
+        logging::info("Average Acceleration: ", average_acceleration);
         for (auto region : regionMatrix.regions) {
             compute_region_com(region);
         }
@@ -304,7 +314,8 @@ A:
         } else {
             averageStarUpdateTime = (averageStarUpdateTime + starUpdateDuration) / 2;
         }
-        std::cout << "Finished a stars acceleration update: " << (loopCnt + 1) << std::endl;
+
+        logging::info("Finished an acceleration cycle: ", loopCnt + 1);
     }
     return 0;
 }

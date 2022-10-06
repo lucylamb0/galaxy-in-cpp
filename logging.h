@@ -29,17 +29,17 @@ class logging {
 
     template <typename T1, typename T2>
     static void log(string prx, T1 arg1 = "", T2 arg2 = "") {
-        cout << currentDateTime() << " - " << prx << " - " << arg1 << arg2 << endl;
+        cout << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << endl;
     }
 
 public:
     template <typename T1, typename T2>
     static void verbose(T1 arg1, T2 arg2) {
-        log("[VERBOSE]", arg1, arg2);
+       // log("[ VERBOSE ]", arg1, arg2);
     }
     template <typename T1, typename T2>
     static void info(T1 arg1, T2 arg2) {
-        log("[INFORMATION]", arg1, arg2);
+        log("[ INFO ]", arg1, arg2);
     }
 };
 

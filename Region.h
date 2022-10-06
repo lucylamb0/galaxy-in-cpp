@@ -50,31 +50,37 @@ public:
 
     Vector simulationSpaceStart, simulationSpaceEnd = {};
 
-    RegionMatrix() {}
     RegionMatrix(Vector min, Vector max, Vector divisions, float overlap_factor = 0.0003f) :
+
                 simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
     {
-        step = (max - min) / divisions;
+        setup_regions();
+    }
+
+    // Dynamic matrix
+    RegionMatrix() {
+        setup_regions();
+    }
+
+    bool setup_regions() {
+        step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
-//        overlap = Vector(0, 0, 0);
-//        std::cout << "Amount of regions: " << divisions.size() << std::endl;
 
         for (int i = 0; i < divisions.x; i++) {
             for (int j = 0; j < divisions.y; j++) {
                 for (int k = 0; k < divisions.z; k++) {
-                    regions.push_back(new Region(Vector((min.x + i * step.x) - overlap.x,
-                                                    (min.y + j * step.y) - overlap.y,
-                                                    (min.z + k * step.z) - overlap.z
-                                             ),
-                                             Vector((min.x + (i + 1) * step.x) + overlap.x,
-                                                    (min.y + (j + 1) * step.y) + overlap.y,
-                                                    (min.z + (k + 1) * step.z) + overlap.z
-                                             )));
+                    regions.push_back(new Region(Vector((simulationSpaceStart.x + i * step.x) - overlap.x,
+                                                        (simulationSpaceStart.y + j * step.y) - overlap.y,
+                                                        (simulationSpaceStart.z + k * step.z) - overlap.z
+                                                 ),
+                                                 Vector((simulationSpaceStart.x + (i + 1) * step.x) + overlap.x,
+                                                        (simulationSpaceStart.y + (j + 1) * step.y) + overlap.y,
+                                                        (simulationSpaceStart.z + (k + 1) * step.z) + overlap.z
+                                                 )));
                 }
             }
         }
-//        region_count = regions.size();
     }
-};
+ };
 
 #endif //C_VERSION_REGION_H

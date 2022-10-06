@@ -11,6 +11,10 @@ struct Vector {
     Vector() = default;
     constexpr Vector(long double x, long double y, long double z) noexcept : x{ x }, y{ y }, z{ z } {}
 
+    friend auto operator<<(std::ostream& os, Vector const& m) -> std::ostream& {
+        return os << "(" << m.x << ", " << m.y << ", " << m.z << ")";
+    }
+
     constexpr auto notNull() const noexcept
     {
         return x || y || z;
