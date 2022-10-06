@@ -42,33 +42,12 @@ void compute_region_com(Region* region) {
     region->com_mass = com_mass;
 }
 
-void threadFunc(int threadID, std::vector<std::vector<Star*>> work_queue) {
-    int tasksComplete = 0;
-    auto myTasks = work_queue.at(threadID).size();
-    double averageTime = -1.0;
-    for (auto star : work_queue.at(threadID)) {
-        auto timeTaken = star->acceleration_update_region_com(true);
-        timeTaken += star->acceleration_update_stars_in_region(false);
-        averageTime = averageTime == -1.0 ? timeTaken : (averageTime + timeTaken) / 2;
-        ++tasksComplete;
-        if(tasksComplete % (100 + (threadID * 100)) == 0) {
-//            auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
-//            auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-//            auto message = "[Thread " + to_string(threadID) + "] " + percent + "% [" + progress + "] Accel Updates, Average Time Taken: " +
-//                    to_string(averageTime) + "ms";
-//            l.verbose(message, "");
-
-            std::cout << "Thread " << threadID << ": " << tasksComplete << "/" << myTasks << " - Average Time Taken: " << averageTime << "ms" << std::endl;
-        }
-    }
-}
-
 RegionMatrix regionMatrix;
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
     if(arg_count == 2) {
-    //    data_set_path = args[1];
+        data_set_path = args[1];
     }
     if(arg_count > 4) {
         data_set_path = args[1];
@@ -94,45 +73,29 @@ int main(int arg_count, char** args) {
                 startPosition, // Start position
                 endPosition, // End position
                 divisions               // Amount of divisions on the z, y, z
+                         // Overlap factor
         );
     } else {
         regionMatrix = RegionMatrix(
                 Vector(-1000000,-1000000,-1000000), // Start position
                 Vector(1000000, 1000000, 1000000), // End position
-                Vector(10, 10, 10)               // Amount of divisions on the z, y, z
+                Vector(10, 10, 10),               // Amount of divisions on the z, y, z
+                0.0003f         // Overlap factor
         );
     }
 
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
     logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
 
-//    getPointsRegions(); /
-
-    // return 0;
-
-//    std::vector<Region> regions = regionMatrix.getRegions(point);
     logging::info("Regions: ", regionMatrix.regions.size());
-
-//    std::cout << regionMatrix.
-//    int outPointsXStartsAt =
-
-//    Region region(Vector(-100, -100, -100), Vector(100, 100, 100)); // what the hell this doing? vibing i guess
-//    if(region.contains(Vector(0, 0, 0))) {
-//        std::cout << "Region contains origin" << std::endl;
-//    } else {
-//        std::cout << "Region does not contain origin" << std::endl;
-//    }
 
     std::ifstream infile;
     infile.open(data_set_path);
     std::string line;
 
-//    int cnt = 0;
 // I think this is making the list of stars from the file
     while (std::getline(infile, line))
     {
-//        ++cnt; if(cnt > 10000000) break;
-
         std::istringstream iss(line);
         auto split_str = split(line, ',');
 
@@ -159,15 +122,8 @@ int main(int arg_count, char** args) {
             // add star to region
             region->stars_in_region.emplace_back(star);
 //             std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
-//            std::cout << "Stars in region: [";
-//            for (int star_in_region : region->stars_in_region) {
-////                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
-//            }
         }
-        // compute region coms
-        for (Region* region : regionMatrix.regions) {
-            compute_region_com(region);
-        }
+
 
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
@@ -177,14 +133,12 @@ int main(int arg_count, char** args) {
             auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
                       to_string(averageStarRegionCount) + " regions";
             logging::verbose(message, "");
-//            std::cout   << "[" << star->id << "] Finished assigning regions to " << 5000 << " stars out of " << star_list.size() << std::endl
-//                        << "---- stars in an average of " << averageStarRegionCount << " regions" <<  std::endl;
         }
     }
-    // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
-//    for(Region* region : regionMatrix.regions) {
-//
-//    }
+
+    for (Region* region : regionMatrix.regions) {
+        compute_region_com(region);
+    }
 
     std::cout << "Finished assigning regions" << std::endl;
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
@@ -231,6 +185,7 @@ int main(int arg_count, char** args) {
 //            threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
 //        }
 //         don't know what this is
+//goto A;
         for (int i = 0; i < thread_count; ++i) {
             threads.emplace_back(std::thread([&work_queue, i]()
             {
@@ -252,7 +207,7 @@ int main(int arg_count, char** args) {
                 }
             }));
         }
-
+A:
         for (auto &thread : threads) {
             thread.join();
         }
@@ -283,10 +238,10 @@ int main(int arg_count, char** args) {
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
             // star->find_regions();
-//            for (Region* region : star->find_regions()) {
-//                // add star to region
-//                region->stars_in_region.emplace_back(star);
-//            }
+            for (Region* region : star->find_regions()) {
+                // add star to region
+                region->stars_in_region.emplace_back(star);
+            }
         }
         for (auto region : regionMatrix.regions) {
             compute_region_com(region);

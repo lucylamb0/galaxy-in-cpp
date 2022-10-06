@@ -25,7 +25,7 @@ public:
 
     RegionMatrix* parent = nullptr;
 
-    std::vector<Region*> find_regions() {
+    RegionArrayT find_regions() {
 #ifdef _DEBUG
         std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
 #endif

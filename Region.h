@@ -38,20 +38,22 @@ public:
 };
 // TODO: Give each region a COM
 // TODO: If a region has no stars set a flag to not calculate it and to skip it when calculating star accels
+
+#define RegionArrayT std::vector<Region*>
 class RegionMatrix {
 public:
-    bool debug = false;
-
     // TODO: Fine tune a decent overlap factor - higher == more overlaps for stars == longer runtimes == higher == greater accuracy?
-    float overlap_factor = 0.0002;
-    int region_count;
-    std::vector<Region*> regions;
+    float overlap_factor;
+
+    RegionArrayT regions;
     Vector step, overlap, divisions;
 
     Vector simulationSpaceStart, simulationSpaceEnd = {};
 
     RegionMatrix() {}
-    RegionMatrix(Vector min, Vector max, Vector divisions) : simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions) {
+    RegionMatrix(Vector min, Vector max, Vector divisions, float overlap_factor = 0.0003f) :
+                simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
+    {
         step = (max - min) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
 //        overlap = Vector(0, 0, 0);
@@ -71,18 +73,8 @@ public:
                 }
             }
         }
-        region_count = regions.size();
+//        region_count = regions.size();
     }
-
-//    std::vector<Region> getRegions(Vector point) {
-//        std::vector<Region> regions;
-//        for (auto region : this->regions) {
-//            if (region->contains(point)) {
-//                regions->push_back(region);
-//            }
-//        }
-//        return regions;
-//    }
 };
 
 #endif //C_VERSION_REGION_H
