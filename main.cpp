@@ -77,8 +77,8 @@ int main(int arg_count, char** args) {
         );
     } else {
         regionMatrix = RegionMatrix(
-                Vector(-1000000,-1000000,-1000000), // Start position
-                Vector(1000000, 1000000, 1000000), // End position
+                Vector(-100000,-100000,-100000), // Start position
+                Vector(100000, 100000, 100000), // End position
                 Vector(10, 10, 10),               // Amount of divisions on the z, y, z
                 0.0003f         // Overlap factor
         );
@@ -108,6 +108,43 @@ int main(int arg_count, char** args) {
  &regionMatrix // Parent region matrix
         )); // Mass
     }
+//    long double max_x;
+//    long double max_y;
+//    long double max_z;
+//    long double min_x;
+//    long double min_y;
+//    long double min_z;
+//    for (auto star : star_list) {
+//        if (star->position.x > max_x) {
+//            max_x = star->position.x;
+//        }
+//        if (star->position.y > max_y) {
+//            max_y = star->position.y;
+//        }
+//        if (star->position.z > max_z) {
+//            max_z = star->position.z;
+//        }
+//        if (star->position.x < min_x) {
+//            min_x = star->position.x;
+//        }
+//        if (star->position.y < min_y) {
+//            min_y = star->position.y;
+//        }
+//        if (star->position.z < min_z) {
+//            min_z = star->position.z;
+//        }
+//    }
+//    min_x *= 1.1;
+//    min_y *= 1.1;
+//    min_z *= 1.1;
+//    max_x *= 1.1;
+//    max_y *= 1.1;
+//    max_z *= 1.1;
+//    regionMatrix = RegionMatrix(
+//            Vector(min_x, min_y, min_z), // Start position
+//            Vector(max_x, max_y, max_z), // End position
+//            Vector(10, 10, 10)               // Amount of divisions on the z, y, z
+//    );
 
     logging::info("Finished reading file", "");
     logging::info("Assigning regions.", "");
@@ -121,9 +158,12 @@ int main(int arg_count, char** args) {
         for (Region* region : star->find_regions()) {
             // add star to region
             region->stars_in_region.emplace_back(star);
-//             std::cout << "Added star " << star->id << " to region " << region_index << std::endl; // for debugging TODO: remove this
+//            std::cout << "Added star " << star->id << " to region " << region << std::endl; // for debugging TODO: remove this
+//            std::cout << "Stars in region: [";
+//            for (int star_in_region : region->stars_in_region) {
+////                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
+//            }
         }
-
 
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
@@ -135,10 +175,15 @@ int main(int arg_count, char** args) {
             logging::verbose(message, "");
         }
     }
-
+    // compute region coms
     for (Region* region : regionMatrix.regions) {
         compute_region_com(region);
     }
+
+    // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
+//    for(Region* region : regionMatrix.regions) {
+//
+//    }
 
     std::cout << "Finished assigning regions" << std::endl;
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
@@ -238,7 +283,7 @@ A:
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
             // star->find_regions();
-            for (Region* region : star->find_regions()) {
+            for (Region* region : star->find_regions()) { // still makes a seg fault here
                 // add star to region
                 region->stars_in_region.emplace_back(star);
             }

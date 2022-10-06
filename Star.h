@@ -29,10 +29,11 @@ public:
 #ifdef _DEBUG
         std::cout << "Star Pos: " << this->position.x << ", " << this->position.y << ", " << this->position.z << std::endl;
 #endif
+        //regions_we_are_in.clear();
         // weird math that works to find the index of the region the star is in
-        auto tmp = (this->position.x - this->parent->simulationSpaceStart.x) / this->parent->step.x;
-        auto tmp2 = std::floor(tmp);
-        auto remainder = tmp - tmp2;
+        long double tmp = (this->position.x - this->parent->simulationSpaceStart.x) / this->parent->step.x;
+        long double tmp2 = std::floor(tmp);
+        long double remainder = tmp - tmp2;
         int index = (tmp2) * this->parent->divisions.y * this->parent->divisions.z; //indexing works
 
 //        if(this->parent->debug) std::cout << "index: " << index << std::endl;
@@ -189,12 +190,14 @@ public:
                 if (star->id == id)
                     continue;
 
-                long double r = this->position.distTo(star->position);
-                long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r, 2)); // Now gives acceleration in pc/year^2
+                long double r = this->position.distTo(star->position); // r needs to me in km
+                long double r_in_km = r * parsec_to_km;
+                long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
                 this->acceleration.x += accel_from_star * ((star->position.x - this->position.x)/r);
                 this->acceleration.y += accel_from_star * ((star->position.y - this->position.y)/r);
                 this->acceleration.z += accel_from_star * ((star->position.z - this->position.z)/r);
+
             }
         }
         return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
@@ -206,11 +209,14 @@ public:
         }
         auto accelerationStartTime = std::chrono::high_resolution_clock::now();
         for (auto region : this->parent->regions){
+            if (region->stars_in_region.size() == 0)
+                continue;
             if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end()) { // Conni you might want to make this your way
                 continue;
             }
-            long double r = this->position.distTo(region->com_position);
-            long double accel_from_region = (gravitationalConstantFinal * region->com_mass)/(pow(r, 2)); // Now gives acceleration in pc/year^2
+            long double r = this->position.distTo(region->com_position); // r needs to me in km
+            long double r_in_km = r * parsec_to_km;
+            long double accel_from_region = (gravitationalConstantFinal * region->com_mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
             this->acceleration.x += accel_from_region * ((region->com_position.x - this->position.x)/r);
             this->acceleration.y += accel_from_region * ((region->com_position.y - this->position.y)/r);
