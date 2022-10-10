@@ -34,7 +34,12 @@ std::vector<std::string> split(const std::string &s, char delim) {
 void compute_region_com(Region* region) {
     for (Star* star : region->stars_in_region) {
         // TODO: Should consider the mass of the star when calculating the COM
-        region->com_position = region->com_position.x == 0 ? star->position : (region->com_position + star->position) / 2;
+        region->com_position = region->com_position.x == 0 ?
+                star->position :
+                (region->com_position -
+                    ((region->com_position - star->position) *
+                        (star->mass / region->com_mass)
+                ));
         region->com_mass += star->mass;
     }
 }
@@ -105,43 +110,38 @@ int main(int arg_count, char** args) {
  &regionMatrix // Parent region matrix
         )); // Mass
     }
-//    long double max_x;
-//    long double max_y;
-//    long double max_z;
-//    long double min_x;
-//    long double min_y;
-//    long double min_z;
-//    for (auto star : star_list) {
-//        if (star->position.x > max_x) {
-//            max_x = star->position.x;
-//        }
-//        if (star->position.y > max_y) {
-//            max_y = star->position.y;
-//        }
-//        if (star->position.z > max_z) {
-//            max_z = star->position.z;
-//        }
-//        if (star->position.x < min_x) {
-//            min_x = star->position.x;
-//        }
-//        if (star->position.y < min_y) {
-//            min_y = star->position.y;
-//        }
-//        if (star->position.z < min_z) {
-//            min_z = star->position.z;
-//        }
-//    }
-//    min_x *= 1.1;
-//    min_y *= 1.1;
-//    min_z *= 1.1;
-//    max_x *= 1.1;
-//    max_y *= 1.1;
-//    max_z *= 1.1;
-//    regionMatrix = RegionMatrix(
-//            Vector(min_x, min_y, min_z), // Start position
-//            Vector(max_x, max_y, max_z), // End position
-//            Vector(10, 10, 10)               // Amount of divisions on the z, y, z
-//    );
+    infile.close();
+
+    Vector min = Vector();
+    Vector max = Vector();
+    for (auto star : star_list) {
+        if (star->position.x > max.x) {
+            max.x = star->position.x;
+        }
+        if (star->position.y > max.y) {
+            max.y = star->position.y;
+        }
+        if (star->position.z > max.z) {
+            max.z = star->position.z;
+        }
+        if (star->position.x < min.x) {
+            min.x = star->position.x;
+        }
+        if (star->position.y < min.y) {
+            min.y = star->position.y;
+        }
+        if (star->position.z < min.z) {
+            min.z = star->position.z;
+        }
+    }
+    min = min * 1.01;
+    max = max * 1.01;
+
+    regionMatrix = RegionMatrix(
+            Vector(min.x, min.y, min.z), // Start position
+            Vector(max.x, max.y, max.z), // End position
+            Vector(10, 10, 10)               // Amount of divisions on the z, y, z
+    );
 
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)
@@ -214,6 +214,7 @@ int main(int arg_count, char** args) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
 #define MULTI_THREADED 1
+#define OUTPUT_EVERY_N_TASKS 1000
 // multi threading stuff
 #if MULTI_THREADED
 
@@ -224,28 +225,25 @@ int main(int arg_count, char** args) {
             }
         }
         auto threads = std::vector<std::thread>{};
-//        for (int threadID = 0; threadID < thread_count; ++threadID) {
-//            threads.emplace_back(std::thread(threadFunc, threadID, work_queue));
-//        }
-//         don't know what this is
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
             threads.emplace_back(std::thread([&work_queue, i]()
             {
                 int tasksComplete = 0;
                 int myTasks = work_queue.at(i).size();
-                double averageTime = -1;
+                double averageTime = 0.f;
                 for (auto star : work_queue.at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
                     timeTaken += star->acceleration_update_stars_in_region(false);
-                    averageTime = averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2;
+
+                    averageTime = (averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2);
+
                     ++tasksComplete;
-#define OUTPUT_EVERY_N_TASKS 1000
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-                        logging::verbose("Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
-                                  to_string(averageTime) + "ms", "");
+                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
+                                             to_string(averageTime) + "ms" << std::flush;
                     }
                 }
             }));
@@ -255,6 +253,7 @@ A:
             thread.join();
         }
 #endif
+
         // not multithreaded star updates
 #ifndef MULTI_THREADED
         for (auto star : star_list) {
@@ -284,12 +283,16 @@ A:
                 std::cout << "Acceleration is NaN for star " << star->id << std::endl;
                 continue;
             }
-            std::cout << "Old Average: " << average_acceleration << " --- " << star->acceleration  << std::endl;
+            // std::cout << "Old Average: " << average_acceleration << " --- " << star->acceleration  << std::endl;
             average_velocity = average_velocity.x == 0 ? star->velocity : (average_velocity + star->velocity) / 2;
             average_acceleration = average_acceleration.x == 0 ? star->acceleration : (average_acceleration + star->acceleration) / 2;
 
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
+
+            if(!star->position.notNull()) {
+                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
+            }
             // star->find_regions();
             for (Region* region : star->find_regions()) { // still makes a seg fault here
                 // add star to region

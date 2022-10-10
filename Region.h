@@ -50,19 +50,14 @@ public:
 
     Vector simulationSpaceStart, simulationSpaceEnd = {};
 
+    RegionMatrix() {
+
+    }
+
     RegionMatrix(Vector min, Vector max, Vector divisions, float overlap_factor = 0.0003f) :
 
                 simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
     {
-        setup_regions();
-    }
-
-    // Dynamic matrix
-    RegionMatrix() {
-        setup_regions();
-    }
-
-    bool setup_regions() {
         step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
 
