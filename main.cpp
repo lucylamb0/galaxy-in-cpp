@@ -1,3 +1,5 @@
+// Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
+
 #include <sstream>
 #include <string>
 #include <fstream>
@@ -190,16 +192,16 @@ int main(int arg_count, char** args) {
 
 //    thread_count /= 3;
 
-//    {
-//
-//        ofstream Test("testDump.txt");
-//
-//        for(auto star : star_list) {
-//            Test << star->id << "," << star->position.x << "," << star->position.y << "," << star->position.z << std::endl;
-//        }
-//
-//        Test.close();
-//    }
+    {
+
+        ofstream Test("testDump.txt");
+
+        for(auto star : star_list) {
+            Test << star->id << "," << star->position.x << "," << star->position.y << "," << star->position.z << std::endl;
+        }
+
+        Test.close();
+    }
 
     auto work_queue = std::vector<std::vector<Star*>>{};
     auto star_count = star_list.size();

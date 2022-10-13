@@ -1,6 +1,4 @@
-//
-// Created by User on 01/08/2022.
-//
+// Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #ifndef C_VERSION_REGION_H
 #define C_VERSION_REGION_H
@@ -14,27 +12,8 @@ public:
     Vector com_position = Vector(0, 0, 0);
     float com_mass = 0;
 
-    Vector center;
-//    long double totalMass;
-
     std::vector<Star*> stars_in_region = {};
-    Region(Vector min, Vector max) : min(min), max(max), center((min + max) / 2) {}
-
-    bool contains_x(Vector v) const {
-        return v.x >= min.x && v.x <= max.x;
-    }
-    bool contains_y(Vector v) const {
-        return v.y >= min.y && v.y <= max.y;
-    }
-    bool contains_z(Vector v) const {
-        return v.z >= min.z && v.z <= max.z;
-    }
-
-    bool contains(Vector v) {
-        return v.x >= min.x && v.x <= max.x &&
-                v.y >= min.y && v.y <= max.y &&
-                v.z >= min.z && v.z <= max.z;
-    }
+    Region(Vector min, Vector max) : min(min), max(max) {}
 };
 // TODO: Give each region a COM
 // TODO: If a region has no stars set a flag to not calculate it and to skip it when calculating star accels
@@ -50,13 +29,10 @@ public:
 
     Vector simulationSpaceStart, simulationSpaceEnd = {};
 
-    RegionMatrix() {
-
-    }
+    RegionMatrix() = default;
 
     RegionMatrix(Vector min, Vector max, Vector divisions, float overlap_factor = 0.0003f) :
-
-                simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
+        simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
     {
         step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions

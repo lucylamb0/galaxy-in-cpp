@@ -1,6 +1,4 @@
-//
-// Created by Conni Bilham on 07/10/2022.
-//
+// Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #include "Star.h"
 #include "logging.h"
