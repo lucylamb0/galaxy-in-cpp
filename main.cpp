@@ -244,8 +244,11 @@ int main(int arg_count, char** args) {
                     if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
-                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
-                                             to_string(averageTime) + "ms" << std::flush;
+
+                        logging::info("[Thread " + to_string(i) + "] Acceleration Status - " + percent + "% [" + progress + "] [" + to_string(averageTime) + "ms]", "", true, true);
+
+//                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
+  //                                           to_string(averageTime) + "ms" << std::flush;
                     }
                 }
             }));

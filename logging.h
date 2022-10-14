@@ -1,22 +1,20 @@
-//
-// Created by Conni Bilham on 04/10/2022.
-//
+// Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #ifndef GALAXYSIMULATION_LOGGING_H
 #define GALAXYSIMULATION_LOGGING_H
 
-#include <iostream>
+#include <fstream>
 #include <iostream>
 #include <chrono>
 #include <ctime>
 
 using namespace std;
-
+struct tm;
 
 class logging {
     // Get current date/time, format is YYYY-MM-DD.HH:mm:ss
-    static const std::string currentDateTime() {
-        time_t     now = time(0);
+    static std::string currentDateTime() {
+        time_t     now = time(nullptr);
         struct tm  tstruct;
         char       buf[80];
         tstruct = *localtime(&now);
@@ -28,20 +26,34 @@ class logging {
     }
 
     template <typename T1, typename T2>
-    static void log(string prx, T1 arg1 = "", T2 arg2 = "") {
-        cout << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << endl;
+    static void log_to_file(string prx, T1 arg1 = "", T2 arg2 = "") {
+        ofstream log_file("log.txt", ios::app);
+        log_file << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << endl;
+        log_file.close();
+    }
+
+    template <typename T1, typename T2>
+    static void log(string prx, T1 arg1 = "", T2 arg2 = "", bool should_output = true, bool should_flush = false) {
+        log_to_file(prx, arg1, arg2);
+
+        if(should_output) {
+            if(!should_flush)
+                cout << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << endl;
+            else
+                std::cout << '\r' << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << std::flush;
+        }
+
     }
 
 public:
     template <typename T1, typename T2>
-    static void verbose(T1 arg1, T2 arg2) {
-       // log("[ VERBOSE ]", arg1, arg2);
+    static void verbose(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
+        // log("VERBOSE", arg1, arg2, should_output, should_flush);
     }
     template <typename T1, typename T2>
-    static void info(T1 arg1, T2 arg2) {
-        log("[ INFO ]", arg1, arg2);
+    static void info(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
+        log("[ INFO ]", arg1, arg2, should_output, should_flush);
     }
 };
 
-inline logging l;
 #endif //GALAXYSIMULATION_LOGGING_H
