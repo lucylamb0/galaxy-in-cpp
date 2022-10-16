@@ -149,19 +149,8 @@ int main(int arg_count, char** args) {
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
     for (auto star : star_list) {
-//        star->position = star->position * parsec;  // no longer need to convert to meters
-//        star->velocity = star->velocity * parsec_per_year;
-
-        // On star initialisation region all the stars
-        for (Region* region : star->find_regions()) {
-            // add star to region
+        for (Region* region : star->find_regions())
             region->stars_in_region.emplace_back(star);
-//            std::cout << "Added star " << star->id << " to region " << region << std::endl; // for debugging TODO: remove this
-//            std::cout << "Stars in region: [";
-//            for (int star_in_region : region->stars_in_region) {
-////                if( std::cout << "(" << region_index << ", " << star_in_region << ")";
-//            }
-        }
 
         if(star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
@@ -304,8 +293,7 @@ A:
                 region->stars_in_region.emplace_back(star);
             }
         }
-        logging::info("Average Velocity: ", average_velocity);
-        logging::info("Average Acceleration: ", average_acceleration);
+
         for (auto region : regionMatrix.regions) {
             compute_region_com(region);
         }
@@ -324,6 +312,63 @@ A:
         }
 
         logging::info("Finished an acceleration cycle: ", loopCnt + 1);
+
+        logging::info("Re assigning stars to regions", "", true, false);
+        min = Vector();
+        max = Vector();
+        for (auto star : star_list) {
+            if(star->position.isNull()) {
+                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
+                continue;
+            }
+            if (star->position.x > max.x) {
+                max.x = star->position.x;
+            }
+            if (star->position.y > max.y) {
+                max.y = star->position.y;
+            }
+            if (star->position.z > max.z) {
+                max.z = star->position.z;
+            }
+            if (star->position.x < min.x) {
+                min.x = star->position.x;
+            }
+            if (star->position.y < min.y) {
+                min.y = star->position.y;
+            }
+            if (star->position.z < min.z) {
+                min.z = star->position.z;
+            }
+        }
+        min = min * 1.01;
+        max = max * 1.01;
+
+        regionMatrix = RegionMatrix(
+                Vector(min.x, min.y, min.z), // Start position
+                Vector(max.x, max.y, max.z), // End position
+                Vector(10, 10, 10)               // Amount of divisions on the z, y, z
+        );
+
+        averageStarRegionCount = 0;
+        for (auto star : star_list) {
+            for (Region* region : star->find_regions())
+                region->stars_in_region.emplace_back(star);
+
+            if(star->id % 5000 == 0) {
+                averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
+
+                auto progress = to_string(star->id) + "/" + to_string(star_list.size());
+                auto percent = to_string((int)((float)star->id / (float)star_list.size() * 100));
+                auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
+                               to_string(averageStarRegionCount) + " regions";
+                logging::verbose(message, "");
+            }
+        }
+        // compute region coms
+        for (Region* region : regionMatrix.regions) {
+            compute_region_com(region);
+        }
+        logging::info("Finished re assigning stars to regions", "", true, false);
     }
     return 0;
 }

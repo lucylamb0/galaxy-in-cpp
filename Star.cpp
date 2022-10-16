@@ -8,11 +8,11 @@ RegionArrayT Star::find_regions() {
     // Check if the start is outside the pl ay space
     if(this->position.isNull()) {
         std::cout << "Star " << this->id << " is null" << std::endl;
-        exit(1);
+        return {};
     }
     if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
-        std::cout << "Star " << this->id << " is outside of the play space" << std::endl; 
-        exit(1);
+        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
+        return {};
     }
 
     logging::verbose("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
@@ -86,7 +86,10 @@ RegionArrayT Star::find_regions() {
     if (mode_neighbours == 1) {
 //            if(this->parent->debug) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
 // getting the region object from the index
-        regions_we_are_in.push_back(this->parent->regions[index]);
+        if(index > this->parent->regions.size())
+            std::cout << "Index is out of bounds" << std::endl;
+        else
+            regions_we_are_in.push_back(this->parent->regions[index]);
     }
     if (mode_neighbours == 2) {
 //            if(this->parent->debug) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;

@@ -52,6 +52,6 @@ public:
             }
         }
     }
- };
+};
 
 #endif //C_VERSION_REGION_H
