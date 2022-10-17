@@ -209,6 +209,7 @@ int main(int arg_count, char** args) {
 // multi threading stuff
 #if MULTI_THREADED
 
+        work_queue.clear();
         for (int i = 0; i < thread_count; ++i) {
             work_queue.emplace_back(std::vector<Star*>{});
             for (int j = 0; j < star_per_thread; ++j) {
