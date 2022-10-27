@@ -4,12 +4,6 @@
 #include "logging.h"
 
 RegionArrayT Star::find_regions() {
-
-    // Check if the start is outside the pl ay space
-    if(this->position.isNull()) {
-        std::cout << "Star " << this->id << " is null" << std::endl;
-        return {};
-    }
 //    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
 //        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
 //        return {};
@@ -24,7 +18,7 @@ RegionArrayT Star::find_regions() {
     long double remainder = tmp - tmp2;
     int index = (tmp2) * this->parent->divisions.y * this->parent->divisions.z; //indexing works
 
-    logging::debug("[ find_regions - 1 ] - Index: ", index);
+//    logging::debug("[ find_regions - 1 ] - Index: ", index);
 
     int neighbour_x = 0;
     int neighbour_y = 0;
@@ -49,7 +43,7 @@ RegionArrayT Star::find_regions() {
     remainder = tmp - tmp2;
     index += (tmp2) * this->parent->divisions.z;
 
-    logging::debug("[ find_regions - 2 ] - Index: ", index);
+//    logging::debug("[ find_regions - 2 ] - Index: ", index);
 
     if(remainder <= this->parent->overlap_factor) {
         // We are overlapping the below region
@@ -211,11 +205,11 @@ double Star::acceleration_update_region_com(bool clear_accel) {
         if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end()) { // Conni you might want to make this your way
             continue;
         }
-        long double r = this->position.distTo(region->com_position); // r needs to me in km
+        long double r = this->position.distTo(region->centreMass.position); // r needs to me in km
         long double r_in_km = r * parsec_to_km;
-        long double accel_from_region = (gravitationalConstantFinal * region->com_mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
+        long double accel_from_region = (gravitationalConstantFinal * region->centreMass.mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-        this->acceleration += ((region->com_position - this->position) / r) * accel_from_region;
+        this->acceleration += ((region->centreMass.position - this->position) / r) * accel_from_region;
     }
     auto accelerationEndTime = std::chrono::high_resolution_clock::now();
     auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();

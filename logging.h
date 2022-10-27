@@ -52,8 +52,8 @@ public:
     }
 
     template <typename T1, typename T2>
-    static void debug(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
-//        log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
+    static void debug(T1 arg1, T2 arg2, bool should_output = false, bool should_flush = false) {
+        log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
     }
 
     template <typename T1, typename T2>

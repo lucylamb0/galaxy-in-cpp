@@ -11,24 +11,11 @@
 #include <iostream>
 
 #include "logging.h"
+#include "CSV_Parser.h"
 
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
-// Not really sure what this does, probably made by Conni
-// Yes it was made by me, and it splits a string by a delimiter.
-// Example:
-// Input: Hello, world!   ,
-// Output: ["Hello", "world!"]
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
 
 #include <filesystem>
 #include <thread>
@@ -36,13 +23,13 @@ std::vector<std::string> split(const std::string &s, char delim) {
 void compute_region_com(Region* region) {
     for (Star* star : region->stars_in_region) {
         // TODO: Should consider the mass of the star when calculating the COM
-        region->com_position = region->com_position.x == 0 ?
+        region->centreMass.position = region->centreMass.position.x == 0 ?
                 star->position :
-                (region->com_position -
-                    ((region->com_position - star->position) *
-                        (star->mass / region->com_mass)
+                (region->centreMass.position -
+                    ((region->centreMass.position - star->position) *
+                        (star->mass / region->centreMass.mass)
                 ));
-        region->com_mass += star->mass;
+        region->centreMass.mass += star->mass;
     }
 }
 
@@ -93,31 +80,7 @@ int main(int arg_count, char** args) {
 
     logging::info("Regions: ", regionMatrix.regions.size());
 
-    std::ifstream infile;
-    infile.open(data_set_path);
-    std::string line;
-
-    int stars_cnt = 0;
-// I think this is making the list of stars from the file
-    while (std::getline(infile, line)) {
-        ++stars_cnt;
-        if (stars_cnt % 25000 == 0) {
-            break;
-            logging::info("Stars: ", stars_cnt);
-        }
-        std::istringstream iss(line);
-        auto split_str = split(line, ',');
-
-        star_list.emplace_back(new Star(
-                std::stoi(split_str.at(0)),     // ID
-                Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
-                Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
-                Vector(0, 0, 0), // Acceleration
-                1.0f,
-                &regionMatrix // Parent region matrix
-        )); // Mass
-    }
-    infile.close();
+    star_list = CSV_Parser::parse_csv(regionMatrix, data_set_path);
 
     Vector min = Vector();
     Vector max = Vector();

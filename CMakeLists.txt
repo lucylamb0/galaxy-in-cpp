@@ -25,7 +25,7 @@ add_executable(GalaxySimulation
         Star.cpp
         includes.h
         Region.h
-        logging.h)
+        logging.h CSV_Parser.cpp CSV_Parser.h RegionMatrix.h)
 
 if(TARGET Threads::Threads)
     target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
