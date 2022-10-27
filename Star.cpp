@@ -10,10 +10,10 @@ RegionArrayT Star::find_regions() {
         std::cout << "Star " << this->id << " is null" << std::endl;
         return {};
     }
-    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
-        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
-        return {};
-    }
+//    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
+//        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
+//        return {};
+//    }
 
     logging::debug("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
 
@@ -83,15 +83,18 @@ RegionArrayT Star::find_regions() {
 //    std::list<int> neighbour_list = (neighbour_x, neighbour_y, neighbour_z);
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
-    if (mode_neighbours == 1) {
-//            if(this->parent->debug) std::cout << "No overlapping regions found. Index of box we are in is: " << index << std::endl;
-// getting the region object from the index
-        if(index > this->parent->regions.size())
-            std::cout << "Index is out of bounds" << std::endl;
-        else
-            regions_we_are_in.push_back(this->parent->regions[index]);
+    if(mode_neighbours == 0) {
+        logging::verbose("[ find_regions - 3 ] - We are in no region???", "");
     }
-    if (mode_neighbours == 2) {
+    else if (mode_neighbours == 1) {
+        if(index > this->parent->regions.size()){
+//            std::cout << "Index is out of bounds {MAYBE}" << std::endl;
+        }
+        else {
+            regions_we_are_in.push_back(this->parent->regions[index]);
+        }
+    }
+    else if (mode_neighbours == 2) {
 //            if(this->parent->debug) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
@@ -103,7 +106,7 @@ RegionArrayT Star::find_regions() {
         regions_we_are_in.emplace_back(this->parent->regions[index]);
         regions_we_are_in.emplace_back(this->parent->regions[tmp]);
     }
-    if (mode_neighbours == 4) {
+    else if (mode_neighbours == 4) {
 //            if(this->parent->debug) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
@@ -131,7 +134,7 @@ RegionArrayT Star::find_regions() {
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
         }
     }
-    if (mode_neighbours == 8) {
+    else if (mode_neighbours == 8) {
 //            if(this->parent->debug) std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
