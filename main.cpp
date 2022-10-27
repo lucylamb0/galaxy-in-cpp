@@ -187,17 +187,6 @@ int main(int arg_count, char** args) {
 
 //    thread_count /= 3;
 
-    {
-
-        ofstream Test("testDump.txt");
-
-        for(auto star : star_list) {
-            Test << star->id << "," << star->position.x << "," << star->position.y << "," << star->position.z << std::endl;
-        }
-
-        Test.close();
-    }
-
     auto work_queue = std::vector<std::vector<Star *>>{};
     auto star_count = star_list.size();
     auto star_per_thread = star_count / thread_count;
@@ -383,6 +372,24 @@ int main(int arg_count, char** args) {
         }
         logging::info("Finished re assigning stars to regions", "", true, false);
     }
+
+    logging::info("Starting to dump data", "");
+    {
+        ofstream Test("testDump.txt");
+
+        for (auto star: star_list) {
+            Test << "STAR: " << star->id << std::endl;
+            Test << "HISTORY: " << std::endl;
+            for (auto history: star->history_position) {
+                Test << history.x << "," << history.y << "," << history.z << std::endl;
+            }
+            Test << "END HISTORY" << std::endl;
+        }
+
+        Test.close();
+    }
+    logging::info("Finished dumping data", "");
+
     return 0;
 }
 
