@@ -50,10 +50,10 @@ RegionMatrix regionMatrix;
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
-    if(arg_count == 2) {
+    if (arg_count == 2) {
         data_set_path = args[1];
     }
-    if(arg_count > 4) {
+    if (arg_count > 4) {
         data_set_path = args[1];
 
         std::cout << "[ Data Set Path ]    [" << data_set_path << "]" << std::endl;
@@ -77,11 +77,11 @@ int main(int arg_count, char** args) {
                 startPosition, // Start position
                 endPosition, // End position
                 divisions               // Amount of divisions on the z, y, z
-                         // Overlap factor
+                // Overlap factor
         );
     } else {
         regionMatrix = RegionMatrix(
-                Vector(-100000,-100000,-100000), // Start position
+                Vector(-100000, -100000, -100000), // Start position
                 Vector(100000, 100000, 100000), // End position
                 Vector(10, 10, 10),               // Amount of divisions on the z, y, z
                 0.0003f         // Overlap factor
@@ -97,26 +97,31 @@ int main(int arg_count, char** args) {
     infile.open(data_set_path);
     std::string line;
 
+    int stars_cnt = 0;
 // I think this is making the list of stars from the file
-    while (std::getline(infile, line))
-    {
+    while (std::getline(infile, line)) {
+        ++stars_cnt;
+        if (stars_cnt % 25000 == 0) {
+            break;
+            logging::info("Stars: ", stars_cnt);
+        }
         std::istringstream iss(line);
         auto split_str = split(line, ',');
 
-        star_list.emplace_back( new Star(
+        star_list.emplace_back(new Star(
                 std::stoi(split_str.at(0)),     // ID
-            Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
-            Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
-        Vector(0,0,0), // Acceleration
-             1.0f,
- &regionMatrix // Parent region matrix
+                Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
+                Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
+                Vector(0, 0, 0), // Acceleration
+                1.0f,
+                &regionMatrix // Parent region matrix
         )); // Mass
     }
     infile.close();
 
     Vector min = Vector();
     Vector max = Vector();
-    for (auto star : star_list) {
+    for (auto star: star_list) {
         if (star->position.x > max.x) {
             max.x = star->position.x;
         }
@@ -148,22 +153,23 @@ int main(int arg_count, char** args) {
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
-    for (auto star : star_list) {
-        for (Region* region : star->find_regions())
+    for (auto star: star_list) {
+        for (Region *region: star->find_regions())
             region->stars_in_region.emplace_back(star);
 
-        if(star->id % 5000 == 0) {
-            averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
+        if (star->id % 5000 == 0) {
+            averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
+                                     (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
             auto progress = to_string(star->id) + "/" + to_string(star_list.size());
-            auto percent = to_string((int)((float)star->id / (float)star_list.size() * 100));
+            auto percent = to_string((int) ((float) star->id / (float) star_list.size() * 100));
             auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
-                      to_string(averageStarRegionCount) + " regions";
+                           to_string(averageStarRegionCount) + " regions";
             logging::verbose(message, "");
         }
     }
     // compute region coms
-    for (Region* region : regionMatrix.regions) {
+    for (Region *region: regionMatrix.regions) {
         compute_region_com(region);
     }
 
@@ -192,16 +198,15 @@ int main(int arg_count, char** args) {
         Test.close();
     }
 
-    auto work_queue = std::vector<std::vector<Star*>>{};
+    auto work_queue = std::vector<std::vector<Star *>>{};
     auto star_count = star_list.size();
     auto star_per_thread = star_count / thread_count;
     logging::info("Star count: ", star_count);
     logging::info("Thread count: ", thread_count);
     logging::info("Star per thread: ", star_per_thread);
 
-    const int loops = 10000; // number of loops to run
-    for (int loopCnt = 0; loopCnt < loops; ++loopCnt)
-    {
+    const int accelCycleCount = 2; // number of accelCycleCount to run
+    for (int loopCnt = 0; loopCnt < accelCycleCount; ++loopCnt) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
 #define MULTI_THREADED 1
@@ -211,7 +216,7 @@ int main(int arg_count, char** args) {
 
         work_queue.clear();
         for (int i = 0; i < thread_count; ++i) {
-            work_queue.emplace_back(std::vector<Star*>{});
+            work_queue.emplace_back(std::vector<Star *>{});
             for (int j = 0; j < star_per_thread; ++j) {
                 work_queue.at(i).emplace_back(star_list.at(i * star_per_thread + j));
             }
@@ -219,32 +224,36 @@ int main(int arg_count, char** args) {
         auto threads = std::vector<std::thread>{};
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
-            threads.emplace_back(std::thread([&work_queue, i]()
-            {
+            threads.emplace_back(std::thread([&work_queue, i]() {
                 int tasksComplete = 0;
                 int myTasks = work_queue.at(i).size();
                 double averageTime = 0.f;
-                for (auto star : work_queue.at(i)) {
+                for (auto star: work_queue.at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
                     timeTaken += star->acceleration_update_stars_in_region(false);
 
                     averageTime = (averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2);
 
                     ++tasksComplete;
-                    if(tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
+                    if (tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
-                        auto percent = to_string((int)((float)tasksComplete / (float)myTasks * 100));
+                        auto percent = to_string((int) ((float) tasksComplete / (float) myTasks * 100));
 
-                        logging::info("[Thread " + to_string(i) + "] Acceleration Status - " + percent + "% [" + progress + "] [" + to_string(averageTime) + "ms]", "", true, true);
+                        logging::info(
+                                "[Thread " + to_string(i) + "] Acceleration Status - " + percent + "% [" + progress +
+                                "] [" + to_string(averageTime) + "ms]", "", true, true);
 
+                        if (averageTime > 20) {
+                            logging::info("Average time is too high", "", true, true);
+                        }
 //                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
-  //                                           to_string(averageTime) + "ms" << std::flush;
+                        //                                           to_string(averageTime) + "ms" << std::flush;
                     }
                 }
             }));
         }
-A:
-        for (auto &thread : threads) {
+        A:
+        for (auto &thread: threads) {
             thread.join();
         }
 #endif
@@ -280,31 +289,33 @@ A:
             }
             // std::cout << "Old Average: " << average_acceleration << " --- " << star->acceleration  << std::endl;
             average_velocity = average_velocity.x == 0 ? star->velocity : (average_velocity + star->velocity) / 2;
-            average_acceleration = average_acceleration.x == 0 ? star->acceleration : (average_acceleration + star->acceleration) / 2;
+            average_acceleration =
+                    average_acceleration.x == 0 ? star->acceleration : (average_acceleration + star->acceleration) / 2;
 
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
 
-            if(!star->position.notNull()) {
+            if (!star->position.notNull()) {
                 logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
             }
             // star->find_regions();
-            for (Region* region : star->find_regions()) { // still makes a seg fault here
+            for (Region *region: star->find_regions()) { // still makes a seg fault here
                 // add star to region
                 region->stars_in_region.emplace_back(star);
             }
         }
 
-        for (auto region : regionMatrix.regions) {
+        for (auto region: regionMatrix.regions) {
             compute_region_com(region);
         }
 
         if (loopCnt % 10 == 0) {
-            std::cout << (loopCnt / loops) * 100 << "% Complete - Stars" << std::endl;
+            std::cout << (loopCnt / accelCycleCount) * 100 << "% Complete - Stars" << std::endl;
         }
 
         auto starUpdateEndTime = std::chrono::high_resolution_clock::now();
-        auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(starUpdateStartTime-starUpdateEndTime).count();
+        auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
+                starUpdateStartTime - starUpdateEndTime).count();
 
         if (averageStarUpdateTime == -1) {
             averageStarUpdateTime = starUpdateDuration;
@@ -317,8 +328,8 @@ A:
         logging::info("Re assigning stars to regions", "", true, false);
         min = Vector();
         max = Vector();
-        for (auto star : star_list) {
-            if(star->position.isNull()) {
+        for (auto star: star_list) {
+            if (star->position.isNull()) {
                 logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
                 continue;
             }
@@ -351,22 +362,23 @@ A:
         );
 
         averageStarRegionCount = 0;
-        for (auto star : star_list) {
-            for (Region* region : star->find_regions())
+        for (auto star: star_list) {
+            for (Region *region: star->find_regions())
                 region->stars_in_region.emplace_back(star);
 
-            if(star->id % 5000 == 0) {
-                averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() : (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
+            if (star->id % 5000 == 0) {
+                averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
+                                         (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
                 auto progress = to_string(star->id) + "/" + to_string(star_list.size());
-                auto percent = to_string((int)((float)star->id / (float)star_list.size() * 100));
+                auto percent = to_string((int) ((float) star->id / (float) star_list.size() * 100));
                 auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
                                to_string(averageStarRegionCount) + " regions";
                 logging::verbose(message, "");
             }
         }
         // compute region coms
-        for (Region* region : regionMatrix.regions) {
+        for (Region *region: regionMatrix.regions) {
             compute_region_com(region);
         }
         logging::info("Finished re assigning stars to regions", "", true, false);
