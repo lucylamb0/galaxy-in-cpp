@@ -15,7 +15,7 @@ RegionArrayT Star::find_regions() {
         return {};
     }
 
-    logging::verbose("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
+    logging::debug("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
 
     //regions_we_are_in.clear();
     // weird math that works to find the index of the region the star is in
@@ -24,7 +24,7 @@ RegionArrayT Star::find_regions() {
     long double remainder = tmp - tmp2;
     int index = (tmp2) * this->parent->divisions.y * this->parent->divisions.z; //indexing works
 
-    logging::verbose("[ find_regions - 1 ] - Index: ", index);
+    logging::debug("[ find_regions - 1 ] - Index: ", index);
 
     int neighbour_x = 0;
     int neighbour_y = 0;
@@ -33,13 +33,13 @@ RegionArrayT Star::find_regions() {
 
     if(remainder <= this->parent->overlap_factor) { // need to check all 3 directions to see if we are in a neighbour region
         // We are overlapping the below region
-        logging::verbose("[ find_regions - 1 ] - We are overlapping the below region", "");
+//        logging::verbose("[ find_regions - 1 ] - We are overlapping the below region", "");
         neighbour_x = -1;
         mode_neighbours *= 2;
     }
     else if (remainder >= 1 - this->parent->overlap_factor) {
         // We are overlapping the above region
-        logging::verbose("[ find_regions - 1 ] - We are overlapping the above region", "");
+//        logging::verbose("[ find_regions - 1 ] - We are overlapping the above region", "");
         neighbour_x = 1;
         mode_neighbours *= 2;
     }
@@ -49,7 +49,7 @@ RegionArrayT Star::find_regions() {
     remainder = tmp - tmp2;
     index += (tmp2) * this->parent->divisions.z;
 
-    logging::verbose("[ find_regions - 2 ] - Index: ", index);
+    logging::debug("[ find_regions - 2 ] - Index: ", index);
 
     if(remainder <= this->parent->overlap_factor) {
         // We are overlapping the below region
@@ -175,8 +175,10 @@ RegionArrayT Star::find_regions() {
 // TODO: When a star is overlapping regions it should update the acceleration using the other stars in the overlapping regions
 // TODO: Make stars update using regions COM
 double Star::acceleration_update_stars_in_region(bool clear_accel) {
-    if (clear_accel)
+    if (clear_accel) {
+        logging::debug("Clearing acceleration", "");
         acceleration = Vector(0, 0, 0);
+    }
 
     auto accelerationStartTime = std::chrono::high_resolution_clock::now();
     for (auto region : this->regions_we_are_in) {

@@ -48,8 +48,14 @@ class logging {
 public:
     template <typename T1, typename T2>
     static void verbose(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
-        // log("VERBOSE", arg1, arg2, should_output, should_flush);
+         log("[ VERBOSE ]", arg1, arg2, should_output, should_flush);
     }
+
+    template <typename T1, typename T2>
+    static void debug(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
+//        log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
+    }
+
     template <typename T1, typename T2>
     static void info(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
         log("[ INFO ]", arg1, arg2, should_output, should_flush);
