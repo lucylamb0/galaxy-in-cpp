@@ -265,14 +265,14 @@ int main(int arg_count, char** args) {
         }
 #endif
         // Clear the stars in the regions
-        for (auto region : regionMatrix.regions) {
+        for (auto region: regionMatrix.regions) {
             region->stars_in_region.clear();
         }
         // updating star positions and velocities and adding them to the regions
         static Vector average_velocity = Vector(0, 0, 0);
         static Vector average_acceleration = Vector(0, 0, 0);
-        for (auto star : star_list) {
-            if(!star->acceleration.x || !star->acceleration.y || !star->acceleration.z) {
+        for (auto star: star_list) {
+            if (!star->acceleration.x || !star->acceleration.y || !star->acceleration.z) {
                 std::cout << "Acceleration is NaN for star " << star->id << std::endl;
                 continue;
             }
