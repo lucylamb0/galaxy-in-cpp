@@ -230,4 +230,8 @@ void Star::position_update() {
     this->position.x += this->velocity.x * time_step + 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
     this->position.y += this->velocity.y * time_step + 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
     this->position.z += this->velocity.z * time_step + 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
+    this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
+    if(this->position.isNull())
+        std::cout << "Null position" << std::endl;
+    this->regions_we_are_in.clear();
 }
