@@ -5,6 +5,7 @@
 
 #include "includes.h"
 #include "Region.h"
+#include "RegionMatrix.h"
 
 class Star {
 public:
