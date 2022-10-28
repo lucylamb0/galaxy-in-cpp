@@ -93,31 +93,49 @@ int main(int arg_count, char** args) {
 
     logging::info("Regions: ", regionMatrix.regions.size());
 
-    std::ifstream infile;
-    infile.open(data_set_path);
-    std::string line;
+//    std::ifstream infile;
+//    infile.open(data_set_path);
+//    std::string line;
+
+    star_list.emplace_back(new Star(
+            1,                                // ID
+            Vector(0.1, 0.1, 0.1),    // Position
+            Vector(0, 0, 0),    // Velocity
+            Vector(0, 0, 0), // Acceleration
+            3.00273e-6,
+            &regionMatrix       // Parent region matrix
+    ));
+
+    star_list.emplace_back(new Star(
+            2,                                // ID
+            Vector(1.246e-8 + 0.1, 0.1, 0.1),    // Position
+            Vector( 0, 2.02269032e-6, 0),    // Velocity
+            Vector(0, 0, 0), // Acceleration
+            3.69396868e-8,
+            &regionMatrix       // Parent region matrix
+    ));
 
     int stars_cnt = 0;
 // I think this is making the list of stars from the file
-    while (std::getline(infile, line)) {
-        ++stars_cnt;
-        if (stars_cnt % 25000 == 0) {
-            break;
-            logging::info("Stars: ", stars_cnt);
-        }
-        std::istringstream iss(line);
-        auto split_str = split(line, ',');
-
-        star_list.emplace_back(new Star(
-                std::stoi(split_str.at(0)),     // ID
-                Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
-                Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
-                Vector(0, 0, 0), // Acceleration
-                1.0f,
-                &regionMatrix // Parent region matrix
-        )); // Mass
-    }
-    infile.close();
+//    while (std::getline(infile, line)) {
+//        ++stars_cnt;
+////        if (stars_cnt % 25000 == 0) {
+////            break;
+////            logging::info("Stars: ", stars_cnt);
+////        }
+//        std::istringstream iss(line);
+//        auto split_str = split(line, ',');
+//
+//        star_list.emplace_back(new Star(
+//                std::stoi(split_str.at(0)),     // ID
+//                Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
+//                Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
+//                Vector(0, 0, 0), // Acceleration
+//                1.0f,
+//                &regionMatrix // Parent region matrix
+//        )); // Mass
+//    }
+//    infile.close();
 
     Vector min = Vector();
     Vector max = Vector();
@@ -194,7 +212,7 @@ int main(int arg_count, char** args) {
     logging::info("Thread count: ", thread_count);
     logging::info("Star per thread: ", star_per_thread);
 
-    const int accelCycleCount = 2; // number of accelCycleCount to run
+    const int accelCycleCount = accelCycles; // number of accelCycleCount to run
     for (int loopCnt = 0; loopCnt < accelCycleCount; ++loopCnt) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
@@ -298,7 +316,7 @@ int main(int arg_count, char** args) {
             compute_region_com(region);
         }
 
-        if (loopCnt % 10 == 0) {
+        if (loopCnt % ((int)((loopCnt / accelCycleCount) * 10)) == 0) {
             std::cout << (loopCnt / accelCycleCount) * 100 << "% Complete - Stars" << std::endl;
         }
 
