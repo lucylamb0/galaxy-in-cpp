@@ -204,10 +204,12 @@ int main(int arg_count, char** args) {
 
     auto work_queue = std::vector<std::vector<Star *>>{};
     auto star_count = star_list.size();
-    auto star_per_thread = star_count / thread_count;
+    auto left_over = star_count % thread_count;
+    auto star_per_thread = (star_count - left_over) / thread_count;
     logging::info("Star count: ", star_count);
     logging::info("Thread count: ", thread_count);
     logging::info("Star per thread: ", star_per_thread);
+    logging::info("Left over: ", left_over);
 
     const int accelCycleCount = accelCycles; // number of accelCycleCount to run
     for (int loopCnt = 0; loopCnt < accelCycleCount; ++loopCnt) {
@@ -218,12 +220,26 @@ int main(int arg_count, char** args) {
 // multi threading stuff
 #if MULTI_THREADED
 
+
+        auto tmp = std::vector<Star *>{};
+        for (int i = 0; i < left_over; ++i) {
+            tmp.emplace_back(star_list.at(0));
+            star_list.erase(star_list.begin());
+        }
+
         work_queue.clear();
         for (int i = 0; i < thread_count; ++i) {
             work_queue.emplace_back(std::vector<Star *>{});
             for (int j = 0; j < star_per_thread; ++j) {
                 work_queue.at(i).emplace_back(star_list.at(i * star_per_thread + j));
             }
+        }
+        for (int i = 0; i < left_over; ++i) {
+            work_queue.at(0).emplace_back(tmp.at(i));
+        }
+
+        for (int i = 0; i < left_over; ++i) {
+            star_list.emplace_back(tmp.at(i));
         }
         auto threads = std::vector<std::thread>{};
 //goto A;
@@ -247,7 +263,7 @@ int main(int arg_count, char** args) {
                                 "[Thread " + to_string(i) + "] Acceleration Status - " + percent + "% [" + progress +
                                 "] [" + to_string(averageTime) + "ms]", "", true, true);
 
-                        if (averageTime > 20) {
+                        if (averageTime > 10) {
                             logging::info("Average time is too high", "", true, true);
                         }
 //                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
