@@ -193,7 +193,11 @@ double Star::acceleration_update_stars_in_region(bool clear_accel) {
             long double r_in_km = r * parsec_to_km;
             long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-            this->acceleration += ((star->position - this->position) / r) * accel_from_star;
+            Vector delta = (star->position - this->position);
+            delta /= r;
+            Vector accel_total = delta * accel_from_star;
+
+            this->acceleration += accel_total;
         }
     }
     return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
@@ -211,11 +215,16 @@ double Star::acceleration_update_region_com(bool clear_accel) {
         if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end()) { // Conni you might want to make this your way
             continue;
         }
-        long double r = this->position.distTo(region->com_position); // r needs to me in km
-        long double r_in_km = r * parsec_to_km;
-        long double accel_from_region = (gravitationalConstantFinal * region->com_mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-        this->acceleration += ((region->com_position - this->position) / r) * accel_from_region;
+        long double r = this->position.distTo(region->centreMass.position); // r needs to me in km
+        long double r_in_km = r * parsec_to_km;
+        long double accel_from_region = (gravitationalConstantFinal * region->centreMass.mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
+
+        Vector delta = (region->centreMass.position - this->position);
+        delta /= r;
+        Vector accel_total = delta * accel_from_region;
+
+        this->acceleration += accel_total;
     }
     auto accelerationEndTime = std::chrono::high_resolution_clock::now();
     auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();
