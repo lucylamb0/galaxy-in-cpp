@@ -106,7 +106,7 @@ int main(int arg_count, char** args) {
     star_list.emplace_back(new Star(
             2,                                // ID
             Vector(1.246e-8 + 0.1, 0.1, 0.1),    // Position
-            Vector( 0, 2.02269032e-6, 0),    // Velocity
+            Vector( 0, -2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
             &regionMatrix       // Parent region matrix
@@ -134,8 +134,7 @@ int main(int arg_count, char** args) {
 //    }
 //    infile.close();
 
-    Vector min = Vector();
-    Vector max = Vector();
+    Vector min, max = Vector();
     for (auto star: star_list) {
         if (star->position.x > max.x) {
             max.x = star->position.x;
@@ -159,11 +158,7 @@ int main(int arg_count, char** args) {
     min = min * 1.01;
     max = max * 1.01;
 
-    regionMatrix = RegionMatrix(
-            Vector(min.x, min.y, min.z), // Start position
-            Vector(max.x, max.y, max.z), // End position
-            Vector(10, 10, 10)               // Amount of divisions on the z, y, z
-    );
+    regionMatrix = RegionMatrix(min, max, Vector(10, 10, 10));
 
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)
