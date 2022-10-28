@@ -2,13 +2,13 @@
 
 #include <sstream>
 #include <string>
-#include <fstream>
 #include <chrono>
 #include "Vector3.h"
 #include "Star.h"
 #include "includes.h"
 #include "Region.h"
 #include <iostream>
+#include <thread>
 
 #include "logging.h"
 
@@ -29,9 +29,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
     }
     return elems;
 }
-
-#include <filesystem>
-#include <thread>
 
 void compute_region_com(Region* region) {
     for (Star* star : region->stars_in_region) {
@@ -287,17 +284,11 @@ int main(int arg_count, char** args) {
             region->stars_in_region.clear();
         }
         // updating star positions and velocities and adding them to the regions
-        static Vector average_velocity = Vector(0, 0, 0);
-        static Vector average_acceleration = Vector(0, 0, 0);
         for (auto star: star_list) {
-            if (!star->acceleration.x || !star->acceleration.y || !star->acceleration.z) {
+            if (!star->acceleration.x && !star->acceleration.y && !star->acceleration.z) {
                 std::cout << "Acceleration is NaN for star " << star->id << std::endl;
                 continue;
             }
-            // std::cout << "Old Average: " << average_acceleration << " --- " << star->acceleration  << std::endl;
-            average_velocity = average_velocity.x == 0 ? star->velocity : (average_velocity + star->velocity) / 2;
-            average_acceleration =
-                    average_acceleration.x == 0 ? star->acceleration : (average_acceleration + star->acceleration) / 2;
 
             star->velocity_update(); // Update the stars veloctiy
             star->position_update(); // Update the stars position
