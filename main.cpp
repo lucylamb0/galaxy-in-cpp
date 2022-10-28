@@ -36,13 +36,13 @@ std::vector<std::string> split(const std::string &s, char delim) {
 void compute_region_com(Region* region) {
     for (Star* star : region->stars_in_region) {
         // TODO: Should consider the mass of the star when calculating the COM
-        region->com_position = region->com_position.x == 0 ?
+        region->centreMass.position = region->centreMass.position.x == 0 ?
                 star->position :
-                (region->com_position -
-                    ((region->com_position - star->position) *
-                        (star->mass / region->com_mass)
+                (region->centreMass.position -
+                    ((region->centreMass.position - star->position) *
+                        (star->mass / region->centreMass.mass)
                 ));
-        region->com_mass += star->mass;
+        region->centreMass.mass += star->mass;
     }
 }
 
