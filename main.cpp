@@ -393,18 +393,17 @@ int main(int arg_count, char** args) {
 
     logging::info("Starting to dump data", "");
     {
-        ofstream Test("testDump.txt");
+        ofstream fileDump("2Stars.dump.txt");
+        fileDump.precision(32);
 
         for (auto star: star_list) {
-            Test << "STAR: " << star->id << std::endl;
-            Test << "HISTORY: " << std::endl;
-            for (auto history: star->history_position) {
-                Test << history.x << "," << history.y << "," << history.z << std::endl;
+            int cycle_id = 1;
+            for (auto history : star->history_position) {
+                fileDump << star->id << ',' << cycle_id << ',' << history.x << ',' << history.y << ',' << history.z << std::endl;
+                ++cycle_id;
             }
-            Test << "END HISTORY" << std::endl;
         }
-
-        Test.close();
+        fileDump.close();
     }
     logging::info("Finished dumping data", "");
 
