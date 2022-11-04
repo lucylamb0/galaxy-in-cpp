@@ -116,6 +116,14 @@ struct Vector {
         return *this;
     }
 
+    constexpr Vector& operator/(long double div) noexcept
+    {
+        x /= div;
+        y /= div;
+        z /= div;
+        return *this;
+    }
+
     constexpr Vector& operator/(Vector v) noexcept
     {
         x /= v.x;

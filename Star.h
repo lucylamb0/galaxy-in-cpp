@@ -9,6 +9,9 @@
 
 class Star {
 public:
+    int first, second = -1;
+    char lastSign = '-';
+
     // position uses parsecs and velocity uses pc/year
     Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix) :
             id(id), position(position), velocity(velocity), acceleration(acceleration), mass(mass), parent(parent_region_matrix) {
@@ -19,6 +22,9 @@ public:
     float mass;
     Vector position, velocity, acceleration;
     std::vector<Vector> history_position = {};
+    std::vector<Vector> history_velocity = {};
+    std::vector<Vector> history_acceleration = {};
+
     std::vector<Region*> regions_we_are_in = {};
 
     RegionMatrix* parent = nullptr;

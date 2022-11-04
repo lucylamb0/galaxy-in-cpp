@@ -96,8 +96,8 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             1,                                // ID
-            Vector(0.1, 0.1, 0.1),    // Position
-            Vector(0, 0, 0),    // Velocity
+            Vector(0, 0, 0),    // Position
+            Vector(0,  -2e-8, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.00273e-6,
             &regionMatrix       // Parent region matrix
@@ -105,12 +105,21 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             2,                                // ID
-            Vector(1.246e-8 + 0.1, 0.1, 0.1),    // Position
-            Vector( 0, -2.02269032e-6, 0),    // Velocity
+            Vector(1.2477e-8, 0, 0),    // Position
+            Vector( 0, 2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
             &regionMatrix       // Parent region matrix
     ));
+
+//    star_list.emplace_back(new Star(
+//            3,                                // ID
+//            Vector(-1.246e-8, 0, 0),    // Position
+//            Vector( 0, 0, 0),    // Velocity
+//            Vector(0, 0, 0), // Acceleration
+//            3.00273e-6,
+//            &regionMatrix       // Parent region matrix
+//    ));
 
     int stars_cnt = 0;
 // I think this is making the list of stars from the file
@@ -206,8 +215,7 @@ int main(int arg_count, char** args) {
     logging::info("Star per thread: ", star_per_thread);
     logging::info("Left over: ", left_over);
 
-    const int accelCycleCount = accelCycles; // number of accelCycleCount to run
-    for (int loopCnt = 0; loopCnt < accelCycleCount; ++loopCnt) {
+    for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
 #define MULTI_THREADED 1
@@ -301,7 +309,8 @@ int main(int arg_count, char** args) {
                 continue;
             }
 
-            star->velocity_update(); // Update the stars veloctiy
+            star->velocity_update(); // Update the stars velocity
+
             star->position_update(); // Update the stars position
 
             if (!star->position.notNull()) {
@@ -318,8 +327,14 @@ int main(int arg_count, char** args) {
             compute_region_com(region);
         }
 
-        if (loopCnt % ((int)((loopCnt / accelCycleCount) * 10)) == 0) {
-            std::cout << (loopCnt / accelCycleCount) * 100 << "% Complete - Stars" << std::endl;
+        if (simFrame % OUTPUT_EVERY_N_TASKS == 0) {
+            auto progress = to_string(simFrame) + "/" + to_string(simulationFrames);
+            auto percent = to_string((int) ((float) simFrame / (float) simulationFrames * 100));
+
+            logging::info("[ Acceleration Cycle ] - " + percent + "% - " + progress, "", true, true);
+        }
+        if (simFrame % ((int)((simFrame / simulationFrames) * 10)) == 0) {
+            std::cout << (simFrame / simulationFrames) * 100 << "% Complete - Stars" << std::endl;
         }
 
         auto starUpdateEndTime = std::chrono::high_resolution_clock::now();
@@ -332,32 +347,29 @@ int main(int arg_count, char** args) {
             averageStarUpdateTime = (averageStarUpdateTime + starUpdateDuration) / 2;
         }
 
-        logging::info("Finished an acceleration cycle: ", loopCnt + 1);
+        logging::verbose("Finished an acceleration cycle: ", simFrame + 1);
 
-        logging::info("Re assigning stars to regions", "", true, false);
+        logging::verbose("Re assigning stars to regions", "", false, false);
         min = Vector();
         max = Vector();
         for (auto star: star_list) {
             if (star->position.isNull()) {
-                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
+                logging::error("Star " + to_string(star->id) + " has position ", star->position);
                 continue;
             }
             if (star->position.x > max.x) {
                 max.x = star->position.x;
+            } else if (star->position.x < min.x) {
+                min.x = star->position.x;
             }
             if (star->position.y > max.y) {
                 max.y = star->position.y;
+            } else if (star->position.y < min.y) {
+                min.y = star->position.y;
             }
             if (star->position.z > max.z) {
                 max.z = star->position.z;
-            }
-            if (star->position.x < min.x) {
-                min.x = star->position.x;
-            }
-            if (star->position.y < min.y) {
-                min.y = star->position.y;
-            }
-            if (star->position.z < min.z) {
+            } else if (star->position.z < min.z) {
                 min.z = star->position.z;
             }
         }
@@ -390,18 +402,29 @@ int main(int arg_count, char** args) {
         for (Region *region: regionMatrix.regions) {
             compute_region_com(region);
         }
-        logging::info("Finished re assigning stars to regions", "", true, false);
+        logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
 
     logging::info("Starting to dump data", "");
     {
-        ofstream fileDump("2Stars.dump.txt");
+        ofstream fileDump("2Stars.test.dump.txt");
         fileDump.precision(32);
 
+        fileDump << "Star ID, Accel ID, X Position, Y Position" << endl;
         for (auto star: star_list) {
             int cycle_id = 1;
+            star->history_position.erase(star->history_position.begin());
             for (auto history : star->history_position) {
-                fileDump << star->id << ',' << cycle_id << ',' << history.x << ',' << history.y << ',' << history.z << std::endl;
+                fileDump << star->id << ',' << cycle_id << ',' << history.x << ',' << history.y << ',' << history.z << ','
+                << star->history_velocity.at(cycle_id - 1).x << ','
+                << star->history_velocity.at(cycle_id - 1).y << ','
+                << star->history_velocity.at(cycle_id - 1).z << ','
+
+                << star->history_acceleration.at(cycle_id - 1).x << ','
+                << star->history_acceleration.at(cycle_id - 1).y << ','
+                << star->history_acceleration.at(cycle_id - 1).z << ','
+
+                << std::endl;
                 ++cycle_id;
             }
         }

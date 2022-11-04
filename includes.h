@@ -30,8 +30,19 @@ const long double parsec_to_km = 3.08567758 * pow(10, 13);
 //const long double parsec_per_year = 9.785 * pow(10, 8);
 const long double yearInSeconds = 31536000;
 const long double gravitationalConstantFinal = gravitationalConstantParsec * pow(yearInSeconds, 2); // this very important constant is used in the calculations. It has units of parsec solarmasses^-1 (km/year)^2
-const long double time_step = 0.0027397260274 * 0.5;// this is the time step used in the calculations. It has units of years
-const int accelCycles = 365 * 4; // this is the number of acceleration cycles that are run before the velocity and position are updated
+
+// Time frame the simulation will simulate
+const int timeScale = 1; // In Years
+// Amount of simulation frames to have
+const int simulationFrames = 1;
+
+// Time to pass per acceleration cycle
+const long double time_step = timeScale / simulationFrames;// this is the time step used in the calculations. It has units of years
+//const long double time_step = 0.0027397260274 * 0.5;// this is the time step used in the calculations. It has units of years
+
+//const int accelCycles = simulationFrames; // this is the number of acceleration cycles that are run before the velocity and position are updated
+//const int accelCycles = 100000; // this is the number of acceleration cycles that are run before the velocity and position are updated
+//const int accelCycles = (365 * 4) * 2; // this is the number of acceleration cycles that are run before the velocity and position are updated
 //const long double chandrasekharLimit = 1.4 * starMass;
 
 #endif //C_VERSION_INCLUDES_H

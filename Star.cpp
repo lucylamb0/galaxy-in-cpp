@@ -24,21 +24,17 @@ RegionArrayT Star::find_regions() {
     long double remainder = tmp - tmp2;
     int index = (tmp2) * this->parent->divisions.y * this->parent->divisions.z; //indexing works
 
-    logging::debug("[ find_regions - 1 ] - Index: ", index);
-
     int neighbour_x = 0;
     int neighbour_y = 0;
     int neighbour_z = 0;
     int mode_neighbours = 1; // 1 = 1 region, 2 = 2 regions, 4 = 4 regions, 8 = 8 regions
 
     if(remainder <= this->parent->overlap_factor) { // need to check all 3 directions to see if we are in a neighbour region
-        // We are overlapping the below region
 //        logging::verbose("[ find_regions - 1 ] - We are overlapping the below region", "");
         neighbour_x = -1;
         mode_neighbours *= 2;
     }
     else if (remainder >= 1 - this->parent->overlap_factor) {
-        // We are overlapping the above region
 //        logging::verbose("[ find_regions - 1 ] - We are overlapping the above region", "");
         neighbour_x = 1;
         mode_neighbours *= 2;
@@ -48,8 +44,6 @@ RegionArrayT Star::find_regions() {
     tmp2 = std::floor(tmp);
     remainder = tmp - tmp2;
     index += (tmp2) * this->parent->divisions.z;
-
-    logging::debug("[ find_regions - 2 ] - Index: ", index);
 
     if(remainder <= this->parent->overlap_factor) {
         // We are overlapping the below region
@@ -193,11 +187,7 @@ double Star::acceleration_update_stars_in_region(bool clear_accel) {
             long double r_in_km = r * parsec_to_km;
             long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-            Vector delta = (star->position - this->position);
-            delta /= r;
-            Vector accel_total = delta * accel_from_star;
-
-            this->acceleration += accel_total;
+            this->acceleration += ((star->position - this->position) / r) * accel_from_star;
         }
     }
     return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
@@ -220,11 +210,7 @@ double Star::acceleration_update_region_com(bool clear_accel) {
         long double r_in_km = r * parsec_to_km;
         long double accel_from_region = (gravitationalConstantFinal * region->centreMass.mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-        Vector delta = (region->centreMass.position - this->position);
-        delta /= r;
-        Vector accel_total = delta * accel_from_region;
-
-        this->acceleration += accel_total;
+        this->acceleration += ((region->centreMass.position - this->position) / r) * accel_from_region;
     }
     auto accelerationEndTime = std::chrono::high_resolution_clock::now();
     auto accelerationDuration = std::chrono::duration_cast<std::chrono::milliseconds>(accelerationEndTime-accelerationStartTime).count();
@@ -233,14 +219,20 @@ double Star::acceleration_update_region_com(bool clear_accel) {
 
 void Star::velocity_update() {
     this->velocity += this->acceleration * time_step;
+    this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
+    this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
 }
 
 void Star::position_update() {
-    this->position.x += this->velocity.x * time_step + 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
-    this->position.y += this->velocity.y * time_step + 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
-    this->position.z += this->velocity.z * time_step + 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
+
+    this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
+    this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
+    this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
+
     this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
+
     if(this->position.isNull())
         std::cout << "Null position" << std::endl;
+
     this->regions_we_are_in.clear();
 }

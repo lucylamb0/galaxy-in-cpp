@@ -12,7 +12,7 @@
 #include "Region.h"
 
 #define RegionArrayT std::vector<Region*>
-class RegionMatrix {
+class  RegionMatrix {
 public:
     // TODO: Fine tune a decent overlap factor - higher == more overlaps for stars == longer runtimes == higher == greater accuracy?
     float overlap_factor;
