@@ -112,7 +112,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             1,                                // ID
-            Vector(1, 1, 1),    // Position
+            Vector(0, 0, 0),    // Position
             Vector(0,  -2e-8, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.00273e-6,
@@ -122,7 +122,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             2,                                // ID
-            Vector(1.2477e-8 + 1, 1, 1),    // Position
+            Vector(1.2477e-8, 0, 0),    // Position
             Vector( 0, 2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
