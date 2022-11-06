@@ -9,6 +9,8 @@
 #include "Region.h"
 #include <iostream>
 #include <thread>
+#include "includes/json.h"
+using json = nlohmann::json;
 
 #include "logging.h"
 
@@ -44,6 +46,23 @@ void compute_region_com(Region* region) {
 }
 
 RegionMatrix regionMatrix;
+
+void to_json(json& j, const Vector& v) {
+    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
+}
+void to_json(json& j, const Star* star) {
+    j = json{
+            { "id", star->id },
+            { "history_position", star->history_position },
+            { "history_velocity", star->history_velocity },
+            { "history_acceleration", star->history_acceleration }
+    };
+}
+void from_json(const json& j, Vector& v) {
+    j.at("x").get_to(v.x);
+    j.at("y").get_to(v.y);
+    j.at("z").get_to(v.z);
+}
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
@@ -90,9 +109,6 @@ int main(int arg_count, char** args) {
 
     logging::info("Regions: ", regionMatrix.regions.size());
 
-//    std::ifstream infile;
-//    infile.open(data_set_path);
-//    std::string line;
 
     star_list.emplace_back(new Star(
             1,                                // ID
@@ -194,10 +210,6 @@ int main(int arg_count, char** args) {
         compute_region_com(region);
     }
 
-    // After updating regions stars we need to ensure we update centre of mass and total mass of the regions
-//    for(Region* region : regionMatrix.regions) {
-//
-//    }
 
     logging::info("Finished assigning regions", "");
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
@@ -255,6 +267,7 @@ int main(int arg_count, char** args) {
                 double averageTime = 0.f;
                 for (auto star: work_queue.at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
+
                     timeTaken += star->acceleration_update_stars_in_region(false);
 
                     averageTime = (averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2);
@@ -306,23 +319,11 @@ int main(int arg_count, char** args) {
         }
         // updating star positions and velocities and adding them to the regions
         for (auto star: star_list) {
-//            if (!star->acceleration.x && !star->acceleration.y && !star->acceleration.z) {
-//                std::cout << "Acceleration is NaN for star " << star->id << std::endl;
-//                continue;
-//            }
-
             star->velocity_update(); // Update the stars velocity
-
             star->position_update(); // Update the stars position
 
-//            if (!star->position.notNull()) {
-//                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
-//            }
-            // star->find_regions();
-            for (Region *region: star->find_regions()) { // still makes a seg fault here
-                // add star to region
-                region->stars_in_region.emplace_back(star);
-            }
+            for (Region *region: star->find_regions())
+                region->stars_in_region.emplace_back(star); // add star to region
         }
 
         for (auto region: regionMatrix.regions) {
@@ -343,11 +344,12 @@ int main(int arg_count, char** args) {
         auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
                 starUpdateStartTime - starUpdateEndTime).count();
 
-        if (averageStarUpdateTime == -1) {
+        if (averageStarUpdateTime == -1)
             averageStarUpdateTime = starUpdateDuration;
-        } else {
+
+        else
             averageStarUpdateTime = (averageStarUpdateTime + starUpdateDuration) / 2;
-        }
+
 
         logging::verbose("Finished an acceleration cycle: ", simFrame + 1);
 
@@ -409,10 +411,19 @@ int main(int arg_count, char** args) {
 
     logging::info("Starting to dump data", "");
     {
+
+        // create an empty structure (null)
+        json dumpStruct = star_list;
+
+        // write prettified JSON to another file
+        std::ofstream o("pretty.json");
+        o << std::setw(4) << dumpStruct << std::endl;
+
+
         ofstream fileDump("2Stars.test.dump.txt");
         fileDump.precision(32);
 
-        fileDump << "Star ID, Accel ID, X Position, Y Position" << endl;
+        fileDump << "Star ID, Accel ID, X Position, Y Position, Z Position, X Velocity, Y Velocity, Z Velocity, X Accel, Y Accel, Z Accel" << endl;
         for (auto star: star_list) {
             int cycle_id = 1;
             star->history_position.erase(star->history_position.begin());
