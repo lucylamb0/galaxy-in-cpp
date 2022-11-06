@@ -5,15 +5,15 @@
 
 RegionArrayT Star::find_regions() {
 
-    // Check if the start is outside the pl ay space
-//    if(this->position.isNull()) {
-//        std::cout << "Star " << this->id << " is null" << std::endl;
-//        return {};
-//    }
-//    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
-//        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
-//        return {};
-//    }
+//     Check if the start is outside the pl ay space
+    if(this->position.isNull()) {
+        std::cout << "Star " << this->id << " is null" << std::endl;
+        return {};
+    }
+    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
+        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
+        return {};
+    }
 
     logging::debug("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
 
