@@ -24,10 +24,10 @@ add_executable(GalaxySimulation
         Star.h
         Star.cpp
         includes.h
-        Region.h
-        logging.h
-        RegionMatrix.h
-        includes/json.h)
+        includes/Region.h
+        includes/logging.h
+        includes/RegionMatrix.h
+        includes/json.h data_parser.cpp data_parser.h)
 
 if(TARGET Threads::Threads)
     target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
