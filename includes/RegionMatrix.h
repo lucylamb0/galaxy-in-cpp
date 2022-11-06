@@ -49,7 +49,6 @@ public:
     ~RegionMatrix() {
         for (const auto &item: this->regions) {
             if(item) delete(item);
-
         }
     }
 
