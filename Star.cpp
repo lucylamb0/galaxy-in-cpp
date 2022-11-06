@@ -6,10 +6,10 @@
 RegionArrayT Star::find_regions() {
 
     // Check if the start is outside the pl ay space
-    if(this->position.isNull()) {
-        std::cout << "Star " << this->id << " is null" << std::endl;
-        return {};
-    }
+//    if(this->position.isNull()) {
+//        std::cout << "Star " << this->id << " is null" << std::endl;
+//        return {};
+//    }
 //    if (this->position > this->parent->simulationSpaceEnd || this->position < this->parent->simulationSpaceStart) {
 //        std::cout << "Star " << this->id << " is outside of the play space" << std::endl;
 //        return {};
@@ -218,21 +218,24 @@ double Star::acceleration_update_region_com(bool clear_accel) {
 }
 
 void Star::velocity_update() {
-    this->velocity += this->acceleration * time_step;
+    if(!(this->flags & (int)STAR_FLAGS::STATIC)) {
+        this->velocity += this->acceleration * time_step;
+    }
+
     this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
     this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
 }
 
 void Star::position_update() {
-
-    this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
-    this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
-    this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
-
+    if(!(this->flags & (int)STAR_FLAGS::STATIC)) {
+        this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
+        this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
+        this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
+    }
     this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
 
-    if(this->position.isNull())
-        std::cout << "Null position" << std::endl;
+//    if(this->position.isNull())
+//        std::cout << "Null position" << std::endl;
 
     this->regions_we_are_in.clear();
 }

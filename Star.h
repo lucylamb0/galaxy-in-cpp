@@ -7,15 +7,43 @@
 #include "Region.h"
 #include "RegionMatrix.h"
 
+enum class STAR_FLAGS
+{
+    STATIC = 1 << 0, // 1
+    Flag2 = 1 << 1, // 2
+    Flag3 = 1 << 2, // 4
+    Flag4 = 1 << 3, // 8
+    Flag5 = 1 << 4, // 16
+    Flag6 = 1 << 5, // 32
+    Flag7 = 1 << 6, // 64
+    Flag8 = 1 << 7  //128
+};
+
 class Star {
 public:
     int first, second = -1;
     char lastSign = '-';
 
+    unsigned char flags = 0;
+
     // position uses parsecs and velocity uses pc/year
-    Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix) :
+    Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix, int flags) :
             id(id), position(position), velocity(velocity), acceleration(acceleration), mass(mass), parent(parent_region_matrix) {
         this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
+        this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
+        this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
+
+        this->flags |= flags;
+
+        if(flags & (int)STAR_FLAGS::Flag4) {
+            std::cout << "Reee";
+        }
+        if(flags & (int)STAR_FLAGS::STATIC) {
+            std::cout << "Reee";
+        }
+        if(flags & (int)STAR_FLAGS::Flag7) {
+            std::cout << "Reee";
+        }
     }
 
     int id;

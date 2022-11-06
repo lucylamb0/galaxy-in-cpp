@@ -100,7 +100,8 @@ int main(int arg_count, char** args) {
             Vector(0,  -2e-8, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.00273e-6,
-            &regionMatrix       // Parent region matrix
+            &regionMatrix,       // Parent region matrix
+            (int)STAR_FLAGS::STATIC
     ));
 
     star_list.emplace_back(new Star(
@@ -109,7 +110,8 @@ int main(int arg_count, char** args) {
             Vector( 0, 2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
-            &regionMatrix       // Parent region matrix
+            &regionMatrix,       // Parent region matrix
+            0
     ));
 
 //    star_list.emplace_back(new Star(
@@ -304,18 +306,18 @@ int main(int arg_count, char** args) {
         }
         // updating star positions and velocities and adding them to the regions
         for (auto star: star_list) {
-            if (!star->acceleration.x && !star->acceleration.y && !star->acceleration.z) {
-                std::cout << "Acceleration is NaN for star " << star->id << std::endl;
-                continue;
-            }
+//            if (!star->acceleration.x && !star->acceleration.y && !star->acceleration.z) {
+//                std::cout << "Acceleration is NaN for star " << star->id << std::endl;
+//                continue;
+//            }
 
             star->velocity_update(); // Update the stars velocity
 
             star->position_update(); // Update the stars position
 
-            if (!star->position.notNull()) {
-                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
-            }
+//            if (!star->position.notNull()) {
+//                logging::verbose("Star " + to_string(star->id) + " has position ", star->position);
+//            }
             // star->find_regions();
             for (Region *region: star->find_regions()) { // still makes a seg fault here
                 // add star to region
@@ -353,10 +355,10 @@ int main(int arg_count, char** args) {
         min = Vector();
         max = Vector();
         for (auto star: star_list) {
-            if (star->position.isNull()) {
-                logging::error("Star " + to_string(star->id) + " has position ", star->position);
-                continue;
-            }
+//            if (star->position.isNull()) {
+//                logging::error("Star " + to_string(star->id) + " has position ", star->position);
+//                continue;
+//            }
             if (star->position.x > max.x) {
                 max.x = star->position.x;
             } else if (star->position.x < min.x) {
