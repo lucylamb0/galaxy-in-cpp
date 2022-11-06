@@ -45,6 +45,14 @@ public:
             }
         }
     }
+
+    ~RegionMatrix() {
+        for (const auto &item: this->regions) {
+            if(item) delete(item);
+
+        }
+    }
+
 };
 
 #endif //GALAXYSIMULATION_REGIONMATRIX_H
