@@ -3,9 +3,13 @@
 #ifndef C_VERSION_INCLUDES_H
 #define C_VERSION_INCLUDES_H
 
+#include "Star.h"
 #include <cmath>
 #include <vector>
+#include <sstream>
 #include <iostream>
+#include <fstream>
+#include <thread>
 
 //const long double PI = 3.14159265358979323846;
 const long double gravitationalConstant = 6.67408 * pow(10, -11);

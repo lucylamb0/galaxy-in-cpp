@@ -1,7 +1,7 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #include "Star.h"
-#include "logging.h"
+#include "includes/logging.h"
 
 RegionArrayT Star::find_regions() {
 
@@ -218,7 +218,7 @@ double Star::acceleration_update_region_com(bool clear_accel) {
 }
 
 void Star::velocity_update() {
-    if(!(this->flags & (int)STAR_FLAGS::STATIC)) {
+    if(this->is_static()) {
         this->velocity += this->acceleration * time_step;
     }
 
@@ -227,7 +227,7 @@ void Star::velocity_update() {
 }
 
 void Star::position_update() {
-    if(!(this->flags & (int)STAR_FLAGS::STATIC)) {
+    if(this->is_static()) {
         this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
         this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
         this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);

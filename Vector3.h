@@ -6,6 +6,7 @@
 #define C_VERSION_VECTOR3_H
 
 #include <valarray>
+#include <sstream>
 
 struct Vector {
     Vector() = default;

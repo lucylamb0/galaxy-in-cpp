@@ -4,8 +4,8 @@
 #define C_VERSION_STAR_H
 
 #include "includes.h"
-#include "Region.h"
-#include "RegionMatrix.h"
+#include "includes/Region.h"
+#include "includes/RegionMatrix.h"
 
 enum class STAR_FLAGS
 {
@@ -20,30 +20,22 @@ enum class STAR_FLAGS
 };
 
 class Star {
-public:
-    int first, second = -1;
-    char lastSign = '-';
-
+private:
     unsigned char flags = 0;
 
+public:
+    int first, second = -1;
+
+    char lastSign = '-';
+
     // position uses parsecs and velocity uses pc/year
-    Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix, int flags) :
+    Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix, int flags = 0) :
             id(id), position(position), velocity(velocity), acceleration(acceleration), mass(mass), parent(parent_region_matrix) {
         this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
         this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
         this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
 
         this->flags |= flags;
-
-        if(flags & (int)STAR_FLAGS::Flag4) {
-            std::cout << "Reee";
-        }
-        if(flags & (int)STAR_FLAGS::STATIC) {
-            std::cout << "Reee";
-        }
-        if(flags & (int)STAR_FLAGS::Flag7) {
-            std::cout << "Reee";
-        }
     }
 
     int id;
@@ -66,6 +58,10 @@ public:
     void velocity_update();
 
     void position_update();
+
+    bool is_static() {
+        return !(this->flags & (int)STAR_FLAGS::STATIC);
+    }
 };
 
 #endif //C_VERSION_STAR_H

@@ -1,46 +1,47 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
-#include <sstream>
 #include <string>
 #include <chrono>
 #include "Vector3.h"
 #include "Star.h"
 #include "includes.h"
-#include "Region.h"
-#include <iostream>
-#include <thread>
+#include "includes/Region.h"
 #include "includes/json.h"
 using json = nlohmann::json;
 
-#include "logging.h"
+#include "includes/logging.h"
 
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
-// Not really sure what this does, probably made by Conni
-// Yes it was made by me, and it splits a string by a delimiter.
-// Example:
-// Input: Hello, world!   ,
-// Output: ["Hello", "world!"]
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
 
 void compute_region_com(Region* region) {
     for (Star* star : region->stars_in_region) {
+        // Setup a shorthand com for usage in this local module
+        auto *centreMass = &region->centreMass;
+        if(!centreMass->initiated) {
+
+            // Set the centre of mass for the region considering the single star inside
+            centreMass->position = star->position;
+            centreMass->mass = star->mass;
+            centreMass->initiated = true;
+        } else {
+            // Calculate new centre of mass including the new star.
+            Vector d = centreMass->position - star->position;
+            float mass_bias = star->mass - centreMass->mass;
+
+            centreMass->position -= d * mass_bias;
+            centreMass->mass += star->mass;
+
+        }
         // TODO: Should consider the mass of the star when calculating the COM
-        region->centreMass.position = region->centreMass.position.x == 0 ?
-                star->position :
+        region->centreMass.position = region->centreMass.position.x == 0 ? star->position :
                 (region->centreMass.position -
-                    ((region->centreMass.position - star->position) *
-                        (star->mass / region->centreMass.mass)
-                ));
+                    (
+                            (region->centreMass.position - star->position) *
+                                    (star->mass / region->centreMass.mass)
+                    )
+                );
         region->centreMass.mass += star->mass;
     }
 }
@@ -129,37 +130,6 @@ int main(int arg_count, char** args) {
             &regionMatrix,       // Parent region matrix
             0
     ));
-
-//    star_list.emplace_back(new Star(
-//            3,                                // ID
-//            Vector(-1.246e-8, 0, 0),    // Position
-//            Vector( 0, 0, 0),    // Velocity
-//            Vector(0, 0, 0), // Acceleration
-//            3.00273e-6,
-//            &regionMatrix       // Parent region matrix
-//    ));
-
-    int stars_cnt = 0;
-// I think this is making the list of stars from the file
-//    while (std::getline(infile, line)) {
-//        ++stars_cnt;
-////        if (stars_cnt % 25000 == 0) {
-////            break;
-////            logging::info("Stars: ", stars_cnt);
-////        }
-//        std::istringstream iss(line);
-//        auto split_str = split(line, ',');
-//
-//        star_list.emplace_back(new Star(
-//                std::stoi(split_str.at(0)),     // ID
-//                Vector(std::stof(split_str.at(2)), std::stof(split_str.at(3)), std::stof(split_str.at(4))), // Position
-//                Vector(std::stof(split_str.at(5)), std::stof(split_str.at(6)), std::stof(split_str.at(7))), // Velocity
-//                Vector(0, 0, 0), // Acceleration
-//                1.0f,
-//                &regionMatrix // Parent region matrix
-//        )); // Mass
-//    }
-//    infile.close();
 
     Vector min, max = Vector();
     for (auto star: star_list) {
