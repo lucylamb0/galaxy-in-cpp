@@ -9,14 +9,27 @@
 
 // TODO: Give each region a COM
 // TODO: If a region has no stars set a flag to not calculate it and to skip it when calculating star accels
-class Star;
 class CentreMass {
 public:
     bool initiated = false;
 
-    Vector position;
-    long double mass;
+    Vector position = Vector(0,0,0);
+    long double mass = 0;
+
+    CentreMass() {
+        this->initiated = false;
+        this->position = Vector(0,0,0);
+        this->mass = 0;
+    }
+
+    void reset() {
+        this->initiated = false;
+        this->position = Vector(0,0,0);
+        this->mass = 0;
+    }
 };
+
+class Star;
 class Region {
 private:
 public:
