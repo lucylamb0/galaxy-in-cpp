@@ -51,7 +51,6 @@ public:
             if(item) delete(item);
         }
     }
-
 };
 
 #endif //GALAXYSIMULATION_REGIONMATRIX_H

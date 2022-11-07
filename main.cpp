@@ -16,6 +16,7 @@ using json = nlohmann::json;
 std::vector<Star*> star_list = {};
 
 void compute_region_com(Region* region) {
+    // TODO: Should consider the mass of the star when calculating the COM
     for (Star* star : region->stars_in_region) {
         // Setup a shorthand com for usage in this local module
         auto *centreMass = &region->centreMass;
@@ -34,15 +35,6 @@ void compute_region_com(Region* region) {
             centreMass->mass += star->mass;
 
         }
-        // TODO: Should consider the mass of the star when calculating the COM
-        region->centreMass.position = region->centreMass.position.x == 0 ? star->position :
-                (region->centreMass.position -
-                    (
-                            (region->centreMass.position - star->position) *
-                                    (star->mass / region->centreMass.mass)
-                    )
-                );
-        region->centreMass.mass += star->mass;
     }
 }
 
@@ -113,7 +105,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             1,                                // ID
-            Vector(0, 0, 0),    // Position
+            Vector(1, 1, 1),    // Position
             Vector(0,  -2e-8, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.00273e-6,
@@ -123,7 +115,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             2,                                // ID
-            Vector(1.2477e-8, 0, 0),    // Position
+            Vector(1.2477e-8, 1, 1),    // Position
             Vector( 0, 2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
@@ -131,24 +123,26 @@ int main(int arg_count, char** args) {
             0
     ));
 
-    Vector min, max = Vector();
+    Vector min = Vector(-1, -1, -1);
+    Vector max = Vector(1, 1, 1);
     for (auto star: star_list) {
+//        if(star->position.x == 0) star->position.x = 0.000000001f;
+//        if(star->position.y == 0) star->position.y = 0.000000001f;
+//        if(star->position.z == 0) star->position.z = 0.000000001f;
+
         if (star->position.x > max.x) {
             max.x = star->position.x;
+        } else if (star->position.x < min.x) {
+            min.x = star->position.x;
         }
         if (star->position.y > max.y) {
             max.y = star->position.y;
+        } else if (star->position.y < min.y) {
+            min.y = star->position.y;
         }
         if (star->position.z > max.z) {
             max.z = star->position.z;
-        }
-        if (star->position.x < min.x) {
-            min.x = star->position.x;
-        }
-        if (star->position.y < min.y) {
-            min.y = star->position.y;
-        }
-        if (star->position.z < min.z) {
+        } else if (star->position.z < min.z) {
             min.z = star->position.z;
         }
     }
@@ -161,9 +155,9 @@ int main(int arg_count, char** args) {
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
     for (auto star: star_list) {
-        for (Region *region: star->find_regions())
+        for (Region *region: star->find_regions()) {
             region->stars_in_region.emplace_back(star);
-
+        }
         if (star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
                                      (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
@@ -283,9 +277,11 @@ int main(int arg_count, char** args) {
             }
         }
 #endif
-        // Clear the stars in the regions
+
+        // Clear the stars in the regions, so we can update the centre of masses and reassign the stars their regions
         for (auto region: regionMatrix.regions) {
             region->stars_in_region.clear();
+            region->centreMass.reset();
         }
         // updating star positions and velocities and adding them to the regions
         for (auto star: star_list) {
@@ -306,9 +302,9 @@ int main(int arg_count, char** args) {
 
             logging::info("[ Acceleration Cycle ] - " + percent + "% - " + progress, "", true, true);
         }
-        if (simFrame % ((int)((simFrame / simulationFrames) * 10)) == 0) {
-            std::cout << (simFrame / simulationFrames) * 100 << "% Complete - Stars" << std::endl;
-        }
+//        if (simFrame % ((int)((simFrame / simulationFrames) * 10)) == 0) {
+//            std::cout << (simFrame / simulationFrames) * 100 << "% Complete - Stars" << std::endl;
+//        }
 
         auto starUpdateEndTime = std::chrono::high_resolution_clock::now();
         auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -324,13 +320,9 @@ int main(int arg_count, char** args) {
         logging::verbose("Finished an acceleration cycle: ", simFrame + 1);
 
         logging::verbose("Re assigning stars to regions", "", false, false);
-        min = Vector();
-        max = Vector();
+        min = Vector(-1, -1, -1);
+        max = Vector(1, 1, 1);
         for (auto star: star_list) {
-//            if (star->position.isNull()) {
-//                logging::error("Star " + to_string(star->id) + " has position ", star->position);
-//                continue;
-//            }
             if (star->position.x > max.x) {
                 max.x = star->position.x;
             } else if (star->position.x < min.x) {
