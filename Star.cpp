@@ -4,6 +4,8 @@
 #include "includes/logging.h"
 
 RegionArrayT Star::find_regions() {
+    int max_bound = this->parent->regions.size();
+
     logging::debug("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
 
     //regions_we_are_in.clear();
@@ -87,7 +89,7 @@ RegionArrayT Star::find_regions() {
 
 //            if(this->parent->debug) std::cout << "The index of the neighbouring region is: " << tmp << std::endl;
         regions_we_are_in.emplace_back(this->parent->regions[index]);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
     }
     else if (mode_neighbours == 4) {
 //            if(this->parent->debug) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
@@ -98,22 +100,22 @@ RegionArrayT Star::find_regions() {
         tmp += neighbour_z;
 
         regions_we_are_in.emplace_back(this->parent->regions[index]);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
         if (neighbour_x != 0) {
             tmp = (index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z));
-            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+            if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
         }
         if (neighbour_y != 0) {
             tmp = (index + (neighbour_y * this->parent->divisions.z));
-            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+            if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
         }
         if (neighbour_z != 0) {
             tmp = (index + neighbour_z);
-            regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+            if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //                if(this->parent->debug) std::cout << "The index of one of the neighbouring regions is: " << tmp << std::endl;
         }
     }
@@ -123,31 +125,31 @@ RegionArrayT Star::find_regions() {
 
         tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z) + neighbour_z;
         regions_we_are_in.emplace_back(this->parent->regions[index]);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "The index of the corner neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(X) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + (neighbour_y * this->parent->divisions.z);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(Y) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + neighbour_z;
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(Z) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z);
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(XY) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + neighbour_z;
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(XZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
         tmp = index + (neighbour_y * this->parent->divisions.z) + neighbour_z;
-        regions_we_are_in.emplace_back(this->parent->regions[tmp]);
+        if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
 //            if(this->parent->debug) std::cout << "(YZ) The index of one of the neighbouring regions is: " << tmp << std::endl;
 
     }
@@ -222,9 +224,5 @@ void Star::position_update() {
         this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
     }
     this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
-
-//    if(this->position.isNull())
-//        std::cout << "Null position" << std::endl;
-
     this->regions_we_are_in.clear();
 }
