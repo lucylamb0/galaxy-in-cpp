@@ -70,8 +70,9 @@ void star_generator(
         RegionMatrix* parent_region_matrix
         ) {
     if (distribution_type == 0){ // uniform
-        std::random_device rd;
+        std::random_device rd; // random device for seeding
         std::mt19937 gen(rd());
+        // random number generators for each variable
         std::uniform_real_distribution<float> dis_mass(min_mass, max_mass);
         std::uniform_real_distribution<long double> dis_position_x(min_position.x, max_position.x);
         std::uniform_real_distribution<long double> dis_position_y(min_position.y, max_position.y);
@@ -85,7 +86,7 @@ void star_generator(
         std::uniform_int_distribution<int> dis_bool(0, 1);
         for (int i = 1; i < number_of_stars+1; i++) {
             long double velocity_z;
-            if (dis_bool(gen) != 1) {
+            if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
                 velocity_z = -dis_position_z(gen);
             }
             else {
@@ -93,17 +94,18 @@ void star_generator(
             }
 
             float mass = dis_mass(gen);
+
             Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
             Vector rel_pos(((max_position.x - position.x)/max_position.x),((max_position.y - position.y)/max_position.y), ((max_position.z - position.z)/max_position.z));
             Vector velocity = Vector(
                     std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
                     std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
-                    std::sqrt(std::abs(rel_pos.x)) * velocity_z
+                    std::sqrt(std::abs(rel_pos.x)) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
                     );
-            velocity.rotate(Vector(0,0,1), dis_direction_x(gen));
-            velocity.rotate(Vector(0,1,0), dis_direction_y(gen));
+            velocity.rotate(Vector(0,0,1), dis_direction_x(gen)); // rotate the velocity by a random amount in the x direction
+            velocity.rotate(Vector(0,1,0), dis_direction_y(gen)); // rotate the velocity by a random amount in the y direction
 
-            star_list.emplace_back(new Star(
+            star_list.emplace_back(new Star( // add the star to the star list
                     i,
                     position,
                     velocity,
@@ -123,6 +125,7 @@ void star_generator(
         std::normal_distribution<long double> dis_position_x(gaussian_mean.x, gaussian_standard_deviation.x);
         std::normal_distribution<long double> dis_position_y(gaussian_mean.y, gaussian_standard_deviation.y);
         std::normal_distribution<long double> dis_position_z(gaussian_mean.z, gaussian_standard_deviation.z);
+        // for gaussian distribution we need to first get gaussian random distances from the origin instead of gaussian xyz positions individually
         std::uniform_real_distribution<long double> dis_distance_from_origin(
                 0,
                 std::sqrt((max_position.x * max_position.x) +
@@ -145,11 +148,14 @@ void star_generator(
             }
 
             float mass = dis_mass(gen);
+
             Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
             // normalise the position vector
             position.normalise();
             // multiply the position vector by the distance from the origin
             position = position * dis_distance_from_origin(gen);
+
+            // same as uniform distribution now
             Vector rel_pos(((max_position.x - position.x)/max_position.x),((max_position.y - position.y)/max_position.y), ((max_position.z - position.z)/max_position.z));
             Vector velocity = Vector(
                     std::sqrt(abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
