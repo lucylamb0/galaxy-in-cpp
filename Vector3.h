@@ -204,27 +204,33 @@ struct Vector {
 
     long double x, y, z;
 
-    // need to check this
-    void rotate(Vector vector, long double d) {
-        long double x = vector.x;
-        long double y = vector.y;
-        long double z = vector.z;
+    //
+    void rotate_about_axis(Vector axis, long double d) {
         long double c = std::cos(d);
         long double s = std::sin(d);
-        long double t = 1 - c;
-        long double x1 = x * t + c;
-        long double y1 = y * t + s * z;
-        long double z1 = z * t - s * y;
-        long double x2 = x * t - s * z;
-        long double y2 = y * t + c;
-        long double z2 = z * t + s * x;
-        long double x3 = x * t + s * y;
-        long double y3 = y * t - s * x;
-        long double z3 = z * t + c;
-        this->x = x1 * x + x2 * y + x3 * z;
-        this->y = y1 * x + y2 * y + y3 * z;
-        this->z = z1 * x + z2 * y + z3 * z;
+        Vector new_axis = axis * 1 - c;
 
+        Vector vector_1, vector_2, vector_3 = new_axis;
+
+        vector_1 += {
+            c,
+            s * axis.z,
+            -s * axis.y
+        };
+
+        vector_2 += {
+            -s * axis.z,
+            c,
+            s * axis.x
+        };
+
+        vector_3 += {
+            s * axis.y,
+            -s * axis.x,
+            c
+        };
+
+        *this = vector_1 * axis.x * vector_2 * axis.y * vector_3 * axis.z;
     }
 
     void normalise() {

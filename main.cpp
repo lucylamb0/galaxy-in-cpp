@@ -102,8 +102,8 @@ void star_generator(
                     std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
                     std::sqrt(std::abs(rel_pos.x)) * velocity_z
                     );
-            velocity.rotate(Vector(0,0,1), dis_direction_x(gen));
-            velocity.rotate(Vector(0,1,0), dis_direction_y(gen));
+            velocity.rotate_about_axis(Vector(0, 0, 1), dis_direction_x(gen));
+            velocity.rotate_about_axis(Vector(0, 1, 0), dis_direction_y(gen));
 
             star_list.emplace_back(new Star(
                     i,
@@ -158,8 +158,8 @@ void star_generator(
                     std::sqrt(abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
                     std::sqrt(abs(rel_pos.x)) * velocity_z
                     );
-            velocity.rotate(Vector(0,0,1), dis_direction_x(gen));
-            velocity.rotate(Vector(0,1,0), dis_direction_y(gen));
+            velocity.rotate_about_axis(Vector(0, 0, 1), dis_direction_x(gen));
+            velocity.rotate_about_axis(Vector(0, 1, 0), dis_direction_y(gen));
 
             star_list.emplace_back(new Star(
                     i,
