@@ -1,26 +1,47 @@
+########### Flags ############################################################
+set(SHOULD_USE_GTEST ON)
+##############################################################################
+
 cmake_minimum_required(VERSION 3.16)
 project(GalaxySimulation)
 
+######### Set Compiler Options #########
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+############# Detect OS ###############
+message(STATUS ${CMAKE_HOST_SYSTEM})
 if(CMAKE_SYSTEM MATCHES Windows)
     message(STATUS "Target system is Windows")
+elseif(CMAKE_SYSTEM MATCHES Linux)
+    message(STATUS "Target system is Linux")
+elseif(CMAKE_SYSTEM MATCHES Darwin)
+    message(STATUS "Target system is MacOS")
+else()
+    message(FATAL_ERROR "Target system is not supported")
+endif()
+######################################
+
+if(SHOULD_USE_GTEST)
+    include(FetchContent)
+    FetchContent_Declare(
+            googletest
+            # Specify the commit you depend on and update it regularly.
+            URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 endif()
 
-if(CMAKE_HOST_SYSTEM MATCHES Linux)
-    message(STATUS "Build host runs Linux")
-endif()
-
-message(STATUS ${CMAKE_HOST_SYSTEM})
 
 find_package(Threads REQUIRED)
 add_executable(GalaxySimulation
         main.cpp
-        Vector3.h
+        includes/Vector3.h
         Star.h
         Star.cpp
         includes.h
@@ -34,4 +55,18 @@ add_executable(GalaxySimulation
 
 if(TARGET Threads::Threads)
     target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
+endif()
+
+if(SHOULD_USE_GTEST)
+    enable_testing()
+    add_executable(Simulation_Tests
+            GTests/Vector3_Test.cc
+    )
+    target_link_libraries(
+            Simulation_Tests
+            GTest::gtest_main
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(Simulation_Tests)
 endif()

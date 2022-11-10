@@ -4,7 +4,7 @@
 #define C_VERSION_REGION_H
 
 #include <iostream>
-#include "../Vector3.h"
+#include "Vector3.h"
 #include "../Star.h"
 
 // TODO: Give each region a COM

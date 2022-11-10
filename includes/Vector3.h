@@ -1,6 +1,4 @@
-//
-// Created by User on 31/07/2022.
-//
+// Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #ifndef C_VERSION_VECTOR3_H
 #define C_VERSION_VECTOR3_H
