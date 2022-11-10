@@ -6,6 +6,7 @@
 
 #include <vector>
 #include "includes.h"
+#include "Star.h"
 
 #ifndef GALAXYSIMULATION_DATA_PARSER_H
 #define GALAXYSIMULATION_DATA_PARSER_H

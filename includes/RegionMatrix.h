@@ -10,6 +10,7 @@
 #include <vector>
 #include "../Vector3.h"
 #include "Region.h"
+#include "../includes.h"
 
 #define RegionArrayT std::vector<Region*>
 class  RegionMatrix {
@@ -46,11 +47,13 @@ public:
         }
     }
 
+#ifdef WINDOWS_or_LINUX
     ~RegionMatrix() {
         for (const auto &item: this->regions) {
             if(item) delete(item);
         }
     }
+#endif
 };
 
 #endif //GALAXYSIMULATION_REGIONMATRIX_H

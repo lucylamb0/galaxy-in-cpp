@@ -9,6 +9,8 @@
 #include "includes/json.h"
 #include "random"
 using json = nlohmann::json;
+#include "data_exporter.h"
+#include "data_parser.h"
 
 #include "includes/logging.h"
 
@@ -243,7 +245,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             1,                                // ID
-            Vector(1, 1, 1),    // Position
+            Vector(0, 0, 0),    // Position
             Vector(0,  -2e-8, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.00273e-6,
@@ -253,7 +255,7 @@ int main(int arg_count, char** args) {
 
     star_list.emplace_back(new Star(
             2,                                // ID
-            Vector(1.2477e-8, 1, 1),    // Position
+            Vector(1.2477e-8, 0, 0),    // Position
             Vector( 0, 2.02269032e-6, 0),    // Velocity
             Vector(0, 0, 0), // Acceleration
             3.69396868e-8,
@@ -509,41 +511,9 @@ int main(int arg_count, char** args) {
         logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
 
-    logging::info("Starting to dump data", "");
-    {
 
-        // create an empty structure (null)
-        json dumpStruct = star_list;
-
-        // write prettified JSON to another file
-        std::ofstream o("pretty.json");
-        o << std::setw(4) << dumpStruct << std::endl;
-
-
-        ofstream fileDump("2Stars.test.dump.txt");
-        fileDump.precision(32);
-
-        fileDump << "Star ID, Accel ID, X Position, Y Position, Z Position, X Velocity, Y Velocity, Z Velocity, X Accel, Y Accel, Z Accel" << endl;
-        for (auto star: star_list) {
-            int cycle_id = 1;
-            star->history_position.erase(star->history_position.begin());
-            for (auto history : star->history_position) {
-                fileDump << star->id << ',' << cycle_id << ',' << history.x << ',' << history.y << ',' << history.z << ','
-                << star->history_velocity.at(cycle_id - 1).x << ','
-                << star->history_velocity.at(cycle_id - 1).y << ','
-                << star->history_velocity.at(cycle_id - 1).z << ','
-
-                << star->history_acceleration.at(cycle_id - 1).x << ','
-                << star->history_acceleration.at(cycle_id - 1).y << ','
-                << star->history_acceleration.at(cycle_id - 1).z << ','
-
-                << std::endl;
-                ++cycle_id;
-            }
-        }
-        fileDump.close();
-    }
-    logging::info("Finished dumping data", "");
+    data_exporter ExportHandler = data_exporter(&star_list);
+    ExportHandler.start_dumping();
 
     return 0;
 }
