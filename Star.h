@@ -60,7 +60,7 @@ public:
     void position_update();
 
     bool is_static() {
-        return !(this->flags & (int)STAR_FLAGS::STATIC);
+        return this->flags & (int)STAR_FLAGS::STATIC;
     }
 };
 
