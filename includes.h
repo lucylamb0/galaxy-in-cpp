@@ -11,7 +11,7 @@
 #include <fstream>
 #include <thread>
 
-//const long double PI = 3.14159265358979323846;
+const long double PI = 3.14159265358979323846;
 const long double gravitationalConstant = 6.67408 * pow(10, -11);
 const long double gravitationalConstantParsec = 4.30091 * pow(10, -3);
 //const long double starMass = 1.98855 * pow(10, 30);
