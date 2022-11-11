@@ -11,7 +11,7 @@
 #include "../data_exporter.h"
 
 TEST(DataExporter_Test, Generic_Test) {
-    std::vector<Star*> *star_list = new std::vector<Star*>;
+    auto star_list = new std::vector<Star*>;
     Star* testing_star = new Star(
             0,
             Vector(1, 2, 3),
@@ -29,7 +29,7 @@ TEST(DataExporter_Test, Generic_Test) {
     tmp = tmp ? testing_star->history_position.size() == testing_star->history_acceleration.size() : false;
     EXPECT_TRUE(tmp);
 
-    data_exporter* exporter = new data_exporter(star_list, "dump_test.csv");
+    auto exporter = new data_exporter(star_list, "dump_test.csv");
     exporter->start_dumping();
     EXPECT_TRUE(1);
 }

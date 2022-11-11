@@ -58,7 +58,7 @@ public:
         dump_csv();
         logging::info("Finished dumping data", "");
     }
-} ;
+};
 
 
 #endif //GALAXYSIMULATION_DATA_EXPORTER_H
