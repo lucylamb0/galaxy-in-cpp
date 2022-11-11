@@ -236,6 +236,13 @@ struct Vector {
         }
 
     }
+
+    void scale(float d) {
+        x *= d;
+        y *= d;
+        z *= d;
+
+    }
 };
 
 #endif //C_VERSION_VECTOR3_H

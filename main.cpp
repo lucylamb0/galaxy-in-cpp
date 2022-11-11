@@ -181,6 +181,99 @@ void star_generator(
 
     }
 
+    void star_generator_uniform(
+            long int number_of_stars,
+            float min_mass, // minimum mass of a star can have
+            float avg_mass, // average mass of a star can have
+            float max_mass, // maximum mass of a star can have
+            Vector min_position, // minimum position of a star can have
+            Vector max_position, // maximum position of a star can have
+            Vector velocity_at_origin, // average velocity of a star can have at the origin pc/year
+            Vector variation_velocity, // variation of velocity of a star can have pc/year
+            long double variation_in_direction_x, // the variation in direction of the velocity in radians +-
+            long double variation_in_direction_y, // the variation in direction of the velocity in radians +-
+            int arms, // number of arms in the galaxy
+            std::vector<float> arm_positions, // the positions of the arms in radians
+            float arm_width, // the width of the arms in parsecs
+            float arm_height, // the height of the arms in parsecs
+            float arm_length, // the length of the arms in pc
+            float arm_offset, // the offset of the arms in radians
+            float arm_velocity, // the velocity of the arms in pc/year
+            float arm_velocity_variation, // the variation in velocity of the arms in pc/year
+            float arm_mass, // the mass of the arms in solar mass
+            float arm_mass_variation, // the variation in mass of the arms in solar mass
+            RegionMatrix* parent_region_matrix // the region matrix that the stars are in
+            ) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    // random number generators for each variable
+    std::uniform_real_distribution<float> dis_mass(min_mass, max_mass);
+    std::uniform_real_distribution<long double> dis_position_x(min_position.x, max_position.x);
+    std::uniform_real_distribution<long double> dis_position_y(min_position.y, max_position.y);
+    std::uniform_real_distribution<long double> dis_position_z(min_position.z, max_position.z);
+    std::uniform_real_distribution<long double> dis_velocity_x(velocity_at_origin.x - variation_velocity.x, velocity_at_origin.x + variation_velocity.x);
+    std::uniform_real_distribution<long double> dis_velocity_y(velocity_at_origin.y - variation_velocity.y, velocity_at_origin.y + variation_velocity.y);
+    std::uniform_real_distribution<long double> dis_velocity_z(velocity_at_origin.z - variation_velocity.z, velocity_at_origin.z + variation_velocity.z);
+    std::uniform_real_distribution<long double> dis_direction_x(-variation_in_direction_x, variation_in_direction_x);
+    std::uniform_real_distribution<long double> dis_direction_y(-variation_in_direction_y, variation_in_direction_y);
+    std::uniform_real_distribution<long double> dis_arm_velocity(-arm_velocity_variation, arm_velocity_variation);
+    std::uniform_real_distribution<long double> dis_arm_mass(-arm_mass_variation, arm_mass_variation);
+
+    // random bool
+    std::uniform_int_distribution<int> dis_bool(0, 1);
+        for (int i = 1; i < number_of_stars+1; i++) {
+            long double velocity_z;
+            if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
+                velocity_z = -dis_position_z(gen);
+            }
+            else {
+                velocity_z = dis_position_z(gen);
+            }
+
+            float mass = dis_mass(gen);
+
+            Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
+            Vector rel_pos(((max_position.x - position.x)/max_position.x),((max_position.y - position.y)/max_position.y), ((max_position.z - position.z)/max_position.z));
+            Vector velocity = Vector(
+                    std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
+                    std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
+                    std::sqrt(std::abs(rel_pos.x)) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
+            );
+            velocity.rotate(Vector(0,0,1), dis_direction_x(gen)); // rotate the velocity by a random amount in the x direction
+            velocity.rotate(Vector(0,1,0), dis_direction_y(gen)); // rotate the velocity by a random amount in the y direction
+
+            star_list.emplace_back(new Star( // add the star to the star list
+                    i,
+                    position,
+                    velocity,
+                    Vector(0,0,0),
+                    mass,
+                    parent_region_matrix,
+                    0
+            ));
+        } //TODO: add arms to the galaxy (need to generate an area for the stars to be in and then move the stars to that area that are nearby)
+        if (arms > 0) { // if there are arms
+            for (int i = 0; i < arms; i++) { // for each arm
+                float mass = arm_mass + dis_arm_mass(gen); // get the mass of the arm
+                Vector velocity = Vector(arm_velocity + dis_arm_velocity(gen), 0, 0); // get the velocity of the arm
+                Vector position = Vector(0, 0, 0); // set the position of the arm to the origin
+                Vector position_vector = Vector(0, 1, 0); // set the position vector of the arm to the y axis
+                position_vector.rotate(Vector(0,0,1), arm_positions[i]); // rotate the position vector by the position of the arm
+                position_vector.rotate(Vector(1,0,0), arm_offset); // rotate the position by the offset in the z direction
+                position_vector.scale(arm_length); // scale the position vector by the length of the arm
+                // make a volume for the arm along the position vector
+                Vector point_1 = Vector(0, 0, 0)
+
+
+
+                ));
+            }
+        }
+        // move stars to create arms
+
+
+    }
+
 
 RegionMatrix regionMatrix;
 
