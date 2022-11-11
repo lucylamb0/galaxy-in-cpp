@@ -62,6 +62,7 @@ if(SHOULD_USE_GTEST)
     add_executable(Simulation_Tests
             GTests/Vector3_Test.cc
             GTests/Star_Test.cc
+            GTests/DataExporter_Test.cc
     )
     target_link_libraries(
             Simulation_Tests
