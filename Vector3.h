@@ -16,16 +16,6 @@ struct Vector {
         return os << "(" << m.x << ", " << m.y << ", " << m.z << ")";
     }
 
-    constexpr auto notNull() const noexcept
-    {
-        return x || y || z;
-    }
-
-    constexpr auto isNull() const noexcept
-    {
-        return !notNull();
-    }
-
     friend constexpr auto operator>(Vector const& a, Vector const& b) noexcept
     {
         return a.x > b.x && a.y > b.y && a.z > b.z;
@@ -204,7 +194,6 @@ struct Vector {
 
     long double x, y, z;
 
-    //
     void rotate_about_axis(Vector axis, long double d) {
         long double c = std::cos(d);
         long double s = std::sin(d);
@@ -234,13 +223,18 @@ struct Vector {
     }
 
     void normalise() {
-        long double l = length();
+        long double l = this->length();
         if (l != 0.0f) {
             x /= l;
             y /= l;
             z /= l;
         }
+    }
 
+    void scale(float d) {
+        x *= d;
+        y *= d;
+        z *= d;
     }
 };
 
