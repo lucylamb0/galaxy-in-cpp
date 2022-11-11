@@ -16,16 +16,6 @@ struct Vector {
         return os << "(" << m.x << ", " << m.y << ", " << m.z << ")";
     }
 
-    constexpr auto notNull() const noexcept
-    {
-        return x || y || z;
-    }
-
-    constexpr auto isNull() const noexcept
-    {
-        return !notNull();
-    }
-
     friend constexpr auto operator>(Vector const& a, Vector const& b) noexcept
     {
         return a.x > b.x && a.y > b.y && a.z > b.z;
@@ -224,24 +214,21 @@ struct Vector {
         this->x = x1 * x + x2 * y + x3 * z;
         this->y = y1 * x + y2 * y + y3 * z;
         this->z = z1 * x + z2 * y + z3 * z;
-
     }
 
     void normalise() {
-        long double l = length();
+        long double l = this->length();
         if (l != 0.0f) {
             x /= l;
             y /= l;
             z /= l;
         }
-
     }
 
     void scale(float d) {
         x *= d;
         y *= d;
         z *= d;
-
     }
 };
 
