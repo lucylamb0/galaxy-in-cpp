@@ -40,6 +40,7 @@ void compute_region_com(Region* region) {
         }
     }
 }
+
 // TODO: Finish this function and maybe split it up into smaller functions for each gen type
 // this function generates stars and puts them into the star list and class
 // all velocities will in general go clockwise around the origin
@@ -265,7 +266,8 @@ void star_generator_uniform (
         velocity.rotate_about_axis(Vector(0, 1, 0),
                                    dis_direction_y(gen)); // rotate the velocity by a random amount in the y direction
 
-        star_list.emplace_back(new Star( // add the star to the star list
+       // add the star to the star list
+        star_list.emplace_back(new Star(
                 i,
                 position,
                 velocity,
