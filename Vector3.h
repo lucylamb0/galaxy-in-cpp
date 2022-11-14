@@ -204,35 +204,31 @@ struct Vector {
 
     long double x, y, z;
 
-    // need to check this
-    void rotate(Vector vector, long double d) {
-        long double x = vector.x;
-        long double y = vector.y;
-        long double z = vector.z;
-        long double c = std::cos(d);
-        long double s = std::sin(d);
-        long double t = 1 - c;
-        long double x1 = x * t + c;
-        long double y1 = y * t + s * z;
-        long double z1 = z * t - s * y;
-        long double x2 = x * t - s * z;
-        long double y2 = y * t + c;
-        long double z2 = z * t + s * x;
-        long double x3 = x * t + s * y;
-        long double y3 = y * t - s * x;
-        long double z3 = z * t + c;
-        this->x = x1 * x + x2 * y + x3 * z;
-        this->y = y1 * x + y2 * y + y3 * z;
-        this->z = z1 * x + z2 * y + z3 * z;
-
+    // rotate vector by angle (x angle = a, y angle = b, z angle = c)
+    void rotate(long double a, long double b, long double c) {
+//        long double x = vector.x;
+//        long double y = vector.y;
+//        long double z = vector.z;
+        long double cos_a = std::cos(a);
+        long double sin_a = std::sin(a);
+        long double cos_b = std::cos(b);
+        long double sin_b = std::sin(b);
+        long double cos_c = std::cos(c);
+        long double sin_c = std::sin(c);
+        long double new_x = (cos_b * cos_c) * x + (sin_a * sin_b * cos_c - cos_a * sin_c) * y + (cos_a * sin_b * cos_c + sin_a * sin_c) * z;
+        long double new_y = (cos_b * sin_c) * x + (sin_a * sin_b * sin_c + cos_a * cos_c) * y + (cos_a * sin_b * sin_c - sin_a * cos_c) * z;
+        long double new_z = (-sin_b) * x + (sin_a * cos_b) * y + (cos_a * cos_b) * z;
+        this->x = new_x;
+        this->y = new_y;
+        this->z = new_z;
     }
 
     void normalise() {
         long double l = length();
         if (l != 0.0f) {
-            x /= l;
-            y /= l;
-            z /= l;
+            this->x /= l;
+            this->y /= l;
+            this->z /= l;
         }
 
     }
