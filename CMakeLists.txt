@@ -51,7 +51,7 @@ add_executable(GalaxySimulation
         includes/json.h
         data_parser.cpp data_parser.h
         data_exporter.cpp data_exporter.h
-        )
+        Simulator.cpp Simulator.h)
 
 if(TARGET Threads::Threads)
     target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)

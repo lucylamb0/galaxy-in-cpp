@@ -12,6 +12,8 @@
 #include "data_exporter.h"
 #include "data_parser.h"
 
+#include "Simulator.h"
+
 #include "includes/logging.h"
 
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
@@ -320,48 +322,26 @@ int main(int arg_count, char** args) {
 
 //    thread_count /= 3;
 
-    auto work_queue = std::vector<std::vector<Star *>>{};
-    auto star_count = star_list.size();
-    auto left_over = star_count % thread_count;
-    auto star_per_thread = (star_count - left_over) / thread_count;
-    logging::info("Star count: ", star_count);
-    logging::info("Thread count: ", thread_count);
-    logging::info("Star per thread: ", star_per_thread);
-    logging::info("Left over: ", left_over);
+    Simulator simulator = Simulator(thread_count,&star_list);
+    simulator.output_info();
+    auto work_queue = simulator.work_queue;
 
     for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
 #define OUTPUT_EVERY_N_TASKS 1000
 
-        auto tmp = std::vector<Star *>{};
-        for (int i = 0; i < left_over; ++i) {
-            tmp.emplace_back(star_list.at(0));
-            star_list.erase(star_list.begin());
-        }
+        // Generate a work queue for the threads to handle
+        simulator.generateWorkQueue();
 
-        work_queue.clear();
-        for (int i = 0; i < thread_count; ++i) {
-            work_queue.emplace_back(std::vector<Star *>{});
-            for (int j = 0; j < star_per_thread; ++j) {
-                work_queue.at(i).emplace_back(star_list.at(i * star_per_thread + j));
-            }
-        }
-        for (int i = 0; i < left_over; ++i) {
-            work_queue.at(0).emplace_back(tmp.at(i));
-        }
-
-        for (int i = 0; i < left_over; ++i) {
-            star_list.emplace_back(tmp.at(i));
-        }
         auto threads = std::vector<std::thread>{};
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
             threads.emplace_back(std::thread([&work_queue, i]() {
                 int tasksComplete = 0;
-                int myTasks = work_queue.at(i).size();
+                int myTasks = work_queue->at(i).size();
                 double averageTime = 0.f;
-                for (auto star: work_queue.at(i)) {
+                for (auto star: work_queue->at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
 
                     timeTaken += star->acceleration_update_stars_in_region(false);
