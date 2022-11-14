@@ -15,8 +15,8 @@ private:
     std::vector<Star*> *star_list;
 
     void handle_csv();
-    void dump_csv() {
-        const char *filename = "2Stars.test.dump.txt";
+    void dump_csv(const char *filename) {
+//        const char *filename = "Stars.test.dump.txt";
 
         std::ofstream fileDump(filename);
         fileDump.precision(32);
@@ -31,7 +31,7 @@ private:
         for (auto star: *star_list) {
             star->history_position.erase(star->history_position.begin());
 
-#define writeVector(VAR) VAR.x << ',' << VAR.y << ',' << VAR.z
+#define writeVector(VAR) VAR.x << ',' << (VAR).y << ',' << (VAR).z
             for (int i = 0; i <= simulationFrames; ++i) {
 
                 Vector position = star->history_position.at(i);
@@ -56,9 +56,9 @@ public:
         this->star_list = star_list;
     }
 
-    void start_dumping() {
-        logging::info("\n\nStarting to dump data", "");
-        dump_csv();
+    void start_dumping(const char *filename) {
+        logging::info("\n\nStarting to dump data to: ", filename);
+        dump_csv(filename);
         logging::info("Finished dumping data", "");
     }
 } ;

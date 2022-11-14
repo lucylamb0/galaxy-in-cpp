@@ -8,6 +8,8 @@
 #include "includes/Region.h"
 #include "includes/json.h"
 #include "random"
+#include "data_exporter.h"
+#include "data_parser.h"
 using json = nlohmann::json;
 
 #include "includes/logging.h"
@@ -509,7 +511,8 @@ int main(int arg_count, char** args) {
             );
 
     // dump the star list to a csv file
-
+//    data_exporter ExportHandler = data_exporter(&star_list);
+//    ExportHandler.start_dumping("\"Stars.test.dump.txt\"");
 
 
     Vector min = Vector(-1, -1, -1);
@@ -760,41 +763,8 @@ int main(int arg_count, char** args) {
         logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
 
-    logging::info("Starting to dump data", "");
-    {
-
-        // create an empty structure (null)
-        json dumpStruct = star_list;
-
-        // write prettified JSON to another file
-        std::ofstream o("pretty.json");
-        o << std::setw(4) << dumpStruct << std::endl;
-
-
-        ofstream fileDump("2Stars.test.dump.txt");
-        fileDump.precision(32);
-
-        fileDump << "Star ID, Accel ID, X Position, Y Position, Z Position, X Velocity, Y Velocity, Z Velocity, X Accel, Y Accel, Z Accel" << endl;
-        for (auto star: star_list) {
-            int cycle_id = 1;
-            star->history_position.erase(star->history_position.begin());
-            for (auto history : star->history_position) {
-                fileDump << star->id << ',' << cycle_id << ',' << history.x << ',' << history.y << ',' << history.z << ','
-                << star->history_velocity.at(cycle_id - 1).x << ','
-                << star->history_velocity.at(cycle_id - 1).y << ','
-                << star->history_velocity.at(cycle_id - 1).z << ','
-
-                << star->history_acceleration.at(cycle_id - 1).x << ','
-                << star->history_acceleration.at(cycle_id - 1).y << ','
-                << star->history_acceleration.at(cycle_id - 1).z << ','
-
-                << std::endl;
-                ++cycle_id;
-            }
-        }
-        fileDump.close();
-    }
-    logging::info("Finished dumping data", "");
+    data_exporter ExportHandler2 = data_exporter(&star_list);
+    ExportHandler2.start_dumping("\"Stars_2.test.dump.txt\"");
 
     return 0;
 }
