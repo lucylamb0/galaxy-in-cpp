@@ -8,7 +8,7 @@
 #include "includes/Region.h"
 #include "includes/json.h"
 #include "random"
-using json = nlohmann::json;
+
 #include "data_exporter.h"
 #include "data_parser.h"
 
@@ -192,23 +192,6 @@ void star_generator(
 }
 
 RegionMatrix regionMatrix;
-
-void to_json(json& j, const Vector& v) {
-    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
-}
-void to_json(json& j, const Star* star) {
-    j = json{
-            { "id", star->id },
-            { "history_position", star->history_position },
-            { "history_velocity", star->history_velocity },
-            { "history_acceleration", star->history_acceleration }
-    };
-}
-void from_json(const json& j, Vector& v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
-}
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
@@ -500,7 +483,6 @@ int main(int arg_count, char** args) {
         }
         logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
-
 
     data_exporter ExportHandler = data_exporter(&star_list);
     ExportHandler.start_dumping();
