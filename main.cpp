@@ -349,11 +349,7 @@ int main(int arg_count, char** args) {
     for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
-#define MULTI_THREADED 1
 #define OUTPUT_EVERY_N_TASKS 1000
-// multi threading stuff
-#if MULTI_THREADED
-
 
         auto tmp = std::vector<Star *>{};
         for (int i = 0; i < left_over; ++i) {
@@ -411,25 +407,6 @@ int main(int arg_count, char** args) {
         for (auto &thread: threads) {
             thread.join();
         }
-#endif
-
-        // not multithreaded star updates
-#ifndef MULTI_THREADED
-        for (auto star : star_list) {
-            auto accelerationDuration = star->acceleration_update_region_com(true);
-            accelerationDuration += star->acceleration_update_stars_in_region(false);;
-
-            if (averageAccelerationUpdateTime == -1) {
-                averageAccelerationUpdateTime = accelerationDuration;
-            } else {
-                averageAccelerationUpdateTime = (averageAccelerationUpdateTime + accelerationDuration) / 2;
-            }
-
-            if (star.id % 100 == 0) {
-                std::cout << star.id << " / " << star_list.size() << " Complete - Average Acceleration Update Time: " << averageAccelerationUpdateTime << "ms" << std::endl;
-            }
-        }
-#endif
 
         // Clear the stars in the regions, so we can update the centre of masses and reassign the stars their regions
         for (auto region: regionMatrix.regions) {
