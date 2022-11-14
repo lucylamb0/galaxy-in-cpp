@@ -258,11 +258,30 @@ void star_generator(
                 Vector velocity = Vector(arm_velocity + dis_arm_velocity(gen), 0, 0); // get the velocity of the arm
                 Vector position = Vector(0, 0, 0); // set the position of the arm to the origin
                 Vector position_vector = Vector(0, 1, 0); // set the position vector of the arm to the y axis
-                position_vector.rotate(Vector(0,0,1), arm_positions[i]); // rotate the position vector by the position of the arm
-                position_vector.rotate(Vector(1,0,0), arm_offset); // rotate the position by the offset in the z direction
                 position_vector.scale(arm_length); // scale the position vector by the length of the arm
                 // make a volume for the arm along the position vector
-                Vector point_1 = Vector(0, 0, 0)
+                Vector point_1 = Vector(0 + arm_width, 0, 0 + arm_height); // width in x, heoght in z
+                Vector point_2 = Vector(0 - arm_width, 0, 0 + arm_height);
+                Vector point_3 = Vector(0 + arm_width, 0, 0 - arm_height);
+                Vector point_4 = Vector(0 - arm_width, 0, 0 - arm_height);
+                // we now have a pyramid with the base at the origin and the top at the position vector
+                // we now need to rotate the pyramid by the angle of the arm
+                float angle = arm_positions[i];// get the angle of the arm
+                point_1.rotate(Vector(0,0,1), angle); // rotate the points by the angle around the z axis
+                point_2.rotate(Vector(0,0,1), angle);
+                point_3.rotate(Vector(0,0,1), angle);
+                point_4.rotate(Vector(0,0,1), angle);
+                position_vector.rotate(Vector(0,0,1), angle); // rotate the position vector by the angle around the z axis
+                // we now have a pyramid with the base at the origin and the top at the position vector all rotated by the angle
+                // curve the pyramid by moving the top of the pyramid by the offset
+                position_vector.rotate(Vector(0,0,1), arm_offset); // rotate the position vector by the offset around the z axis
+                // define 4 equation curves for the pyramid goint from the base to the top
+                // curve
+
+
+
+
+
 
 
 
