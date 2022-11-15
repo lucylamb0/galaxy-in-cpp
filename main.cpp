@@ -86,21 +86,21 @@ std::uniform_int_distribution<int> dis_bool(0, 1);
     for (int i = 1; i < number_of_stars+1; i++) {
         long double velocity_z;
         if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
-            velocity_z = -dis_position_z(gen);
+            velocity_z = -dis_velocity_z(gen);
         }
         else {
-            velocity_z = dis_position_z(gen);
+            velocity_z = dis_velocity_z(gen);
         }
 
         float mass = dis_mass(gen);
         galaxy_mass += mass;
 
         Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
-        Vector rel_pos(((max_position.x - position.x)/max_position.x),((max_position.y - position.y)/max_position.y), ((max_position.z - position.z)/max_position.z));
+        Vector rel_pos(((max_position.x - std::abs(position.x))/max_position.x),((max_position.y - std::abs(position.y))/max_position.y), ((max_position.z - std::abs(position.z))/max_position.z));
         Vector velocity = Vector(
-                std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
-                std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
-                std::sqrt(std::abs(rel_pos.x)) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
+                std::sqrt(rel_pos.y) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
+                std::sqrt(rel_pos.x) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
+                std::sqrt(rel_pos.z) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
         );
 
         velocity.rotate(dis_direction_x(gen), dis_direction_y(gen), 0); // rotate the velocity by a random amount in the x and y direction
@@ -159,18 +159,18 @@ std::uniform_int_distribution<int> dis_bool(0, 1);
 
                 long double velocity_z;
                 if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
-                    velocity_z = -dis_position_z(gen);
+                    velocity_z = -dis_velocity_z(gen);
                 }
                 else {
-                    velocity_z = dis_position_z(gen);
+                    velocity_z = dis_velocity_z(gen);
                 }
 
                 // create the position vector
-                Vector rel_pos(((max_x - position.x)/max_x),((max_y - position.y)/max_y), ((max_z - position.z)/max_z));
+                Vector rel_pos(((max_x - std::abs(position.x))/max_x),((max_y - std::abs(position.y))/max_y), ((max_z - std::abs(position.z))/max_z));
                 Vector velocity_star_arm = Vector(
-                        std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
-                        std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
-                        std::sqrt(std::abs(rel_pos.x)) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
+                        std::sqrt(rel_pos.y) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
+                        std::sqrt(rel_pos.x) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
+                        std::sqrt(rel_pos.z) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
                 );
                 velocity_star_arm.rotate(dis_direction_x(gen), dis_direction_y(gen), 0); // rotate the velocity by a random amount in the x and y direction
                 star_list.emplace_back(new Star( // add the star to the star list
@@ -233,9 +233,9 @@ void star_generator_gaussian(
     for (int i = 1; i < number_of_stars+1; i++) {
         long double velocity_z;
         if (dis_bool(gen) != 1) {
-            velocity_z = -dis_position_z(gen);
+            velocity_z = -dis_velocity_z(gen);
         } else {
-            velocity_z = dis_position_z(gen);
+            velocity_z = dis_velocity_z(gen);
         }
 
         long double gaussian_x_norm = dis_gaussian_x(gen);
@@ -260,12 +260,11 @@ void star_generator_gaussian(
 //        // multiply the position vector by the distance from the origin
 //        position = position * dis_distance_from_origin(gen);
 //        // create the velocity vector
+        Vector rel_pos(((max_position.x - std::abs(position.x))/max_position.x),((max_position.y - std::abs(position.y))/max_position.y), ((max_position.z - std::abs(position.z))/max_position.z));
         Vector velocity = Vector(
-                std::sqrt(std::abs(position.y)) * std::cos((position.x * PI) / 2) * dis_velocity_x(
-                        gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
-                std::sqrt(std::abs(position.x)) * std::cos((position.y * PI) / 2) * dis_velocity_y(gen),
-                std::sqrt(std::abs(position.x)) *
-                velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
+                std::sqrt(rel_pos.y) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
+                std::sqrt(rel_pos.x) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
+                std::sqrt(rel_pos.z) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
         );
         velocity.rotate(dis_direction_x(gen), dis_direction_y(gen),
                         0); // rotate the velocity by a random amount in the x and y direction
@@ -353,16 +352,16 @@ void star_generator_gaussian(
 
                 long double velocity_z;
                 if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
-                    velocity_z = -dis_position_z(gen);
+                    velocity_z = -dis_velocity_z(gen);
                 }
                 else {
-                    velocity_z = dis_position_z(gen);
+                    velocity_z = dis_velocity_z(gen);
                 }
-                Vector rel_pos(((max.x - position_star_arm.x)/max.x),((max.y - position_star_arm.y)/max.y), ((max.z - position_star_arm.z)/max.z));
+                Vector rel_pos(((max_x - std::abs(position.x))/max_x),((max_y - std::abs(position.y))/max_y), ((max_z - std::abs(position.z))/max_z));
                 Vector velocity_star_arm = Vector(
-                        std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
-                        std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
-                        std::sqrt(std::abs(rel_pos.x)) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
+                        std::sqrt(rel_pos.y) * std::cos((rel_pos.x * PI)/2) * dis_velocity_x(gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
+                        std::sqrt(rel_pos.x) * std::cos((rel_pos.y * PI)/2) * dis_velocity_y(gen),
+                        std::sqrt(rel_pos.z) * velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
                 );
                 velocity_star_arm.rotate(dis_direction_x(gen), dis_direction_y(gen), 0); // rotate the velocity by a random amount in the x and y direction
                 star_list.emplace_back(new Star( // add the star to the star list
@@ -471,14 +470,14 @@ int main(int arg_count, char** args) {
 
     int number_of_stars = 100;
     int number_of_stars_per_arm = 10;
-    float mean_mass = 0.8;
-    float std_mass = 0.05;
-    Vector min_position = Vector(-20, -20, -20);
-    Vector max_position = Vector(20, 20, 20);
+    float mean_mass = 10;
+    float std_mass = 0.1;
+    Vector min_position = Vector(-20, -20, -5);
+    Vector max_position = Vector(20, 20, 5);
     Vector min_velocity = Vector(-0.1, -0.1, -0.1);
     Vector max_velocity = Vector(0.1, 0.1, 0.1);
-    Vector velocity_at_center = Vector(0.0002556727896654, 0.0002556727896654, 0.000002);
-    Vector variation_velocity = Vector(0.0001056727896654, 0.0001056727896654, 0.0000002);
+    Vector velocity_at_center = Vector(0.00000002556727896654, 0.00000002556727896654, 0.0000000002);
+    Vector variation_velocity = Vector(0.00000001056727896654, 0.00000001056727896654, 0.00000000002);
     long double variation_direction_x = 0.0174533;
     long double variation_direction_y = 0.0174533;
     int number_of_arms = 0;
@@ -489,7 +488,7 @@ int main(int arg_count, char** args) {
     float arm_offset = 0.1;
     RegionMatrix* parent_region_matrix = &regionMatrix;
     Vector gaussian_mean = Vector(0, 0, 0);
-    Vector gaussian_std = Vector(0.1, 0.1, 0.1);
+    Vector gaussian_std = Vector(0.2, 0.2, 0.2);
 
 
 //    star_generator_uniform(
@@ -788,7 +787,7 @@ int main(int arg_count, char** args) {
     }
 
     data_exporter ExportHandler2 = data_exporter(&star_list);
-    ExportHandler2.start_dumping("Stars_2.test.dump.txt");
+    ExportHandler2.start_dumping("Stars_gaussian.test.dump.txt");
 
     return 0;
 }
