@@ -488,9 +488,31 @@ int main(int arg_count, char** args) {
     float arm_height = 0.1;
     float arm_offset = 0.1;
     RegionMatrix* parent_region_matrix = &regionMatrix;
+    Vector gaussian_mean = Vector(0, 0, 0);
+    Vector gaussian_std = Vector(0.1, 0.1, 0.1);
 
 
-    star_generator_uniform(
+//    star_generator_uniform(
+//            number_of_stars,
+//            mean_mass,
+//            std_mass,
+//            min_position,
+//            max_position,
+//            velocity_at_center,
+//            variation_velocity,
+//            variation_direction_x,
+//            variation_direction_y,
+//            number_of_arms,
+//            number_of_stars_per_arm,
+//            angle_of_arms,
+//            arm_width,
+//            arm_height,
+//            arm_length,
+//            arm_offset,
+//            parent_region_matrix
+//            );
+
+    star_generator_gaussian(
             number_of_stars,
             mean_mass,
             std_mass,
@@ -507,8 +529,10 @@ int main(int arg_count, char** args) {
             arm_height,
             arm_length,
             arm_offset,
-            parent_region_matrix
-            );
+            parent_region_matrix,
+            gaussian_mean,
+            gaussian_std
+    );
 
     // dump the star list to a csv file
 //    data_exporter ExportHandler = data_exporter(&star_list);
@@ -764,7 +788,7 @@ int main(int arg_count, char** args) {
     }
 
     data_exporter ExportHandler2 = data_exporter(&star_list);
-    ExportHandler2.start_dumping("\"Stars_2.test.dump.txt\"");
+    ExportHandler2.start_dumping("Stars_2.test.dump.txt");
 
     return 0;
 }

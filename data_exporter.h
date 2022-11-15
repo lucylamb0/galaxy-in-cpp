@@ -19,6 +19,9 @@ private:
 //        const char *filename = "Stars.test.dump.txt";
 
         std::ofstream fileDump(filename);
+        // output file location on system full location
+        std::cout << "Output file location: " << filename << std::endl;
+
         fileDump.precision(32);
 
         // Output header
