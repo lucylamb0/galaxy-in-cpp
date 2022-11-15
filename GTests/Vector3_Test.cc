@@ -16,25 +16,24 @@
 
 TEST(Vector3_Test, SetVector_Test) {
     Vector testVector = Vector(1, 2, 3);
-    EXPECT_TRUE(testVector.x == 1);
-    EXPECT_TRUE(testVector.y == 2);
-    EXPECT_TRUE(testVector.z == 3);
-//    testVector.
+    EXPECT_EQ(testVector.x, 1);
+    EXPECT_EQ(testVector.y, 2);
+    EXPECT_EQ(testVector.z, 3);
+    //    testVector.
 }
 TEST(Vector3_Test, Distance_Test) {
     Vector testVector = Vector(1, 2, 3);
     Vector testVector2 = Vector(4, 5, 6);
-    long double dist = testVector.distTo(testVector2);
-
-    OUTPUT_ON_FAIL(dist == 5.196152422706632, dist);
+    float dist = testVector.distTo(testVector2);
+    EXPECT_FLOAT_EQ(dist, 5.1961522);
 }
 
 TEST(Vector3_Test, Normalise_Test) {
     Vector testVector = Vector(1, 2, 3);
     testVector.normalise();
-    OUTPUT_ON_FAIL(testVector.x == 0.2672612419124244, testVector.x);
-    OUTPUT_ON_FAIL(testVector.y == 0.5345224838248488, testVector.y);
-    OUTPUT_ON_FAIL(testVector.z == 0.8017837257372732, testVector.z);
+    EXPECT_FLOAT_EQ(testVector.x, 0.26726124);
+    EXPECT_FLOAT_EQ(testVector.y, 0.53452247);
+    EXPECT_FLOAT_EQ(testVector.z, 0.80178374);
 }
 
 TEST(Vector3_Test, Rotate_Test) {
