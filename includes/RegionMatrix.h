@@ -8,7 +8,7 @@
 #define GALAXYSIMULATION_REGIONMATRIX_H
 
 #include <vector>
-#include "../Vector3.h"
+#include "Vector3.h"
 #include "Region.h"
 #include "../includes.h"
 

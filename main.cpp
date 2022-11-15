@@ -2,15 +2,17 @@
 
 #include <string>
 #include <chrono>
-#include "Vector3.h"
+#include "includes/Vector3.h"
 #include "Star.h"
 #include "includes.h"
 #include "includes/Region.h"
 #include "includes/json.h"
 #include "random"
-using json = nlohmann::json;
+
 #include "data_exporter.h"
 #include "data_parser.h"
+
+#include "Simulator.h"
 
 #include "includes/logging.h"
 
@@ -40,7 +42,6 @@ void compute_region_com(Region* region) {
         }
     }
 }
-
 // TODO: Finish this function and maybe split it up into smaller functions for each gen type
 // this function generates stars and puts them into the star list and class
 // all velocities will in general go clockwise around the origin
@@ -72,10 +73,9 @@ void star_generator(
         float arm_mass_variation, // the variation in mass of the arms in solar mass
         RegionMatrix* parent_region_matrix
         ) {
-    if (distribution_type == 0){ // uniform
-        std::random_device rd; // random device for seeding
+    if (distribution_type == 0) { // uniform
+        std::random_device rd;
         std::mt19937 gen(rd());
-        // random number generators for each variable
         std::uniform_real_distribution<float> dis_mass(min_mass, max_mass);
         std::uniform_real_distribution<long double> dis_position_x(min_position.x, max_position.x);
         std::uniform_real_distribution<long double> dis_position_y(min_position.y, max_position.y);
@@ -94,14 +94,13 @@ void star_generator(
         std::uniform_int_distribution<int> dis_bool(0, 1);
         for (int i = 1; i < number_of_stars + 1; i++) {
             long double velocity_z;
-            if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
+            if (dis_bool(gen) != 1) {
                 velocity_z = -dis_position_z(gen);
             } else {
                 velocity_z = dis_position_z(gen);
             }
 
             float mass = dis_mass(gen);
-
             Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
             Vector rel_pos(((max_position.x - position.x) / max_position.x),
                            ((max_position.y - position.y) / max_position.y),
@@ -115,7 +114,7 @@ void star_generator(
             velocity.rotate_about_axis(Vector(0, 0, 1), dis_direction_x(gen));
             velocity.rotate_about_axis(Vector(0, 1, 0), dis_direction_y(gen));
 
-            star_list.emplace_back(new Star( // add the star to the star list
+            star_list.emplace_back(new Star(
                     i,
                     position,
                     velocity,
@@ -134,7 +133,6 @@ void star_generator(
         std::normal_distribution<long double> dis_position_x(gaussian_mean.x, gaussian_standard_deviation.x);
         std::normal_distribution<long double> dis_position_y(gaussian_mean.y, gaussian_standard_deviation.y);
         std::normal_distribution<long double> dis_position_z(gaussian_mean.z, gaussian_standard_deviation.z);
-        // for gaussian distribution we need to first get gaussian random distances from the origin instead of gaussian xyz positions individually
         std::uniform_real_distribution<long double> dis_distance_from_origin(
                 0,
                 std::sqrt((max_position.x * max_position.x) +
@@ -163,7 +161,6 @@ void star_generator(
             }
 
             float mass = dis_mass(gen);
-
             Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
 
             // normalise the position vector
@@ -171,7 +168,6 @@ void star_generator(
 
             // multiply the position vector by the distance from the origin
             position = position * dis_distance_from_origin(gen);
-            // same as uniform distribution now
             Vector rel_pos(((max_position.x - position.x) / max_position.x),
                            ((max_position.y - position.y) / max_position.y),
                            ((max_position.z - position.z) / max_position.z));
@@ -193,125 +189,11 @@ void star_generator(
                     parent_region_matrix,
                     0
             ));
-        }
-    }
-}
-
-void star_generator_uniform (
-            long int number_of_stars,
-            float min_mass, // minimum mass of a star can have
-            float avg_mass, // average mass of a star can have
-            float max_mass, // maximum mass of a star can have
-            Vector min_position, // minimum position of a star can have
-            Vector max_position, // maximum position of a star can have
-            Vector velocity_at_origin, // average velocity of a star can have at the origin pc/year
-            Vector variation_velocity, // variation of velocity of a star can have pc/year
-            long double variation_in_direction_x, // the variation in direction of the velocity in radians +-
-            long double variation_in_direction_y, // the variation in direction of the velocity in radians +-
-            int arms, // number of arms in the galaxy
-            std::vector<float> arm_positions, // the positions of the arms in radians
-            float arm_width, // the width of the arms in parsecs
-            float arm_height, // the height of the arms in parsecs
-            float arm_length, // the length of the arms in pc
-            float arm_offset, // the offset of the arms in radians
-            float arm_velocity, // the velocity of the arms in pc/year
-            float arm_velocity_variation, // the variation in velocity of the arms in pc/year
-            float arm_mass, // the mass of the arms in solar mass
-            float arm_mass_variation, // the variation in mass of the arms in solar mass
-            RegionMatrix* parent_region_matrix // the region matrix that the stars are in
-            ) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    // random number generators for each variable
-    std::uniform_real_distribution<float> dis_mass(min_mass, max_mass);
-    std::uniform_real_distribution<long double> dis_position_x(min_position.x, max_position.x);
-    std::uniform_real_distribution<long double> dis_position_y(min_position.y, max_position.y);
-    std::uniform_real_distribution<long double> dis_position_z(min_position.z, max_position.z);
-    std::uniform_real_distribution<long double> dis_velocity_x(velocity_at_origin.x - variation_velocity.x,
-                                                               velocity_at_origin.x + variation_velocity.x);
-    std::uniform_real_distribution<long double> dis_velocity_y(velocity_at_origin.y - variation_velocity.y,
-                                                               velocity_at_origin.y + variation_velocity.y);
-    std::uniform_real_distribution<long double> dis_velocity_z(velocity_at_origin.z - variation_velocity.z,
-                                                               velocity_at_origin.z + variation_velocity.z);
-    std::uniform_real_distribution<long double> dis_direction_x(-variation_in_direction_x, variation_in_direction_x);
-    std::uniform_real_distribution<long double> dis_direction_y(-variation_in_direction_y, variation_in_direction_y);
-    std::uniform_real_distribution<long double> dis_arm_velocity(-arm_velocity_variation, arm_velocity_variation);
-    std::uniform_real_distribution<long double> dis_arm_mass(-arm_mass_variation, arm_mass_variation);
-
-    // random bool
-    std::uniform_int_distribution<int> dis_bool(0, 1);
-    for (int i = 1; i < number_of_stars + 1; i++) {
-        long double velocity_z;
-        if (dis_bool(gen) != 1) { // for getting a random negative or positive z velocity
-            velocity_z = -dis_position_z(gen);
-        } else {
-            velocity_z = dis_position_z(gen);
-        }
-
-        float mass = dis_mass(gen);
-
-        Vector position = Vector(dis_position_x(gen), dis_position_y(gen), dis_position_z(gen));
-        Vector rel_pos(((max_position.x - position.x) / max_position.x),
-                       ((max_position.y - position.y) / max_position.y),
-                       ((max_position.z - position.z) / max_position.z));
-        Vector velocity = Vector(
-                std::sqrt(std::abs(rel_pos.y)) * std::cos((rel_pos.x * PI) / 2) * dis_velocity_x(
-                        gen), // get velocities using relative positions to the centre of the galaxy using inverse square law
-                std::sqrt(std::abs(rel_pos.x)) * std::cos((rel_pos.y * PI) / 2) * dis_velocity_y(gen),
-                std::sqrt(std::abs(rel_pos.x)) *
-                velocity_z // z velocity does not need to have a cos function as the direction of orbit is not in the z direction
-        );
-        velocity.rotate_about_axis(Vector(0, 0, 1),
-                                   dis_direction_x(gen)); // rotate the velocity by a random amount in the x direction
-        velocity.rotate_about_axis(Vector(0, 1, 0),
-                                   dis_direction_y(gen)); // rotate the velocity by a random amount in the y direction
-
-       // add the star to the star list
-        star_list.emplace_back(new Star(
-                i,
-                position,
-                velocity,
-                Vector(0, 0, 0),
-                mass,
-                parent_region_matrix,
-                0
-        ));
-    } //TODO: add arms to the galaxy (need to generate an area for the stars to be in and then move the stars to that area that are nearby)
-    if (arms > 0) { // if there are arms
-        for (int i = 0; i < arms; i++) { // for each arm
-            float mass = arm_mass + dis_arm_mass(gen); // get the mass of the arm
-            Vector velocity = Vector(arm_velocity + dis_arm_velocity(gen), 0, 0); // get the velocity of the arm
-            Vector position = Vector(0, 0, 0); // set the position of the arm to the origin
-            Vector position_vector = Vector(0, 1, 0); // set the position vector of the arm to the y axis
-            position_vector.rotate_about_axis(Vector(0, 0, 1),
-                                              arm_positions[i]); // rotate the position vector by the position of the arm
-            position_vector.rotate_about_axis(Vector(1, 0, 0),
-                                              arm_offset); // rotate the position by the offset in the z direction
-            position_vector.scale(arm_length); // scale the position vector by the length of the arm
-            // make a volume for the arm along the position vector
-            Vector point_1 = Vector(0, 0, 0);
-        }
+        };
     }
 }
 
 RegionMatrix regionMatrix;
-
-void to_json(json& j, const Vector& v) {
-    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
-}
-void to_json(json& j, const Star* star) {
-    j = json{
-            { "id", star->id },
-            { "history_position", star->history_position },
-            { "history_velocity", star->history_velocity },
-            { "history_acceleration", star->history_acceleration }
-    };
-}
-void from_json(const json& j, Vector& v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
-}
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
@@ -440,52 +322,26 @@ int main(int arg_count, char** args) {
 
 //    thread_count /= 3;
 
-    auto work_queue = std::vector<std::vector<Star *>>{};
-    auto star_count = star_list.size();
-    auto left_over = star_count % thread_count;
-    auto star_per_thread = (star_count - left_over) / thread_count;
-    logging::info("Star count: ", star_count);
-    logging::info("Thread count: ", thread_count);
-    logging::info("Star per thread: ", star_per_thread);
-    logging::info("Left over: ", left_over);
+    Simulator simulator = Simulator(thread_count,&star_list);
+    simulator.output_info();
+    auto work_queue = simulator.work_queue;
 
     for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
-#define MULTI_THREADED 1
 #define OUTPUT_EVERY_N_TASKS 1000
-// multi threading stuff
-#if MULTI_THREADED
 
+        // Generate a work queue for the threads to handle
+        simulator.generateWorkQueue();
 
-        auto tmp = std::vector<Star *>{};
-        for (int i = 0; i < left_over; ++i) {
-            tmp.emplace_back(star_list.at(0));
-            star_list.erase(star_list.begin());
-        }
-
-        work_queue.clear();
-        for (int i = 0; i < thread_count; ++i) {
-            work_queue.emplace_back(std::vector<Star *>{});
-            for (int j = 0; j < star_per_thread; ++j) {
-                work_queue.at(i).emplace_back(star_list.at(i * star_per_thread + j));
-            }
-        }
-        for (int i = 0; i < left_over; ++i) {
-            work_queue.at(0).emplace_back(tmp.at(i));
-        }
-
-        for (int i = 0; i < left_over; ++i) {
-            star_list.emplace_back(tmp.at(i));
-        }
         auto threads = std::vector<std::thread>{};
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
             threads.emplace_back(std::thread([&work_queue, i]() {
                 int tasksComplete = 0;
-                int myTasks = work_queue.at(i).size();
+                int myTasks = work_queue->at(i).size();
                 double averageTime = 0.f;
-                for (auto star: work_queue.at(i)) {
+                for (auto star: work_queue->at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
 
                     timeTaken += star->acceleration_update_stars_in_region(false);
@@ -514,25 +370,6 @@ int main(int arg_count, char** args) {
         for (auto &thread: threads) {
             thread.join();
         }
-#endif
-
-        // not multithreaded star updates
-#ifndef MULTI_THREADED
-        for (auto star : star_list) {
-            auto accelerationDuration = star->acceleration_update_region_com(true);
-            accelerationDuration += star->acceleration_update_stars_in_region(false);;
-
-            if (averageAccelerationUpdateTime == -1) {
-                averageAccelerationUpdateTime = accelerationDuration;
-            } else {
-                averageAccelerationUpdateTime = (averageAccelerationUpdateTime + accelerationDuration) / 2;
-            }
-
-            if (star.id % 100 == 0) {
-                std::cout << star.id << " / " << star_list.size() << " Complete - Average Acceleration Update Time: " << averageAccelerationUpdateTime << "ms" << std::endl;
-            }
-        }
-#endif
 
         // Clear the stars in the regions, so we can update the centre of masses and reassign the stars their regions
         for (auto region: regionMatrix.regions) {
@@ -626,7 +463,6 @@ int main(int arg_count, char** args) {
         }
         logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
-
 
     data_exporter ExportHandler = data_exporter(&star_list);
     ExportHandler.start_dumping();

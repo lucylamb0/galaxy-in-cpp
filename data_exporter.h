@@ -13,12 +13,12 @@
 class data_exporter {
 private:
     std::vector<Star*> *star_list;
+    std::string file_path;
 
     void handle_csv();
     void dump_csv() {
-        const char *filename = "2Stars.test.dump.txt";
 
-        std::ofstream fileDump(filename);
+        std::ofstream fileDump(file_path.c_str());
         fileDump.precision(32);
 
         // Output header
@@ -29,8 +29,6 @@ private:
                  << std::endl;
 
         for (auto star: *star_list) {
-            star->history_position.erase(star->history_position.begin());
-
 #define writeVector(VAR) VAR.x << ',' << VAR.y << ',' << VAR.z
             for (int i = 0; i <= simulationFrames; ++i) {
 
@@ -47,13 +45,12 @@ private:
             }
         }
         fileDump.close();
-
     }
 
 public:
-
-    data_exporter(std::vector<Star*> *star_list) {
+    data_exporter(std::vector<Star*> *star_list, std::string file_path = "2Stars.test.dump.txt") {
         this->star_list = star_list;
+        this->file_path = file_path;
     }
 
     void start_dumping() {
@@ -61,7 +58,7 @@ public:
         dump_csv();
         logging::info("Finished dumping data", "");
     }
-} ;
+};
 
 
 #endif //GALAXYSIMULATION_DATA_EXPORTER_H
