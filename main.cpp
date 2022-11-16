@@ -382,27 +382,7 @@ void star_generator_gaussian(
 
 }
 
-
-
-
 RegionMatrix regionMatrix;
-
-void to_json(json& j, const Vector& v) {
-    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
-}
-void to_json(json& j, const Star* star) {
-    j = json{
-            { "id", star->id },
-            { "history_position", star->history_position },
-            { "history_velocity", star->history_velocity },
-            { "history_acceleration", star->history_acceleration }
-    };
-}
-void from_json(const json& j, Vector& v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
-}
 
 int main(int arg_count, char** args) {
     std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
@@ -448,36 +428,6 @@ int main(int arg_count, char** args) {
     logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
 
     logging::info("Regions: ", regionMatrix.regions.size());
-
-
-    star_list.emplace_back(new Star(
-            1,                                // ID
-            Vector(0, 0, 0),    // Position
-            Vector(0,  -2e-8, 0),    // Velocity
-            Vector(0, 0, 0), // Acceleration
-            3.00273e-6,
-            &regionMatrix,       // Parent region matrix
-            (int)STAR_FLAGS::STATIC
-    ));
-//    star_list.emplace_back(new Star(
-//            1,                                // ID
-//            Vector(1, 1, 1),    // Position
-//            Vector(0,  -2e-8, 0),    // Velocity
-//            Vector(0, 0, 0), // Acceleration
-//            3.00273e-6,
-//            &regionMatrix,       // Parent region matrix
-//            (int)STAR_FLAGS::STATIC
-//    ));
-//
-//    star_list.emplace_back(new Star(
-//            2,                                // ID
-//            Vector(1.2477e-8, 1, 1),    // Position
-//            Vector( 0, 2.02269032e-6, 0),    // Velocity
-//            Vector(0, 0, 0), // Acceleration
-//            3.69396868e-8,
-//            &regionMatrix,       // Parent region matrix
-//            0
-//    ));
 
     int number_of_stars = 100;
     int number_of_stars_per_arm = 10;
