@@ -153,14 +153,9 @@ struct Vector {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    auto length2D() const noexcept
-    {
-        return std::sqrt(x * x + y * y);
-    }
-
     constexpr auto squareLength() const noexcept
     {
-        return x * x + y * y + z * z;
+        return (x * x) + (y * y) + (z * z);
     }
 
     constexpr auto size() const noexcept
@@ -180,39 +175,23 @@ struct Vector {
         return (*this - v).length();
     }
 
-//    auto toAngle() const noexcept
-//    {
-//        return Vector{ Helpers::rad2deg(std::atan2(-z, std::hypot(x, y))),
-//                       Helpers::rad2deg(std::atan2(y, x)),
-//                       0.0f };
-//    }
-//
-//    static auto fromAngle(const Vector& angle) noexcept
-//    {
-//        return Vector{ std::cos(Helpers::deg2rad(angle.x)) * std::cos(Helpers::deg2rad(angle.y)),
-//                       std::cos(Helpers::deg2rad(angle.x)) * std::sin(Helpers::deg2rad(angle.y)),
-//                       -std::sin(Helpers::deg2rad(angle.x)) };
-//    }
-
     long double x, y, z;
 
     // rotate vector by angle (x angle = a, y angle = b, z angle = c)
     void rotate(long double a, long double b, long double c) {
-//        long double x = vector.x;
-//        long double y = vector.y;
-//        long double z = vector.z;
         long double cos_a = std::cos(a);
         long double sin_a = std::sin(a);
         long double cos_b = std::cos(b);
         long double sin_b = std::sin(b);
         long double cos_c = std::cos(c);
         long double sin_c = std::sin(c);
-        long double new_x = (cos_b * cos_c) * x + (sin_a * sin_b * cos_c - cos_a * sin_c) * y + (cos_a * sin_b * cos_c + sin_a * sin_c) * z;
-        long double new_y = (cos_b * sin_c) * x + (sin_a * sin_b * sin_c + cos_a * cos_c) * y + (cos_a * sin_b * sin_c - sin_a * cos_c) * z;
-        long double new_z = (-sin_b) * x + (sin_a * cos_b) * y + (cos_a * cos_b) * z;
-        this->x = new_x;
-        this->y = new_y;
-        this->z = new_z;
+
+        long double sina_sinb = sin_a * sin_b;
+        long double cosa_sinb = cos_a * sin_b;
+
+        this->x = (cos_b * cos_c) * this->x + (sina_sinb * cos_c - cos_a * sin_c) * this->y + (cosa_sinb * cos_c + sin_a * sin_c) * this->z;
+        this->y = (cos_b * sin_c) * this->x + (sina_sinb * sin_c + cos_a * cos_c) * this->y + (cosa_sinb * sin_c - sin_a * cos_c) * this->z;
+        this->z = (-sin_b) * this->x + (sin_a * cos_b) * this->y + (cos_a * cos_b) * this->z;
     }
 
     void normalise() {

@@ -25,7 +25,8 @@ private:
         fileDump << "Star ID, " << "Accel ID, "
                  << "X Position, " << "Y Position, " << "Z Position, "
                  << "X Velocity, " << "Y Velocity, " << "Z Velocity, "
-                 << "X Accel, " << "Y Accel, " << "Z Accel"
+                 << "X Accel, " << "Y Accel, " << "Z Accel,"
+                 << "Total Energy 1, " << "Total Energy 2, " << "Total Energy 3"
                  << std::endl;
 
         for (auto star: *star_list) {
@@ -43,6 +44,11 @@ private:
                         << writeVector(position)
                         << writeVector(velocity)
                         << writeVector(acceleration)
+                        << writeVector(Vector(
+                                velocity.size(),
+                                velocity.length(),
+                                velocity.squareLength()
+                                ))
                         << std::endl;
             }
         }
