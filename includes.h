@@ -43,9 +43,9 @@ const long double yearInSeconds = 31536000;
 const long double gravitationalConstantFinal = gravitationalConstantParsec * pow(yearInSeconds, 2); // this very important constant is used in the calculations. It has units of parsec solarmasses^-1 (km/year)^2
 
 // Time frame the simulation will simulate
-const long double timeScale = 1; // In Years
+const long double timeScale = 10; // In Years
 // Amount of simulation frames to have
-const int simulationFrames = 10000;
+const int simulationFrames = 100;
 
 // Time to pass per acceleration cycle
 const long double time_step = timeScale / simulationFrames;// this is the time step used in the calculations. It has units of years

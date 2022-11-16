@@ -29,7 +29,9 @@ private:
                  << std::endl;
 
         for (auto star: *star_list) {
-#define writeVector(VAR) VAR.x << ',' << VAR.y << ',' << VAR.z
+            star->history_position.erase(star->history_position.begin());
+
+#define writeVector(VAR) VAR.x << ',' << (VAR).y << ',' << (VAR).z << ','
             for (int i = 0; i <= simulationFrames; ++i) {
 
                 Vector position = star->history_position.at(i);

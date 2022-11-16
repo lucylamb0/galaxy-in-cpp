@@ -1,4 +1,8 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
+//
+// Created by Conni on 31/07/2022.
+// With help from - https://github.com/danielkrupinski/Osiris/blob/640e00f34d4233dc6d74d9327463c50248acc1dd/Source/SDK/Vector.h
+//
 
 #ifndef C_VERSION_VECTOR3_H
 #define C_VERSION_VECTOR3_H
@@ -192,40 +196,31 @@ struct Vector {
 
     long double x, y, z;
 
-    void rotate_about_axis(Vector axis, long double d) {
-        long double c = std::cos(d);
-        long double s = std::sin(d);
-        Vector new_axis = axis * 1 - c;
-
-        Vector vector_1, vector_2, vector_3 = new_axis;
-
-        vector_1 += {
-            c,
-            s * axis.z,
-            -s * axis.y
-        };
-
-        vector_2 += {
-            -s * axis.z,
-            c,
-            s * axis.x
-        };
-
-        vector_3 += {
-            s * axis.y,
-            -s * axis.x,
-            c
-        };
-
-        *this = vector_1 * axis.x * vector_2 * axis.y * vector_3 * axis.z;
+    // rotate vector by angle (x angle = a, y angle = b, z angle = c)
+    void rotate(long double a, long double b, long double c) {
+//        long double x = vector.x;
+//        long double y = vector.y;
+//        long double z = vector.z;
+        long double cos_a = std::cos(a);
+        long double sin_a = std::sin(a);
+        long double cos_b = std::cos(b);
+        long double sin_b = std::sin(b);
+        long double cos_c = std::cos(c);
+        long double sin_c = std::sin(c);
+        long double new_x = (cos_b * cos_c) * x + (sin_a * sin_b * cos_c - cos_a * sin_c) * y + (cos_a * sin_b * cos_c + sin_a * sin_c) * z;
+        long double new_y = (cos_b * sin_c) * x + (sin_a * sin_b * sin_c + cos_a * cos_c) * y + (cos_a * sin_b * sin_c - sin_a * cos_c) * z;
+        long double new_z = (-sin_b) * x + (sin_a * cos_b) * y + (cos_a * cos_b) * z;
+        this->x = new_x;
+        this->y = new_y;
+        this->z = new_z;
     }
 
     void normalise() {
         long double l = this->length();
         if (l != 0.0f) {
-            x /= l;
-            y /= l;
-            z /= l;
+            this->x /= l;
+            this->y /= l;
+            this->z /= l;
         }
     }
 
