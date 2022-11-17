@@ -25,12 +25,12 @@ void data_parser::handle_csv(csv_data_template data) {
     std::ifstream infile;
     infile.open(data.file_path);
     std::string line;
-    int stars_cnt = 0;
-// I think this is making the list of stars from the file
-    while (std::getline(infile, line)) {
-        ++stars_cnt;
 
+    // Loop through each line in the file
+    while (std::getline(infile, line)) {
         std::istringstream iss(line);
+
+        // Split the line by commas into a vector array
         auto split_str = split(line, ',');
 
         int StarID = std::stoi(split_str.at(data.star_id));
@@ -63,5 +63,4 @@ void data_parser::handle_csv(csv_data_template data) {
         )); // Mass
     }
     infile.close();
-
 }

@@ -19,9 +19,9 @@ public:
     float overlap_factor;
 
     RegionArrayT regions;
-    Vector step, overlap, divisions;
+    Vector step, overlap, divisions,
 
-    Vector simulationSpaceStart, simulationSpaceEnd = {};
+        simulationSpaceStart, simulationSpaceEnd = {};
 
     RegionMatrix() = default;
 

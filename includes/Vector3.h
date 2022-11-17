@@ -10,35 +10,51 @@
 #include <valarray>
 #include <sstream>
 
-struct Vector {
-    Vector() = default;
-    constexpr Vector(long double x, long double y, long double z) noexcept : x{ x }, y{ y }, z{ z } {}
+#define Vector Vector_t<long double>
+template<typename TYPE>
+struct Vector_t {
+    Vector_t() = default;
+    constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {}
 
-    friend auto operator<<(std::ostream& os, Vector const& m) -> std::ostream& {
+    constexpr Vector_t(TYPE x, TYPE y, TYPE z, TYPE scale_factor) noexcept : x{ x }, y{ y }, z{ z } {
+        this->scale(scale_factor);
+    }
+
+    friend auto operator<<(std::ostream& os, Vector_t const& m) -> std::ostream& {
         return os << "(" << m.x << ", " << m.y << ", " << m.z << ")";
     }
 
-    friend constexpr auto operator>(Vector const& a, Vector const& b) noexcept
+    friend constexpr auto operator>(Vector_t const& a, Vector_t const& b) noexcept
     {
         return a.x > b.x && a.y > b.y && a.z > b.z;
     }
 
-    friend constexpr auto operator<(Vector const& a, Vector const& b) noexcept
+    friend constexpr auto operator<(Vector_t const& a, Vector_t const& b) noexcept
     {
         return a.x < b.x && a.y < b.y && a.z < b.z;
     }
 
-    friend constexpr auto operator==(const Vector& a, const Vector& b) noexcept
+    friend constexpr auto operator>=(Vector_t const& a, Vector_t const& b) noexcept
+    {
+        return a.x >= b.x && a.y >= b.y && a.z >= b.z;
+    }
+
+    friend constexpr auto operator<=(Vector_t const& a, Vector_t const& b) noexcept
+    {
+        return a.x <= b.x && a.y <= b.y && a.z <= b.z;
+    }
+
+    friend constexpr auto operator==(const Vector_t& a, const Vector_t& b) noexcept
     {
         return a.x == b.x && a.y == b.y && a.z == b.z;
     }
 
-    friend constexpr auto operator!=(const Vector& a, const Vector& b) noexcept
+    friend constexpr auto operator!=(const Vector_t& a, const Vector_t& b) noexcept
     {
         return !(a == b);
     }
 
-    constexpr Vector& operator=(const long double array[3]) noexcept
+    constexpr Vector_t& operator=(const TYPE array[3]) noexcept
     {
         x = array[0];
         y = array[1];
@@ -46,7 +62,7 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator+=(const Vector& v) noexcept
+    constexpr Vector_t& operator+=(const Vector_t& v) noexcept
     {
         x += v.x;
         y += v.y;
@@ -54,7 +70,7 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator+=(long double f) noexcept
+    constexpr Vector_t& operator+=(TYPE f) noexcept
     {
         x += f;
         y += f;
@@ -62,7 +78,7 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator-=(const Vector& v) noexcept
+    constexpr Vector_t& operator-=(const Vector_t& v) noexcept
     {
         x -= v.x;
         y -= v.y;
@@ -70,7 +86,7 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator-=(long double f) noexcept
+    constexpr Vector_t& operator-=(TYPE f) noexcept
     {
         x -= f;
         y -= f;
@@ -78,30 +94,22 @@ struct Vector {
         return *this;
     }
 
-    friend constexpr auto operator-(const Vector& a, const Vector& b) noexcept
+    friend constexpr auto operator-(const Vector_t& a, const Vector_t& b) noexcept
     {
-        return Vector{ a.x - b.x, a.y - b.y, a.z - b.z };
+        return Vector_t{ a.x - b.x, a.y - b.y, a.z - b.z };
     }
 
-    friend constexpr auto operator+(const Vector& a, const Vector& b) noexcept
+    friend constexpr auto operator+(const Vector_t& a, const Vector_t& b) noexcept
     {
-        return Vector{ a.x + b.x, a.y + b.y, a.z + b.z };
+        return Vector_t{ a.x + b.x, a.y + b.y, a.z + b.z };
     }
 
-    friend constexpr auto operator*(const Vector& a, const Vector& b) noexcept
+    friend constexpr auto operator*(const Vector_t& a, const Vector_t& b) noexcept
     {
-        return Vector{ a.x * b.x, a.y * b.y, a.z * b.z };
+        return Vector_t{ a.x * b.x, a.y * b.y, a.z * b.z };
     }
 
-    constexpr Vector& operator/=(long double div) noexcept
-    {
-        x /= div;
-        y /= div;
-        z /= div;
-        return *this;
-    }
-
-    constexpr Vector& operator/(int div) noexcept
+    constexpr Vector_t& operator/=(TYPE div) noexcept
     {
         x /= div;
         y /= div;
@@ -109,7 +117,7 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator/(long double div) noexcept
+    constexpr Vector_t& operator/(int div) noexcept
     {
         x /= div;
         y /= div;
@@ -117,7 +125,15 @@ struct Vector {
         return *this;
     }
 
-    constexpr Vector& operator/(Vector v) noexcept
+    constexpr Vector_t& operator/(TYPE div) noexcept
+    {
+        x /= div;
+        y /= div;
+        z /= div;
+        return *this;
+    }
+
+    constexpr Vector_t& operator/(Vector_t v) noexcept
     {
         x /= v.x;
         y /= v.y;
@@ -125,22 +141,22 @@ struct Vector {
         return *this;
     }
 
-    constexpr auto operator*(long double mul) const noexcept
+    constexpr auto operator*(TYPE mul) const noexcept
     {
-        return Vector{ x * mul, y * mul, z * mul };
+        return Vector_t{ x * mul, y * mul, z * mul };
     }
 
-    constexpr auto operator-(long double sub) const noexcept
+    constexpr auto operator-(TYPE sub) const noexcept
     {
-        return Vector{ x - sub, y - sub, z - sub };
+        return Vector_t{ x - sub, y - sub, z - sub };
     }
 
-    constexpr auto operator+(long double add) const noexcept
+    constexpr auto operator+(TYPE add) const noexcept
     {
-        return Vector{ x + add, y + add, z + add };
+        return Vector_t{ x + add, y + add, z + add };
     }
 
-    Vector& normalize() noexcept
+    Vector_t& normalize() noexcept
     {
         x = std::isfinite(x) ? std::remainder(x, 360.0f) : 0.0f;
         y = std::isfinite(y) ? std::remainder(y, 360.0f) : 0.0f;
@@ -148,9 +164,22 @@ struct Vector {
         return *this;
     }
 
+    auto abs() const noexcept
+    {
+        return Vector_t{ std::abs(x), std::abs(y), std::abs(z) };
+    }
+
     auto length() const noexcept
     {
         return std::sqrt(x * x + y * y + z * z);
+    }
+
+    // Only to be used on velocity
+    auto calc_energy(TYPE mass) const noexcept
+    {
+        mass *= 0.5;
+        TYPE length = this->length();
+        return (mass * (length * length));
     }
 
     constexpr auto squareLength() const noexcept
@@ -163,31 +192,29 @@ struct Vector {
         return x * y * z;
     }
 
-    constexpr auto dotProduct(const Vector& v) const noexcept
+    constexpr auto dotProduct(const Vector_t& v) const noexcept
     {
         return x * v.x + y * v.y + z * v.z;
     }
 
-//    constexpr auto transform(const matrix3x4& mat) const noexcept;
-
-    auto distTo(const Vector& v) const noexcept
+    auto distTo(const Vector_t& v) const noexcept
     {
         return (*this - v).length();
     }
 
-    long double x, y, z;
+    TYPE x, y, z;
 
-    // rotate vector by angle (x angle = a, y angle = b, z angle = c)
-    void rotate(long double a, long double b, long double c) {
-        long double cos_a = std::cos(a);
-        long double sin_a = std::sin(a);
-        long double cos_b = std::cos(b);
-        long double sin_b = std::sin(b);
-        long double cos_c = std::cos(c);
-        long double sin_c = std::sin(c);
+    // rotate Vector_t by angle (x angle = a, y angle = b, z angle = c)
+    void rotate(TYPE a, TYPE b, TYPE c) {
+        TYPE cos_a = std::cos(a);
+        TYPE sin_a = std::sin(a);
+        TYPE cos_b = std::cos(b);
+        TYPE sin_b = std::sin(b);
+        TYPE cos_c = std::cos(c);
+        TYPE sin_c = std::sin(c);
 
-        long double sina_sinb = sin_a * sin_b;
-        long double cosa_sinb = cos_a * sin_b;
+        TYPE sina_sinb = sin_a * sin_b;
+        TYPE cosa_sinb = cos_a * sin_b;
 
         this->x = (cos_b * cos_c) * this->x + (sina_sinb * cos_c - cos_a * sin_c) * this->y + (cosa_sinb * cos_c + sin_a * sin_c) * this->z;
         this->y = (cos_b * sin_c) * this->x + (sina_sinb * sin_c + cos_a * cos_c) * this->y + (cosa_sinb * sin_c - sin_a * cos_c) * this->z;
@@ -195,7 +222,7 @@ struct Vector {
     }
 
     void normalise() {
-        long double l = this->length();
+        TYPE l = this->length();
         if (l != 0.0f) {
             this->x /= l;
             this->y /= l;
@@ -210,4 +237,4 @@ struct Vector {
     }
 };
 
-#endif //C_VERSION_VECTOR3_H
+#endif //C_VERSION_Vector_t3_H
