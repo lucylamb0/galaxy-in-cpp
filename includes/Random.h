@@ -23,11 +23,20 @@ public:
 
 #define SHOULD_SEED this->seed();
 
+    Vector_t<std::normal_distribution<long double>> normal_distribution_vector(Vector mean, Vector stddev) {
+        return Vector_t<std::normal_distribution<long double>>(
+                normal_distro(mean.x, stddev.x),
+                normal_distro(mean.y, stddev.y),
+                normal_distro(mean.z, stddev.z)
+        );
+    }
+
     Vector_t<std::uniform_real_distribution<long double>> uniform_real_distro_vector (Vector min, Vector max) {
-        std::uniform_real_distribution<long double> dis_x(min.x, max.x);
-        std::uniform_real_distribution<long double> dis_y(min.y, max.y);
-        std::uniform_real_distribution<long double> dis_z(min.z, max.z);
-        return {dis_x, dis_y, dis_z};
+        return Vector_t<std::uniform_real_distribution<long double>>(
+                uniform_real_distro(min.x, max.x),
+                uniform_real_distro(min.y, max.y),
+                uniform_real_distro(min.z, max.z)
+        );
     }
 
     std::uniform_real_distribution<long double> uniform_real_distro(long double min, long double max) {

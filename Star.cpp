@@ -3,7 +3,7 @@
 #include "Star.h"
 #include "includes/logging.h"
 
-RegionArrayT Star::find_regions() {
+void Star::find_regions() {
     int max_bound = this->parent->regions.size();
 
     logging::debug("Finding regions for star " + std::to_string(this->id) + " - position: ", this->position);
@@ -69,7 +69,7 @@ RegionArrayT Star::find_regions() {
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
     if(mode_neighbours == 0) {
-        logging::verbose("[ find_regions - 3 ] - We are in no region???", "");
+        logging::verbose("[ find_regions - 3 ] - We are in no region???");
     }
     else if (mode_neighbours == 1) {
         if(index > this->parent->regions.size()){
@@ -154,7 +154,9 @@ RegionArrayT Star::find_regions() {
 
     }
 
-    return regions_we_are_in;
+    for(Region *region : regions_we_are_in) {
+        region->stars_in_region.emplace_back(this);
+    }
 }
 
 // code for updating the acceleration of the star
@@ -164,7 +166,7 @@ RegionArrayT Star::find_regions() {
 // TODO: Make stars update using regions COM
 double Star::acceleration_update_stars_in_region(bool clear_accel) {
     if (clear_accel) {
-        logging::debug("Clearing acceleration", "");
+        logging::debug("Clearing acceleration");
         acceleration = Vector(0, 0, 0);
     }
 

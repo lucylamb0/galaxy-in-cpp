@@ -14,10 +14,23 @@
 template<typename TYPE>
 struct Vector_t {
     Vector_t() = default;
-    constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {}
+    constexpr Vector_t(TYPE x, TYPE y) noexcept : x{ x }, y{ y } {}
 
-    constexpr Vector_t(TYPE x, TYPE y, TYPE z, TYPE scale_factor) noexcept : x{ x }, y{ y }, z{ z } {
-        this->scale(scale_factor);
+    constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {
+    }
+
+    constexpr Vector_t(TYPE x, TYPE y, TYPE z, float scale_factor) noexcept : x{ x }, y{ y }, z{ z } {
+        if(scale_factor != 0)
+            this->scale(scale_factor);
+    }
+
+    void getBounds(Vector_t<TYPE> &min, Vector_t<TYPE> &max) {
+        if(x > max.x) max.x = x;
+        else if (x < min.x) min.x = x;
+        if(y > max.y) max.y = y;
+        else if (y < min.y) min.y = y;
+        if(z > max.z) max.z = z;
+        else if (z < min.z) min.z = z;
     }
 
     friend auto operator<<(std::ostream& os, Vector_t const& m) -> std::ostream& {
@@ -174,12 +187,9 @@ struct Vector_t {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    // Only to be used on velocity
-    auto calc_energy(TYPE mass) const noexcept
-    {
-        mass *= 0.5;
-        TYPE length = this->length();
-        return (mass * (length * length));
+    auto magnitude_squared() const noexcept {
+        auto tmp = length();
+        return tmp * tmp;
     }
 
     constexpr auto squareLength() const noexcept

@@ -12,16 +12,13 @@
 #include "Region.h"
 #include "../includes.h"
 
-#define RegionArrayT std::vector<Region*>
 class  RegionMatrix {
 public:
     // TODO: Fine tune a decent overlap factor - higher == more overlaps for stars == longer runtimes == higher == greater accuracy?
     float overlap_factor;
 
-    RegionArrayT regions;
-    Vector step, overlap, divisions,
-
-        simulationSpaceStart, simulationSpaceEnd = {};
+    std::vector<Region*> regions;
+    Vector step, overlap, divisions, simulationSpaceStart, simulationSpaceEnd = {};
 
     RegionMatrix() = default;
 

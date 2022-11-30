@@ -6,8 +6,6 @@
 #include "Star.h"
 #include "includes.h"
 #include "includes/Region.h"
-#include "includes/json.h"
-#include "random"
 
 #include "data_exporter.h"
 #include "data_parser.h"
@@ -19,6 +17,7 @@
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
+data_exporter ExportHandler = data_exporter(&star_list, "Stars_gaussian.test.dump.txt");
 
 void compute_region_com(Region* region) {
     // TODO: Should consider the mass of the star when calculating the COM
@@ -60,8 +59,7 @@ void star_generator_uniform(
         Vector max_position, // maximum position of a star can have
         Vector velocity_at_origin, // average velocity of a star can have at the origin pc/year
         Vector variation_velocity, // variation of velocity of a star can have pc/year
-        long double variation_in_direction_x, // the variation in direction of the velocity in radians +-
-        long double variation_in_direction_y, // the variation in direction of the velocity in radians +-
+        Vector variation_in_direction, // the variation in direction of the velocity in radians +-
         int arms, // number of arms in the galaxy
         int number_of_stars_per_arm, // number of stars per arm
         std::vector<float> arm_positions, // the positions of the arms in radians
@@ -90,8 +88,8 @@ void star_generator_uniform(
     std::uniform_real_distribution<long double> dis_velocity_z(velocity_at_origin.z - variation_velocity.z,
                                                                velocity_at_origin.z + variation_velocity.z);
 
-    std::uniform_real_distribution<long double> dis_direction_x(-variation_in_direction_x, variation_in_direction_x);
-    std::uniform_real_distribution<long double> dis_direction_y(-variation_in_direction_y, variation_in_direction_y);
+    std::uniform_real_distribution<long double> dis_direction_x(-variation_in_direction.x, variation_in_direction.x);
+    std::uniform_real_distribution<long double> dis_direction_y(-variation_in_direction.y, variation_in_direction.y);
 
 // random bool
     long double galaxy_mass = 0;
@@ -252,29 +250,28 @@ void star_generator_gaussian(
     auto dis_direction = random.uniform_real_distro_vector(Vector(-variation_in_direction.x, -variation_in_direction.y, -variation_in_direction.z), variation_in_direction);
 
     // for gaussian distribution we need to first get gaussian random distances from the origin instead of gaussian xyz positions individually
-    std::normal_distribution<long double> dis_gaussian_x(gaussian_mean.x, gaussian_standard_deviation.x);
-    std::normal_distribution<long double> dis_gaussian_y(gaussian_mean.y, gaussian_standard_deviation.y);
-    std::normal_distribution<long double> dis_gaussian_z(gaussian_mean.z, gaussian_standard_deviation.z);
+    auto dis_gaussian = random.normal_distribution_vector(gaussian_mean, gaussian_standard_deviation);
+
     // random bool
     long double galaxy_mass = 0;
     std::uniform_int_distribution<int> dis_bool(0, 1);
     for (int i = 1; i < number_of_stars+1; i++) {
         long double velocity_z = dis_bool(random.gen) != 1 ? -dis_velocity.z(random.gen) : dis_velocity.z(random.gen);
 
-
         Vector gaussian_norm = {
-                dis_gaussian_x(random.gen),
-                dis_gaussian_y(random.gen),
-                dis_gaussian_z(random.gen)
+                dis_gaussian.x(random.gen),
+                dis_gaussian.y(random.gen),
+                dis_gaussian.z(random.gen)
         };
+
         while (gaussian_norm.x > 1)
-            gaussian_norm.x = dis_gaussian_x(random.gen);
+            gaussian_norm.x = dis_gaussian.x(random.gen);
 
         while (gaussian_norm.y > 1)
-            gaussian_norm.y = dis_gaussian_y(random.gen);
+            gaussian_norm.y = dis_gaussian.y(random.gen);
 
         while (gaussian_norm.z > 1)
-            gaussian_norm.z = dis_gaussian_z(random.gen);
+            gaussian_norm.z = dis_gaussian.z(random.gen);
 
 
         float mass = dis_mass(random.gen);
@@ -351,19 +348,19 @@ void star_generator_gaussian(
 
             for (int j = 1; j < number_of_stars_per_arm+1; j++) { // for each star in the arm
                 Vector gaussian_norm = {
-                        dis_gaussian_x(random.gen),
-                        dis_gaussian_y(random.gen),
-                        dis_gaussian_z(random.gen)
+                        dis_gaussian.x(random.gen),
+                        dis_gaussian.y(random.gen),
+                        dis_gaussian.z(random.gen)
                 };
 
                 while (gaussian_norm.x > 1)
-                    gaussian_norm.x = dis_gaussian_x(random.gen);
+                    gaussian_norm.x = dis_gaussian.x(random.gen);
 
                 while (gaussian_norm.y > 1)
-                    gaussian_norm.y = dis_gaussian_y(random.gen);
+                    gaussian_norm.y = dis_gaussian.y(random.gen);
 
                 while (gaussian_norm.z > 1)
-                    gaussian_norm.z = dis_gaussian_z(random.gen);
+                    gaussian_norm.z = dis_gaussian.z(random.gen);
 
                 Vector position_star_arm = gaussian_norm * max;
 
@@ -454,15 +451,13 @@ int main(int arg_count, char** args) {
     logging::info("Regions: ", regionMatrix.regions.size());
     logging::info("Outputting log to: ", "<UNDEFINED>");
 
-    int number_of_stars = 0;
-    int number_of_stars_per_arm = 1000;
+    int number_of_stars = 2500;
+    int number_of_stars_per_arm = 10;
     float mean_mass = 10;
     float std_mass = 0.1;
-    Vector min_position = Vector(-0.1, -0.1, -0.05);
-    Vector max_position = Vector(0.1, 0.1, 0.05);
-    Vector min_velocity = Vector(-0.1, -0.1, -0.1);
-    Vector max_velocity = Vector(0.1, 0.1, 0.1);
-    Vector velocity_at_center = Vector(0.00000002556727896654, 0.00000002556727896654, 0.0000000002);
+    Vector min_position = Vector(-10, -10, -0.5);
+    Vector max_position = Vector(10, 10, 0.5);
+    Vector velocityAtOrigin = Vector(0.00000002556727896654, 0.00000002556727896654, 0.0000000002);
     Vector variation_velocity = Vector(0.00000001056727896654, 0.00000001056727896654, 0.00000000002);
     long double variation_direction_x = 0.0174533;
     long double variation_direction_y = 0.0174533;
@@ -470,11 +465,11 @@ int main(int arg_count, char** args) {
 #define degrees_to_radians(degrees) ((float)(degrees * PI / 180.0))
 #define radians_to_degrees(radians) ((float)(radians * 180.0 / PI))
 
-    int number_of_arms = 1;
-    std::vector<float> angle_of_arms = { degrees_to_radians(0) };
+    int number_of_arms = 0;
+    std::vector<float> angle_of_arms = { };
     float arm_width = 1;
     float arm_length = 2;
-    float arm_height = 4;
+    float arm_height = 1;
     float arm_offset = 0.2;
 
     Vector gaussian_mean = Vector(0, 0, 0);
@@ -490,15 +485,15 @@ int main(int arg_count, char** args) {
 //            0
 //    ));
 
-    star_generator_gaussian(
+    star_generator_uniform(
             number_of_stars,
             mean_mass,
             std_mass,
             min_position,
             max_position,
-            velocity_at_center,
+            velocityAtOrigin,
             variation_velocity,
-            Vector(variation_direction_x, variation_direction_y, 0),
+            Vector(variation_direction_x, variation_direction_y),
             number_of_arms,
             number_of_stars_per_arm,
             angle_of_arms,
@@ -506,9 +501,9 @@ int main(int arg_count, char** args) {
             arm_height,
             arm_length,
             arm_offset,
-            &regionMatrix,
-            gaussian_mean,
-            gaussian_std
+            &regionMatrix
+//            gaussian_mean,
+//            gaussian_std
     );
 
     // dump the star list to a csv file
@@ -518,29 +513,12 @@ int main(int arg_count, char** args) {
 
     Vector min = Vector(-1, -1, -1);
     Vector max = Vector(1, 1, 1);
-    for (auto star: star_list) {
-//        if(star->position.x == 0) star->position.x = 0.000000001f;
-//        if(star->position.y == 0) star->position.y = 0.000000001f;
-//        if(star->position.z == 0) star->position.z = 0.000000001f;
 
-        if (star->position.x > max.x) {
-            max.x = star->position.x;
-        } else if (star->position.x < min.x) {
-            min.x = star->position.x;
-        }
-        if (star->position.y > max.y) {
-            max.y = star->position.y;
-        } else if (star->position.y < min.y) {
-            min.y = star->position.y;
-        }
-        if (star->position.z > max.z) {
-            max.z = star->position.z;
-        } else if (star->position.z < min.z) {
-            min.z = star->position.z;
-        }
-    }
-    min = min * 1.01;
-    max = max * 1.01;
+    for (auto star: star_list)
+        star->position.getBounds(min, max);
+
+    min.scale(1.01);
+    max.scale(1.01);
 
     regionMatrix = RegionMatrix(min, max, Vector(10, 10, 10));
 
@@ -548,9 +526,8 @@ int main(int arg_count, char** args) {
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
     for (auto star: star_list) {
-        for (Region *region: star->find_regions()) {
-            region->stars_in_region.emplace_back(star);
-        }
+        star->find_regions();
+
         if (star->id % 5000 == 0) {
             averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
                                      (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
@@ -563,10 +540,8 @@ int main(int arg_count, char** args) {
         }
     }
     // compute region coms
-    for (Region *region: regionMatrix.regions) {
+    for (Region *region: regionMatrix.regions)
         compute_region_com(region);
-    }
-
 
     logging::info("Finished assigning regions", "");
 // don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
@@ -575,8 +550,6 @@ int main(int arg_count, char** args) {
 
     int thread_count = std::thread::hardware_concurrency() - 1;
 
-//    thread_count /= 3;
-
     Simulator simulator = Simulator(thread_count,&star_list);
     simulator.output_info();
     auto work_queue = simulator.work_queue;
@@ -584,11 +557,15 @@ int main(int arg_count, char** args) {
     for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
-#define OUTPUT_EVERY_N_TASKS 1000
-
         // Generate a work queue for the threads to handle
         simulator.generateWorkQueue();
 
+        // begin threading
+        struct thread_data {
+        public:
+            int thread_id;
+            std::vector<Star *> *work_queue;
+        };
         auto threads = std::vector<std::thread>{};
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
@@ -598,13 +575,12 @@ int main(int arg_count, char** args) {
                 double averageTime = 0.f;
                 for (auto star: work_queue->at(i)) {
                     auto timeTaken = star->acceleration_update_region_com(true);
-
-                    timeTaken += star->acceleration_update_stars_in_region(false);
+                         timeTaken += star->acceleration_update_stars_in_region(false);
 
                     averageTime = (averageTime == -1 ? timeTaken : (averageTime + timeTaken) / 2);
 
                     ++tasksComplete;
-                    if (tasksComplete % (OUTPUT_EVERY_N_TASKS + (i * OUTPUT_EVERY_N_TASKS)) == 0) {
+                    if (tasksComplete % (1000 + (i * 1000)) == 0) {
                         auto progress = to_string(tasksComplete) + "/" + to_string(myTasks);
                         auto percent = to_string((int) ((float) tasksComplete / (float) myTasks * 100));
 
@@ -622,8 +598,15 @@ int main(int arg_count, char** args) {
             }));
         }
         A:
+        int thread_index = 0;
         for (auto &thread: threads) {
             thread.join();
+            logging::verbose("Thread " + to_string(thread_index) + " joined");
+
+            // Initiate live data dumps
+            ExportHandler.dump_segment(work_queue->at(thread_index));
+
+            ++thread_index;
         }
 
         // Clear the stars in the regions, so we can update the centre of masses and reassign the stars their regions
@@ -636,15 +619,14 @@ int main(int arg_count, char** args) {
             star->velocity_update(); // Update the stars velocity
             star->position_update(); // Update the stars position
 
-            for (Region *region: star->find_regions())
-                region->stars_in_region.emplace_back(star); // add star to region
+            star->find_regions();
         }
 
         for (auto region: regionMatrix.regions) {
             compute_region_com(region);
         }
 
-        if (simFrame % OUTPUT_EVERY_N_TASKS == 0) {
+        if (simFrame % 1000 == 0) {
             auto progress = to_string(simFrame) + "/" + to_string(simulationFrames);
             auto percent = to_string((int) ((float) simFrame / (float) simulationFrames * 100));
 
@@ -698,12 +680,12 @@ int main(int arg_count, char** args) {
 
         averageStarRegionCount = 0;
         for (auto star: star_list) {
-            for (Region *region: star->find_regions())
-                region->stars_in_region.emplace_back(star);
+            star->find_regions();
+
+            averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
+                                     (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
             if (star->id % 5000 == 0) {
-                averageStarRegionCount = averageStarRegionCount == 0 ? star->regions_we_are_in.size() :
-                                         (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
                 auto progress = to_string(star->id) + "/" + to_string(star_list.size());
                 auto percent = to_string((int) ((float) star->id / (float) star_list.size() * 100));
@@ -719,7 +701,6 @@ int main(int arg_count, char** args) {
         logging::verbose("Finished re assigning stars to regions", "", false, false);
     }
 
-    data_exporter ExportHandler = data_exporter(&star_list, "Stars_gaussian.test.dump.txt");
     ExportHandler.start_dumping();
 //    data_exporter ExportHandler2 = data_exporter(&star_list);
 ////    ExportHandler2.start_dumping("Stars_gaussian.test.dump.txt");

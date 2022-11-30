@@ -6,7 +6,7 @@
 
 #include "Simulator.h"
 
-std::vector<std::vector<Star *>> *Simulator::generateWorkQueue() {
+void Simulator::generateWorkQueue() {
     auto left_over = star_list->size() % thread_count;
     auto overflowList = new std::vector<Star*>();
 
@@ -39,13 +39,13 @@ std::vector<std::vector<Star *>> *Simulator::generateWorkQueue() {
 }
 
 void Simulator::output_info() {
-    logging::info("---------------------------", "");
+    logging::info("---------------------------");
     logging::info("Thread count: ", std::to_string(thread_count));
     logging::info("Star count: ", star_list->size());
     logging::info("Stars per thread: ", std::to_string(star_per_thread));
     if(left_over > 0) {
-        logging::info("--- Moving left over stars into thread 0 ---", "");
+        logging::info("--- Moving left over stars into thread 0 ---");
         logging::info("Left over stars: ", std::to_string(left_over));
     }
-    logging::info("---------------------------", "");
+    logging::info("---------------------------");
 }

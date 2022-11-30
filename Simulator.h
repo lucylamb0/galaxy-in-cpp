@@ -28,7 +28,7 @@ public:
 
     void output_info();
 
-    std::vector<std::vector<Star *>>* generateWorkQueue();
+    void generateWorkQueue();
 };
 
 

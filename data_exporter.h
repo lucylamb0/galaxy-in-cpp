@@ -15,6 +15,7 @@ class data_exporter {
 private:
     std::vector<Star*> *star_list;
     std::string file_path;
+    std::ofstream fileDump;
 
     void dump_csv();
 
@@ -24,10 +25,15 @@ public:
         this->file_path = file_path;
     }
 
+    void full_dump();
+    void setup_live_dump();
+
+    void csv_full_dump_Star(Star star);
+
     void start_dumping() {
-        logging::info("\n\nStarting to dump data", "");
+        logging::info("\n\nStarting to dump data");
         dump_csv();
-        logging::info("Finished dumping data", "");
+        logging::info("Finished dumping data");
     }
 };
 

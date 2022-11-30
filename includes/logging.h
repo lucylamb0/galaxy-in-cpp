@@ -51,9 +51,19 @@ public:
          log("[ VERBOSE ]", arg1, arg2, should_output, should_flush);
     }
 
+    template <typename T1>
+    static void verbose(T1 arg1, bool should_output = false, bool should_flush = false) {
+         log("[ VERBOSE ]", arg1, "", should_output, should_flush);
+    }
+
     template <typename T1, typename T2>
     static void debug(T1 arg1, T2 arg2, bool should_output = false, bool should_flush = false) {
         log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
+    }
+
+    template <typename T1>
+    static void debug(T1 arg1, bool should_output = false, bool should_flush = false) {
+        log("[ DEBUG ]", arg1, "", should_output, should_flush);
     }
 
     template <typename T1, typename T2>
@@ -61,10 +71,21 @@ public:
         log("[ INFO ]", arg1, arg2, should_output, should_flush);
     }
 
+    template <typename T1>
+    static void info(T1 arg1, bool should_output = true, bool should_flush = false) {
+        log("[ INFO ]", arg1, "", should_output, should_flush);
+    }
+
+    template <typename T1>
+    static void error(T1 arg1, bool should_output = true, bool should_flush = false) {
+        log("[ ERROR ]", arg1, "", should_output, should_flush);
+        std::cerr << "[ ERROR ]" << arg1 << std::endl;
+    }
+
     template <typename T1, typename T2>
     static void error(T1 arg1, T2 arg2, bool should_output = true, bool should_flush = false) {
         log("[ ERROR ]", arg1, arg2, should_output, should_flush);
-        std::cerr << "[ ERROR ]" << arg1 << arg2;
+        std::cerr << "[ ERROR ]" << arg1 << arg2 << std::endl;
     }
 };
 

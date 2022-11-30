@@ -25,8 +25,34 @@ void from_json(const json& j, Vector& v) {
 
 #define VEC(x) #x << "_x" << "," << #x << "_y" << "," << #x << "_z"
 
+
+#define writeVector(VAR) VAR.x << ',' << (VAR).y << ',' << (VAR).z << ','
+void data_exporter::csv_full_dump_Star(Star star) {
+    if(!fileDump.is_open()) {
+        logging::error("[ data_exporter::csv_full_dump_Star ] File is not open");
+        return;
+    }
+    for (int i = 0; i <= simulationFrames; ++i) {
+
+        Vector position = star.history_position.at(i);
+        Vector velocity = star.history_velocity.at(i);
+        Vector acceleration = star.history_acceleration.at(i);
+
+        fileDump
+                << star.id << ',' << (i + 1) << ','
+                << writeVector(position)
+                << writeVector(velocity)
+                << writeVector(acceleration)
+                << writeVector(Vector(
+                        velocity.size(),
+                        velocity.length(),
+                        star.kinetic_energy()
+                ))
+                << std::endl;
+    }
+}
+
 void data_exporter::dump_csv() {
-    std::ofstream fileDump; //(file_path.c_str());
     fileDump.open(file_path.c_str());
     fileDump.precision(32);
 
@@ -43,26 +69,7 @@ void data_exporter::dump_csv() {
 
     for (auto star: *star_list) {
         star->history_position.erase(star->history_position.begin());
-
-#define writeVector(VAR) VAR.x << ',' << (VAR).y << ',' << (VAR).z << ','
-        for (int i = 0; i <= simulationFrames; ++i) {
-
-            Vector position = star->history_position.at(i);
-            Vector velocity = star->history_velocity.at(i);
-            Vector acceleration = star->history_acceleration.at(i);
-
-            fileDump
-                    << star->id << ',' << (i + 1) << ','
-                    << writeVector(position)
-                    << writeVector(velocity)
-                    << writeVector(acceleration)
-                    << writeVector(Vector(
-                            velocity.size(),
-                            velocity.length(),
-                            velocity.calc_energy(star->mass)
-                    ))
-                    << std::endl;
-        }
+        this->csv_full_dump_Star(*star);
     }
     fileDump.close();
 }

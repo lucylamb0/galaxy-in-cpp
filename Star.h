@@ -49,7 +49,7 @@ public:
 
     RegionMatrix* parent = nullptr;
 
-    RegionArrayT find_regions();
+    void find_regions();
 
     double acceleration_update_stars_in_region(bool clear_accel);
 
@@ -61,6 +61,10 @@ public:
 
     bool is_static() {
         return this->flags & (int)STAR_FLAGS::STATIC;
+    }
+
+    long double kinetic_energy() {
+        return (0.5 * this->mass) * this->velocity.magnitude_squared();
     }
 };
 
