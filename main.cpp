@@ -607,7 +607,7 @@ int main(int arg_count, char** args) {
             logging::verbose("Thread " + to_string(thread_index) + " joined");
 
             // Initiate live data dumps
-            ExportHandler.dump_segment(work_queue->at(thread_index));
+//            ExportHandler.csv_full_dump_Star(work_queue->at(thread_index));
 
             ++thread_index;
         }
