@@ -187,6 +187,8 @@ struct Vector_t {
         return std::sqrt(x * x + y * y + z * z);
     }
 
+    // Sqrt of the sum of the squares of the components, squared
+    // (sqrt(x^2 + y^2 + z^2))^2
     auto magnitude_squared() const noexcept {
         auto tmp = length();
         return tmp * tmp;

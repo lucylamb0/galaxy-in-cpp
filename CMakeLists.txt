@@ -1,5 +1,7 @@
 ########### Flags ############################################################
+set(SHOULD_USE_EXTERNALS ON)
 set(SHOULD_USE_GTEST ON)
+set(SHOULD_USE_MATPLOTLIB_CPP ON)
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.16)
@@ -25,17 +27,31 @@ else()
 endif()
 ######################################
 
-if(SHOULD_USE_GTEST)
+if(SHOULD_USE_EXTERNALS)
     include(FetchContent)
-    FetchContent_Declare(
-            googletest
-            # Specify the commit you depend on and update it regularly.
-            URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
-    )
-    # For Windows: Prevent overriding the parent project's compiler/linker settings
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
+
+#    if(SHOULD_USE_MATPLOTLIB_CPP)
+#        FetchContent_Declare(
+#                matplotlib-cpp
+#                # Specify the commit you depend on and update it regularly.
+#                URL https://codeload.github.com/lava/matplotlib-cpp/zip/ef0383f1315d32e0156335e10b82e90b334f6d9f
+#        )
+#        FetchContent_MakeAvailable(matplotlib-cpp)
+#    endif()
+
+    if(SHOULD_USE_GTEST)
+        FetchContent_Declare(
+                googletest
+                # Specify the commit you depend on and update it regularly.
+                URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
+        )
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(googletest)
+    endif()
 endif()
+
+
 
 
 find_package(Threads REQUIRED)
@@ -51,24 +67,39 @@ add_executable(GalaxySimulation
         includes/json.h
         data_parser.cpp data_parser.h
         data_exporter.cpp data_exporter.h
-        Simulator.cpp Simulator.h star_generator.h includes/Random.h)
+        Simulator.cpp Simulator.h star_generator.h includes/Random.h
+        includes/external/matplotlibcpp.hpp
+)
 
-if(TARGET Threads::Threads)
-    target_link_libraries(GalaxySimulation PRIVATE Threads::Threads)
-endif()
 
-if(SHOULD_USE_GTEST)
-    enable_testing()
-    add_executable(Simulation_Tests
-            GTests/Vector3_Test.cc
-            GTests/Star_Test.cc
-            GTests/DataExporter_Test.cc
-    )
-    target_link_libraries(
-            Simulation_Tests
-            GTest::gtest_main
-    )
+if(SHOULD_USE_EXTERNALS)
+    if(SHOULD_USE_GTEST)
+        enable_testing()
+        add_executable(Simulation_Tests
+                GTests/Vector3_Test.cc
+                GTests/Star_Test.cc
+                GTests/DataExporter_Test.cc
+        )
+        target_link_libraries(
+                Simulation_Tests
+                GTest::gtest_main
+        )
 
-    include(GoogleTest)
-    gtest_discover_tests(Simulation_Tests)
+        include(GoogleTest)
+        gtest_discover_tests(Simulation_Tests)
+    endif()
+
+    if(SHOULD_USE_MATPLOTLIB_CPP)
+        find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
+
+        target_include_directories(GalaxySimulation PRIVATE ${Python3_INCLUDE_DIRS} includes includes/external/)
+
+        if(TARGET Threads::Threads)
+            target_link_libraries(GalaxySimulation Python3::Python Python3::NumPy Threads::Threads)
+        else()
+            target_link_libraries(GalaxySimulation Python3::Python Python3::NumPy)
+        endif()
+    endif()
+else()
+    target_link_libraries(GalaxySimulation Threads::Threads)
 endif()
