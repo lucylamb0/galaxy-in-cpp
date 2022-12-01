@@ -9,12 +9,18 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-        compiler: [g++]
+        compiler: [g++-11, clang++-13, clang++-14]
         configuration: [Debug, Release]
         exclude:
           - os: ubuntu-20.04
-            compiler: g++
+            compiler: clang++-13
+          - os: ubuntu-20.04
+            compiler: clang++-14
+          - os: ubuntu-22.04
+            compiler: g++-11
         include:
+          - os: ubuntu-20.04
+            continue-on-error: false
           - os: ubuntu-22.04
             continue-on-error: true
     steps:
@@ -22,11 +28,11 @@ jobs:
     - name: Install g++-11 for minimal required libstdc++
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update && sudo apt-get install -y g++
+        sudo apt-get update && sudo apt-get install -y g++-11
     - name: install
       run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libfreetype-dev ${{ matrix.compiler }}
     - name: configure
-      run: cmake -D CMAKE_BUILD_TYPE=${{ matrix.configuration }} -D CMAKE_CXX_COMPILER=${{ matrix.compiler }} -S . -B ${{ matrix.configuration }}
+      run: cmake -D CMAKE_BUILD_TYPE=${{ matrix.configuration }} -D CMAKE_CXX_COMPILER=${{ matrix.compiler }} -D BUILD_TESTS=1 -S . -B ${{ matrix.configuration }}
     - name: build
       run: cmake --build ${{ matrix.configuration }} -j $(nproc --all)
     - name: run unit tests
