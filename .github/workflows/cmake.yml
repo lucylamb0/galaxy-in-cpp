@@ -31,6 +31,8 @@ jobs:
         sudo apt-get update && sudo apt-get install -y g++-11
     - name: install
       run: sudo apt-get update && sudo apt-get install -y python3 python3-dev libsdl2-dev libfreetype-dev ${{ matrix.compiler }}
+    - name: pip3 modules
+      run: sudo pip3 install numpy
     - name: configure
       run: cmake -D CMAKE_BUILD_TYPE=${{ matrix.configuration }} -D CMAKE_CXX_COMPILER=${{ matrix.compiler }} -D BUILD_TESTS=1 -S . -B ${{ matrix.configuration }}
     - name: build
