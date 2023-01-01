@@ -14,8 +14,7 @@
 
 #include "includes/logging.h"
 
-#include <matplotlibcpp.hpp>
-namespace plt = matplotlibcpp;
+#include "Plotting.h"
 
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
@@ -445,16 +444,17 @@ int main(int arg_count, char** args) {
                 Vector(-100000, -100000, -100000), // Start position
                 Vector(100000, 100000, 100000), // End position
                 Vector(10, 10, 10),               // Amount of divisions on the z, y, z
-                0.0003f         // Overlap factor
+                1.f         // Overlap factor
         );
     }
 
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
     logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
     logging::info("Regions: ", regionMatrix.regions.size());
+    logging::info("Overlap factor of: ", regionMatrix.overlap_factor);
     logging::info("Outputting log to: ", "<UNDEFINED>");
 
-    int number_of_stars = 2500;
+    int number_of_stars = 10000;
     int number_of_stars_per_arm = 10;
     float mean_mass = 10;
     float std_mass = 0.1;
@@ -488,7 +488,7 @@ int main(int arg_count, char** args) {
 //            0
 //    ));
 
-    star_generator_uniform(
+    star_generator_gaussian(
             number_of_stars,
             mean_mass,
             std_mass,
@@ -504,9 +504,9 @@ int main(int arg_count, char** args) {
             arm_height,
             arm_length,
             arm_offset,
-            &regionMatrix
-//            gaussian_mean,
-//            gaussian_std
+            &regionMatrix,
+            gaussian_mean,
+            gaussian_std
     );
 
     // dump the star list to a csv file
@@ -528,7 +528,7 @@ int main(int arg_count, char** args) {
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)
     static unsigned long averageStarRegionCount = 0;
-    for (auto star: star_list) {
+    for (auto star : star_list) {
         star->find_regions();
 
         if (star->id % 5000 == 0) {
@@ -542,6 +542,7 @@ int main(int arg_count, char** args) {
             logging::verbose(message, "");
         }
     }
+
     // compute region coms
     for (Region *region: regionMatrix.regions)
         compute_region_com(region);
@@ -557,18 +558,13 @@ int main(int arg_count, char** args) {
     simulator.output_info();
     auto work_queue = simulator.work_queue;
 
-    for (int simFrame = 0; simFrame <= simulationFrames; ++simFrame) {
+    for (int simFrame = 1; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
         // Generate a work queue for the threads to handle
         simulator.generateWorkQueue();
 
         // begin threading
-        struct thread_data {
-        public:
-            int thread_id;
-            std::vector<Star *> *work_queue;
-        };
         auto threads = std::vector<std::thread>{};
 //goto A;
         for (int i = 0; i < thread_count; ++i) {
@@ -608,7 +604,6 @@ int main(int arg_count, char** args) {
 
             // Initiate live data dumps
 //            ExportHandler.csv_full_dump_Star(work_queue->at(thread_index));
-
             ++thread_index;
         }
 
@@ -617,6 +612,7 @@ int main(int arg_count, char** args) {
             region->stars_in_region.clear();
             region->centreMass.reset();
         }
+
         // updating star positions and velocities and adding them to the regions
         for (auto star: star_list) {
             star->velocity_update(); // Update the stars velocity
@@ -639,20 +635,15 @@ int main(int arg_count, char** args) {
 //            std::cout << (simFrame / simulationFrames) * 100 << "% Complete - Stars" << std::endl;
 //        }
 
-        auto starUpdateEndTime = std::chrono::high_resolution_clock::now();
-        auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
-                starUpdateStartTime - starUpdateEndTime).count();
+        auto starUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(starUpdateStartTime - std::chrono::high_resolution_clock::now()).count();
 
-        if (averageStarUpdateTime == -1)
-            averageStarUpdateTime = starUpdateDuration;
-
-        else
-            averageStarUpdateTime = (averageStarUpdateTime + starUpdateDuration) / 2;
+        averageStarUpdateTime = (averageStarUpdateTime == -1) ?
+                starUpdateDuration : (averageStarUpdateTime + starUpdateDuration) / 2;
 
 
         logging::verbose("Finished an acceleration cycle: ", simFrame + 1);
 
-        logging::verbose("Re assigning stars to regions", "", false, false);
+        logging::verbose("Re assigning stars to regions");
         min = Vector(-1, -1, -1);
         max = Vector(1, 1, 1);
         for (auto star: star_list) {
@@ -694,19 +685,25 @@ int main(int arg_count, char** args) {
                 auto percent = to_string((int) ((float) star->id / (float) star_list.size() * 100));
                 auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
                                to_string(averageStarRegionCount) + " regions";
-                logging::verbose(message, "");
+                logging::verbose(message);
             }
         }
         // compute region coms
         for (Region *region: regionMatrix.regions) {
             compute_region_com(region);
         }
-        logging::verbose("Finished re assigning stars to regions", "", false, false);
+        logging::verbose("Finished re assigning stars to regions");
     }
 
-    ExportHandler.start_dumping();
+    logging::info("Simulation Complete");
+    logging::info("Loading matplotlib");
+
+    Plotting c;
+    c.test(star_list);
+
+//    ExportHandler.start_dumping();
 //    data_exporter ExportHandler2 = data_exporter(&star_list);
-////    ExportHandler2.start_dumping("Stars_gaussian.test.dump.txt");
+//    ExportHandler2.start_dumping(L"Stars_gaussian.test.dump.txt");
     return 0;
 }
 

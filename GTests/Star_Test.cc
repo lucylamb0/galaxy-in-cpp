@@ -10,7 +10,7 @@
 #include <gtest/gtest.h>
 #include "../Star.h"
 
-TEST(Star_Test, Create_Star_Test) {
+TEST(Star, Create) {
     Star* star = new Star(
             1,
             Vector(1, 2, 3),
@@ -37,7 +37,7 @@ TEST(Star_Test, Create_Star_Test) {
     EXPECT_TRUE(star->regions_we_are_in.size() == 0);
 }
 
-TEST(Star_Test, Consistant_HistoryRecords) {
+TEST(Star, Consistant_HistoryRecords) {
     std::vector<Star*> *star_list = new std::vector<Star*>;
     Star* testing_star = new Star(
             0,

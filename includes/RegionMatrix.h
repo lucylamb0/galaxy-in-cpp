@@ -25,6 +25,9 @@ public:
     RegionMatrix(Vector min, Vector max, Vector divisions, float overlap_factor = 0.0003f) :
             simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor)
     {
+        // Ensure we dont enter a value out of range
+        assert(overlap_factor >= 0.f && overlap_factor <= 1.f);
+
         step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
         overlap = Vector(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
 

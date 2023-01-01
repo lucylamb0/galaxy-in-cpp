@@ -19,6 +19,16 @@ enum class STAR_FLAGS
     Flag8 = 1 << 7  //128
 };
 
+class history_record_t {
+public:
+    Vector position, velocity, acceleration = {};
+
+    history_record_t() = default;
+
+    history_record_t(Vector position, Vector velocity, Vector acceleration) :
+        position(position), velocity(velocity), acceleration(acceleration) {}
+
+};
 class Star {
 private:
     unsigned char flags = 0;
@@ -26,14 +36,14 @@ private:
 public:
     int first, second = -1;
 
-    char lastSign = '-';
-
     // position uses parsecs and velocity uses pc/year
     Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix, int flags = 0) :
             id(id), position(position), velocity(velocity), acceleration(acceleration), mass(mass), parent(parent_region_matrix) {
-        this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
-        this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
-        this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
+
+        this->history.emplace_back(
+                history_record_t(this->position, this->velocity, this->acceleration)
+        );
+        // Push final history record
 
         this->flags |= flags;
     }
@@ -41,6 +51,10 @@ public:
     int id;
     float mass;
     Vector position, velocity, acceleration;
+
+    history_record_t history_tmp = history_record_t();
+    std::vector<history_record_t> history = {};
+
     std::vector<Vector> history_position = {};
     std::vector<Vector> history_velocity = {};
     std::vector<Vector> history_acceleration = {};
@@ -63,8 +77,14 @@ public:
         return this->flags & (int)STAR_FLAGS::STATIC;
     }
 
-    long double kinetic_energy() {
-        return (0.5 * this->mass) * this->velocity.magnitude_squared();
+    long double kinetic_energy(int history_index = -1, bool reverse = false) {
+        // Return the live value of the star
+        if(history_index == -1)
+            return (0.5 * this->mass) * this->velocity.magnitude_squared();
+        else {
+            history_index = reverse ? this->history.size() - history_index : history_index;
+            return ((0.5 * this->mass) * this->history.at(history_index).velocity.magnitude_squared());
+        }
     }
 };
 

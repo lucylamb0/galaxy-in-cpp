@@ -10,7 +10,7 @@
 #include <gtest/gtest.h>
 #include "../data_exporter.h"
 
-TEST(DataExporter_Test, Generic_Test) {
+TEST(DataExporter, Generic) {
     auto star_list = new std::vector<Star*>;
     Star* testing_star = new Star(
             0,

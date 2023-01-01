@@ -68,6 +68,8 @@ void Star::find_regions() {
 //    std::list<int> neighbour_list = (neighbour_x, neighbour_y, neighbour_z);
 //    Vector neighbour_vector = Vector(neighbour_x,neighbour_y,neighbour_z);
 
+    logging::verbose("We are in " + std::to_string(mode_neighbours) + " regions. Index of box we are in is: ", index);
+
     if(mode_neighbours == 0) {
         logging::verbose("[ find_regions - 3 ] - We are in no region???");
     }
@@ -80,7 +82,6 @@ void Star::find_regions() {
         }
     }
     else if (mode_neighbours == 2) {
-//            if(this->parent->debug) std::cout << "We are in 2 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
         tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
@@ -92,7 +93,6 @@ void Star::find_regions() {
         if(tmp >= 0 && tmp <= max_bound) regions_we_are_in.emplace_back(this->parent->regions[tmp]);
     }
     else if (mode_neighbours == 4) {
-//            if(this->parent->debug) std::cout << "We are in 4 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
         tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z);
@@ -120,7 +120,6 @@ void Star::find_regions() {
         }
     }
     else if (mode_neighbours == 8) {
-//            if(this->parent->debug) std::cout << "We are in 8 regions. Index of box we are in is: " << index << std::endl;
         tmp = index;
 
         tmp += (neighbour_x * this->parent->divisions.y * this->parent->divisions.z) + (neighbour_y * this->parent->divisions.z) + neighbour_z;
@@ -184,7 +183,6 @@ double Star::acceleration_update_stars_in_region(bool clear_accel) {
         }
     }
     return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
-
 }
 
 double Star::acceleration_update_region_com(bool clear_accel) {
@@ -195,9 +193,10 @@ double Star::acceleration_update_region_com(bool clear_accel) {
     for (auto region : this->parent->regions){
         if (region->stars_in_region.size() == 0)
             continue;
-        if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end()) { // Conni you might want to make this your way
+
+        // Conni you might want to make this your way
+        if (std::find(regions_we_are_in.begin(), regions_we_are_in.end(), region) != regions_we_are_in.end())
             continue;
-        }
 
         long double r = this->position.distTo(region->centreMass.position); // r needs to me in km
         long double r_in_km = r * parsec_to_km;
@@ -211,9 +210,11 @@ double Star::acceleration_update_region_com(bool clear_accel) {
 }
 
 void Star::velocity_update() {
-    if(this->is_static()) {
+    if(this->is_static())
         this->velocity += this->acceleration * time_step;
-    }
+
+    this->history_tmp.velocity = this->velocity;
+    this->history_tmp.acceleration = this->acceleration;
 
     this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
     this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);

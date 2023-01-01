@@ -32,7 +32,7 @@ void data_exporter::csv_full_dump_Star(Star star) {
         logging::error("[ data_exporter::csv_full_dump_Star ] File is not open");
         return;
     }
-    for (int i = 0; i <= simulationFrames; ++i) {
+    for (int i = 0; i < simulationFrames; ++i) {
 
         Vector position = star.history_position.at(i);
         Vector velocity = star.history_velocity.at(i);

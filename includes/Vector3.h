@@ -37,23 +37,19 @@ struct Vector_t {
         return os << "(" << m.x << ", " << m.y << ", " << m.z << ")";
     }
 
-    friend constexpr auto operator>(Vector_t const& a, Vector_t const& b) noexcept
-    {
+    friend constexpr auto operator>(Vector_t const& a, Vector_t const& b) noexcept -> bool {
         return a.x > b.x && a.y > b.y && a.z > b.z;
     }
 
-    friend constexpr auto operator<(Vector_t const& a, Vector_t const& b) noexcept
-    {
+    friend constexpr auto operator<(Vector_t const& a, Vector_t const& b) noexcept -> bool {
         return a.x < b.x && a.y < b.y && a.z < b.z;
     }
 
-    friend constexpr auto operator>=(Vector_t const& a, Vector_t const& b) noexcept
-    {
+    friend constexpr auto operator>=(Vector_t const& a, Vector_t const& b) noexcept -> bool {
         return a.x >= b.x && a.y >= b.y && a.z >= b.z;
     }
 
-    friend constexpr auto operator<=(Vector_t const& a, Vector_t const& b) noexcept
-    {
+    friend constexpr auto operator<=(Vector_t const& a, Vector_t const& b) noexcept -> bool {
         return a.x <= b.x && a.y <= b.y && a.z <= b.z;
     }
 

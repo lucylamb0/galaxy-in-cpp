@@ -32,7 +32,7 @@ const long double gravitationalConstantFinal = gravitationalConstantParsec * pow
 // Time frame the simulation will simulate
 const long double timeScale = 10; // In Years
 // Amount of simulation frames to have
-const int simulationFrames = 1;
+const int simulationFrames = 2     - 1;
 
 
 
