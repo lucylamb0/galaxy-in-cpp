@@ -6,6 +6,7 @@
 #include "includes.h"
 #include "includes/Region.h"
 #include "includes/RegionMatrix.h"
+#include "includes/logging.h"
 
 enum class STAR_FLAGS
 {
@@ -21,11 +22,11 @@ enum class STAR_FLAGS
 
 class history_record_t {
 public:
-    Vector position, velocity, acceleration = {};
+    Vectorr position, velocity, acceleration = {};
 
     history_record_t() = default;
 
-    history_record_t(Vector position, Vector velocity, Vector acceleration) :
+    history_record_t(Vectorr position, Vectorr velocity, Vectorr acceleration) :
         position(position), velocity(velocity), acceleration(acceleration) {}
 
 };
@@ -37,7 +38,7 @@ public:
     int first, second = -1;
 
     // position uses parsecs and velocity uses pc/year
-    Star(int id, Vector position, Vector velocity, Vector acceleration, float mass, RegionMatrix* parent_region_matrix, int flags = 0) :
+    Star(int id, Vectorr position, Vectorr velocity, Vectorr acceleration, float mass, RegionMatrix* parent_region_matrix, int flags = 0) :
             id(id), position(position), velocity(velocity), acceleration(acceleration), mass(mass), parent(parent_region_matrix) {
 
         this->history.emplace_back(
@@ -50,14 +51,14 @@ public:
 
     int id;
     float mass;
-    Vector position, velocity, acceleration;
+    Vectorr position, velocity, acceleration;
 
     history_record_t history_tmp = history_record_t();
     std::vector<history_record_t> history = {};
 
-    std::vector<Vector> history_position = {};
-    std::vector<Vector> history_velocity = {};
-    std::vector<Vector> history_acceleration = {};
+//    std::vector<Vectorr> history_position = {};
+//    std::vector<Vectorr> history_velocity = {};
+//    std::vector<Vectorr> history_acceleration = {};
 
     std::vector<Region*> regions_we_are_in = {};
 
@@ -78,12 +79,25 @@ public:
     }
 
     long double kinetic_energy(int history_index = -1, bool reverse = false) {
+        history_index = history_index - 1;
+
         // Return the live value of the star
         if(history_index == -1)
             return (0.5 * this->mass) * this->velocity.magnitude_squared();
         else {
             history_index = reverse ? this->history.size() - history_index : history_index;
-            return ((0.5 * this->mass) * this->history.at(history_index).velocity.magnitude_squared());
+
+            auto tmp_mass = 0.5 * this->mass;
+            auto tmp_velocity = this->history[history_index].velocity; // in ps/year
+
+//            logging::info("Velocity ps/year - ", tmp_velocity);
+            tmp_velocity = tmp_velocity * parsecsPerYear_to_metersPerSecond; // convert to m/s
+//            logging::info("Velocity m/s - ", tmp_velocity);
+
+            auto energy = tmp_mass * tmp_velocity.magnitude_squared(); // in J
+//            logging::info("Energy J - ", energy);
+
+            return energy;
         }
     }
 };

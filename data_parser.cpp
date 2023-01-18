@@ -35,19 +35,19 @@ void data_parser::handle_csv(csv_data_template data) {
 
         int StarID = std::stoi(split_str.at(data.star_id));
 
-        Vector position = !data.position_override ? Vector(
+        Vectorr position = !data.position_override ? Vectorr(
                 std::stof(split_str.at(data.position.x)),
                 std::stof(split_str.at(data.position.y)),
                 std::stof(split_str.at(data.position.z))
         ) : data.position;
 
-        Vector velocity = !data.velocity_override ? Vector(
+        Vectorr velocity = !data.velocity_override ? Vectorr(
                 std::stof(split_str.at(data.velocity.x)),
                 std::stof(split_str.at(data.velocity.y)),
                 std::stof(split_str.at(data.velocity.z))
         ) : data.velocity;
 
-        Vector acceleration = !data.acceleration_override ? Vector(
+        Vectorr acceleration = !data.acceleration_override ? Vectorr(
                 std::stof(split_str.at(data.acceleration.x)),
                 std::stof(split_str.at(data.acceleration.y)),
                 std::stof(split_str.at(data.acceleration.z))

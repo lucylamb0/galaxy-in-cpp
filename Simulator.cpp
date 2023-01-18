@@ -38,6 +38,14 @@ void Simulator::generateWorkQueue() {
     }
 }
 
+void multithreadedWorkHandler() {
+
+}
+
+void singlethreadedWorkHandler() {
+
+}
+
 void Simulator::output_info() {
     logging::info("---------------------------");
     logging::info("Thread count: ", std::to_string(thread_count));

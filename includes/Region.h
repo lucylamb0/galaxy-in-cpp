@@ -13,18 +13,18 @@ class CentreMass {
 public:
     bool initiated = false;
 
-    Vector position = Vector(0,0,0);
+    Vectorr position = Vectorr(0, 0, 0);
     long double mass = 0;
 
     CentreMass() {
         this->initiated = false;
-        this->position = Vector(0,0,0);
+        this->position = Vectorr(0, 0, 0);
         this->mass = 0;
     }
 
     void reset() {
         this->initiated = false;
-        this->position = Vector(0,0,0);
+        this->position = Vectorr(0, 0, 0);
         this->mass = 0;
     }
 };
@@ -34,11 +34,11 @@ class Region {
 private:
 public:
 
-    Vector min, max;
+    Vectorr min, max;
     CentreMass centreMass;
 
     std::vector<Star*> stars_in_region = {};
-    Region(Vector min, Vector max) : min(min), max(max) {}
+    Region(Vectorr min, Vectorr max) : min(min), max(max) {}
 };
 
 #endif //C_VERSION_REGION_H
