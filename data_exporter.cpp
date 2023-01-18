@@ -6,18 +6,31 @@
 #include "data_exporter.h"
 
 
-void to_json(json& j, const Vector& v) {
+void to_json(json& j, const Vectorr& v) {
     j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
+}
+//void to_json(json& j, const Star* star) {
+//    j = json{
+//            { "id", star->id },
+//            { "history_position", star->history_position },
+//            { "history_velocity", star->history_velocity },
+//            { "history_acceleration", star->history_acceleration }
+//    };
+//}
+void to_json(json& j, const history_record_t history) {
+    j = json{
+            { "position", history.position },
+            { "velocity", history.velocity },
+            { "acceleration", history.acceleration }
+    };
 }
 void to_json(json& j, const Star* star) {
     j = json{
             { "id", star->id },
-            { "history_position", star->history_position },
-            { "history_velocity", star->history_velocity },
-            { "history_acceleration", star->history_acceleration }
+            { "history", star->history }
     };
 }
-void from_json(const json& j, Vector& v) {
+void from_json(const json& j, Vectorr& v) {
     j.at("x").get_to(v.x);
     j.at("y").get_to(v.y);
     j.at("z").get_to(v.z);
@@ -34,16 +47,20 @@ void data_exporter::csv_full_dump_Star(Star star) {
     }
     for (int i = 0; i < simulationFrames; ++i) {
 
-        Vector position = star.history_position.at(i);
-        Vector velocity = star.history_velocity.at(i);
-        Vector acceleration = star.history_acceleration.at(i);
+//        Vectorr position = star.history_position.at(i);
+//        Vectorr velocity = star.history_velocity.at(i);
+//        Vectorr acceleration = star.history_acceleration.at(i);
+        history_record_t history = star.history.at(i);
+        auto position = history.position;
+        auto velocity = history.velocity;
+        auto acceleration = history.acceleration;
 
         fileDump
                 << star.id << ',' << (i + 1) << ','
                 << writeVector(position)
                 << writeVector(velocity)
                 << writeVector(acceleration)
-                << writeVector(Vector(
+                << writeVector(Vectorr(
                         velocity.size(),
                         velocity.length(),
                         star.kinetic_energy()
@@ -68,7 +85,7 @@ void data_exporter::dump_csv() {
                 << std::endl;
 
     for (auto star: *star_list) {
-        star->history_position.erase(star->history_position.begin());
+//        star->history_position.erase(star->history_position.begin());
         this->csv_full_dump_Star(*star);
     }
     fileDump.close();

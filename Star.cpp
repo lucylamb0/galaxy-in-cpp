@@ -166,7 +166,7 @@ void Star::find_regions() {
 double Star::acceleration_update_stars_in_region(bool clear_accel) {
     if (clear_accel) {
         logging::debug("Clearing acceleration");
-        acceleration = Vector(0, 0, 0);
+        acceleration = Vectorr(0, 0, 0);
     }
 
     auto accelerationStartTime = std::chrono::high_resolution_clock::now();
@@ -187,7 +187,7 @@ double Star::acceleration_update_stars_in_region(bool clear_accel) {
 
 double Star::acceleration_update_region_com(bool clear_accel) {
     if (clear_accel)
-        acceleration = Vector(0, 0, 0);
+        acceleration = Vectorr(0, 0, 0);
 
     auto accelerationStartTime = std::chrono::high_resolution_clock::now();
     for (auto region : this->parent->regions){
@@ -216,8 +216,8 @@ void Star::velocity_update() {
     this->history_tmp.velocity = this->velocity;
     this->history_tmp.acceleration = this->acceleration;
 
-    this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
-    this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
+//    this8->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
+//    this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
 }
 
 void Star::position_update() {
@@ -226,6 +226,11 @@ void Star::position_update() {
         this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
         this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
     }
-    this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
+    this->history_tmp.position = this->position;
+    this->history.emplace_back(this->history_tmp);
+
+    this->history_tmp = history_record_t();
+
+//    this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
     this->regions_we_are_in.clear();
 }

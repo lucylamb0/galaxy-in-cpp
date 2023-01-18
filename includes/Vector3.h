@@ -10,7 +10,7 @@
 #include <valarray>
 #include <sstream>
 
-#define Vector Vector_t<long double>
+#define Vectorr Vector_t<long double>
 template<typename TYPE>
 struct Vector_t {
     Vector_t() = default;

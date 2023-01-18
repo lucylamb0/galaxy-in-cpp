@@ -68,9 +68,11 @@ add_executable(GalaxySimulation
         data_parser.cpp data_parser.h
         data_exporter.cpp data_exporter.h
         Simulator.cpp Simulator.h star_generator.h includes/Random.h
-        includes/external/matplotlibcpp.hpp
-)
+        Plotting.h)
 
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes/external)
 
 if(SHOULD_USE_EXTERNALS)
     if(SHOULD_USE_GTEST)
@@ -90,16 +92,16 @@ if(SHOULD_USE_EXTERNALS)
     endif()
 
     if(SHOULD_USE_MATPLOTLIB_CPP)
-        find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
+#        find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
 
-        target_include_directories(GalaxySimulation PRIVATE ${Python3_INCLUDE_DIRS} includes includes/external/)
+#        target_include_directories(GalaxySimulation PRIVATE ${Python3_INCLUDE_DIRS} includes includes/external/)
 
         if(TARGET Threads::Threads)
-            target_link_libraries(GalaxySimulation Python3::Python Python3::NumPy Threads::Threads)
+            target_link_libraries(GalaxySimulation PUBLIC Threads::Threads)
         else()
-            target_link_libraries(GalaxySimulation Python3::Python Python3::NumPy)
+            target_link_libraries(GalaxySimulation PUBLIC)
         endif()
     endif()
 else()
-    target_link_libraries(GalaxySimulation Threads::Threads)
+    target_link_libraries(GalaxySimulation PUBLIC Threads::Threads)
 endif()

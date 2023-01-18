@@ -25,13 +25,13 @@ struct csv_data_template : data_template {
     RegionMatrix* regionMatrix_Parent;
 
     bool position_override = false;
-    Vector position;
+    Vectorr position;
 
     bool velocity_override = false;
-    Vector velocity;
+    Vectorr velocity;
 
     bool acceleration_override = false;
-    Vector acceleration;
+    Vectorr acceleration;
 };
 
 class data_parser {

@@ -23,16 +23,18 @@ const long double gravitationalConstant = 6.67408 * pow(10, -11);
 const long double gravitationalConstantParsec = 4.30091 * pow(10, -3);
 //const long double parsec = 3.08567758 * pow(10, 16);
 const long double parsec_to_km = 3.08567758 * pow(10, 13);
-//const long double parsec_per_year = 9.785 * pow(10, 8);
+const long double parsec_per_year = 9.785 * pow(10, 8);
 const long double yearInSeconds = 31536000;
 const long double gravitationalConstantFinal = gravitationalConstantParsec * pow(yearInSeconds, 2); // this very important constant is used in the calculations. It has units of parsec solarmasses^-1 (km/year)^2
+const long double solarMass = 1.98847 * pow(10, 30);
+const long double parsecsPerYear_to_metersPerSecond = parsec_to_km * 1000 / yearInSeconds;
 
 
 
 // Time frame the simulation will simulate
 const long double timeScale = 10; // In Years
 // Amount of simulation frames to have
-const int simulationFrames = 2     - 1;
+const int simulationFrames = 10; // 1 week per cycle
 
 
 

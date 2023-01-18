@@ -21,9 +21,9 @@ public:
         this->gen = std::mt19937(rd()); // seed the generator
     }
 
-#define SHOULD_SEED this->seed();
+#define SHOULD_SEED // this->seed();
 
-    Vector_t<std::normal_distribution<long double>> normal_distribution_vector(Vector mean, Vector stddev) {
+    Vector_t<std::normal_distribution<long double>> normal_distribution_vector(Vectorr mean, Vectorr stddev) {
         return Vector_t<std::normal_distribution<long double>>(
                 normal_distro(mean.x, stddev.x),
                 normal_distro(mean.y, stddev.y),
@@ -31,7 +31,7 @@ public:
         );
     }
 
-    Vector_t<std::uniform_real_distribution<long double>> uniform_real_distro_vector (Vector min, Vector max) {
+    Vector_t<std::uniform_real_distribution<long double>> uniform_real_distro_vector (Vectorr min, Vectorr max) {
         return Vector_t<std::uniform_real_distribution<long double>>(
                 uniform_real_distro(min.x, max.x),
                 uniform_real_distro(min.y, max.y),
