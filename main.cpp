@@ -21,28 +21,6 @@
 std::vector<Star*> star_list = {};
 data_exporter ExportHandler = data_exporter(&star_list, "Stars_gaussian.test.dump.txt");
 
-void compute_region_com(Region* region) {
-    // TODO: Should consider the mass of the star when calculating the COM
-    for (Star* star : region->stars_in_region) {
-        // Setup a shorthand com for usage in this local module
-        auto *centreMass = &region->centreMass;
-        if(!centreMass->initiated) {
-
-            // Set the centre of mass for the region considering the single star inside
-            centreMass->position = star->position;
-            centreMass->mass = star->mass;
-            centreMass->initiated = true;
-        } else {
-            // Calculate new centre of mass including the new star.
-            Vectorr d = centreMass->position - star->position;
-            float mass_bias = star->mass - centreMass->mass;
-
-            centreMass->position -= d * mass_bias;
-            centreMass->mass += star->mass;
-
-        }
-    }
-}
 // TODO: Maybe make smaller functions for this
 // this function generates stars and puts them into the star list and class
 // all velocities will in general go clockwise around the origin
@@ -742,20 +720,17 @@ int main(int arg_count, char** args) {
     }
 
     // compute region coms
-    for (Region *region: regionMatrix.regions)
-        compute_region_com(region);
+    regionMatrix.computeRegionComs();
 
-    logging::info("Finished assigning regions", "");
-// don't know what the hell averageStarUpdateTime is, I think it is for keeping track of how long it takes
-//    static long long averageAccelerationUpdateTime = -1;
+    logging::info("Finished assigning regions");
     static long long averageStarUpdateTime = -1;
 
     int thread_count = std::thread::hardware_concurrency() - 1;
 
-    Simulator simulator = Simulator(thread_count,&star_list);
+    Simulator simulator = Simulator(thread_count, &star_list);
     simulator.output_info();
-    auto work_queue = simulator.work_queue;
 
+    auto work_queue = simulator.work_queue;
     for (int simFrame = 1; simFrame <= simulationFrames; ++simFrame) {
         auto starUpdateStartTime = std::chrono::high_resolution_clock::now();
 
@@ -764,7 +739,6 @@ int main(int arg_count, char** args) {
 
         // begin threading
         auto threads = std::vector<std::thread>{};
-
         for (int i = 0; i < thread_count; ++i) {
             threads.emplace_back(std::thread([&work_queue, i]() {
                 int tasksComplete = 0;
@@ -787,7 +761,7 @@ int main(int arg_count, char** args) {
                                 "] [" + to_string(averageTime) + "ms]", "", true, true);
 
                         if (averageTime > 1) {
-                            logging::info("\nAverage time is higher than a second", "", true, false);
+                            logging::info("Average time is higher than a second", "", true, false);
                         }
 //                        std::cout << '\r' << "Acceleration Update Status - [Thread " + to_string(i) + "] " + percent + "% [" + progress + "], Average Time Taken: " +
                         //                                           to_string(averageTime) + "ms" << std::flush;
@@ -796,24 +770,21 @@ int main(int arg_count, char** args) {
             }));
         }
 
-        {
-            int thread_index = 0;
-            for (auto &thread: threads) {
-                thread.join();
 
-                logging::verbose("Thread " + to_string(thread_index) + " joined");
+        int thread_index = 0;
+        for (auto &thread: threads) {
+            thread.join();
 
-                // Initiate live data dumps
-//            ExportHandler.csv_full_dump_Star(work_queue->at(thread_index));
-                ++thread_index;
-            }
+            logging::verbose("Thread " + to_string(thread_index) + " joined");
+
+            // Initiate live data dumps
+            // ExportHandler.csv_full_dump_Star(work_queue->at(thread_index));
+            ++thread_index;
         }
+
 
         // Clear the stars in the regions, so we can update the centre of masses and reassign the stars their regions
-        for (auto region: regionMatrix.regions) {
-            region->stars_in_region.clear();
-            region->centreMass.reset();
-        }
+        regionMatrix.reset();
 
         // updating star positions and velocities and adding them to the regions
         for (auto star: star_list) {
@@ -823,9 +794,8 @@ int main(int arg_count, char** args) {
             star->find_regions();
         }
 
-        for (auto region: regionMatrix.regions) {
-            compute_region_com(region);
-        }
+        // compute region coms
+        regionMatrix.computeRegionComs();
 
 //        if (simFrame % 1 == 0) {
             auto progress = to_string(simFrame) + "/" + to_string(simulationFrames);
@@ -888,9 +858,8 @@ int main(int arg_count, char** args) {
             }
         }
         // compute region coms
-        for (Region *region: regionMatrix.regions) {
-            compute_region_com(region);
-        }
+        regionMatrix.computeRegionComs();
+
         logging::verbose("Finished re assigning stars to regions");
     }
 

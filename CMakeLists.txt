@@ -30,15 +30,6 @@ endif()
 if(SHOULD_USE_EXTERNALS)
     include(FetchContent)
 
-#    if(SHOULD_USE_MATPLOTLIB_CPP)
-#        FetchContent_Declare(
-#                matplotlib-cpp
-#                # Specify the commit you depend on and update it regularly.
-#                URL https://codeload.github.com/lava/matplotlib-cpp/zip/ef0383f1315d32e0156335e10b82e90b334f6d9f
-#        )
-#        FetchContent_MakeAvailable(matplotlib-cpp)
-#    endif()
-
     if(SHOULD_USE_GTEST)
         FetchContent_Declare(
                 googletest
@@ -49,9 +40,11 @@ if(SHOULD_USE_EXTERNALS)
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(googletest)
     endif()
+
+    find_package(Matplot++ REQUIRED)
+
+
 endif()
-
-
 
 
 find_package(Threads REQUIRED)
@@ -68,7 +61,7 @@ add_executable(GalaxySimulation
         data_parser.cpp data_parser.h
         data_exporter.cpp data_exporter.h
         Simulator.cpp Simulator.h star_generator.h includes/Random.h
-        Plotting.h)
+        Plotting.h source/RegionMatrix.cpp)
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes)

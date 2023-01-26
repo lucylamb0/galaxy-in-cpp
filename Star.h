@@ -4,9 +4,12 @@
 #define C_VERSION_STAR_H
 
 #include "includes.h"
-#include "includes/Region.h"
+//#include "includes/Region.h"
 #include "includes/RegionMatrix.h"
 #include "includes/logging.h"
+#include "includes/Vector3.h"
+
+class Region;
 
 enum class STAR_FLAGS
 {

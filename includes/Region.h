@@ -29,7 +29,6 @@ public:
     }
 };
 
-class Star;
 class Region {
 private:
 public:
@@ -39,6 +38,31 @@ public:
 
     std::vector<Star*> stars_in_region = {};
     Region(Vectorr min, Vectorr max) : min(min), max(max) {}
+
+    void reset() {
+        this->stars_in_region.clear();
+        this->centreMass.reset();
+    }
+
+    void computeRegionCom() {
+        for (Star* star : this->stars_in_region) {
+            // Set up a shorthand com for usage in this local module
+            auto* centreMass = &this->centreMass;
+            if(!centreMass->initiated) {
+                // Set the centre of mass for the region considering the single star inside
+                centreMass->position = star->position;
+                centreMass->mass = star->mass;
+                centreMass->initiated = true;
+
+            } else {
+                auto mass_bias = star->mass - centreMass->mass;
+
+                // Calculate new centre of mass including the new star.
+                centreMass->mass += star->mass;
+                centreMass->position -= (star->position - centreMass->position) * mass_bias;
+            }
+        }
+    }
 };
 
 #endif //C_VERSION_REGION_H

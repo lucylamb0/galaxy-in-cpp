@@ -1,6 +1,7 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
 #include "Star.h"
+#include "Region.h"
 #include "includes/logging.h"
 
 void Star::find_regions() {
