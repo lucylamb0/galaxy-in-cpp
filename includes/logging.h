@@ -40,7 +40,7 @@ class logging {
             if(!should_flush)
                 cout << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << endl;
             else
-                std::cout << '\r' << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << std::flush;
+                std::cout << '\r' << "[ " << currentDateTime() << " ] - " << prx << " - " << arg1 << arg2 << std::flush << endl;
         }
 
     }
@@ -48,22 +48,22 @@ class logging {
 public:
     template <typename T1, typename T2>
     static void verbose(T1 arg1, T2 arg2, bool should_output = false, bool should_flush = false) {
-         log("[ VERBOSE ]", arg1, arg2, should_output, should_flush);
+//         log("[ VERBOSE ]", arg1, arg2, should_output, should_flush);
     }
 
     template <typename T1>
     static void verbose(T1 arg1, bool should_output = false, bool should_flush = false) {
-         log("[ VERBOSE ]", arg1, "", should_output, should_flush);
+//         log("[ VERBOSE ]", arg1, "", should_output, should_flush);
     }
 
     template <typename T1, typename T2>
     static void debug(T1 arg1, T2 arg2, bool should_output = false, bool should_flush = false) {
-        log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
+//        log("[ DEBUG ]", arg1, arg2, should_output, should_flush);
     }
 
     template <typename T1>
     static void debug(T1 arg1, bool should_output = false, bool should_flush = false) {
-        log("[ DEBUG ]", arg1, "", should_output, should_flush);
+//        log("[ DEBUG ]", arg1, "", should_output, should_flush);
     }
 
     template <typename T1, typename T2>
