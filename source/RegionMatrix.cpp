@@ -12,6 +12,7 @@ RegionMatrix::RegionMatrix(Vector_t<long double> min, Vector_t<long double> max,
         simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor) {
     // Ensure we dont enter a value out of range
     assert(overlap_factor >= 0.f && overlap_factor <= 1.f);
+    assert(divisions.x > 0 && divisions.y > 0 && divisions.z > 0);
 
     step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
     overlap = Vectorr(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions

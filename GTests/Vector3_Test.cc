@@ -37,10 +37,45 @@ TEST(Vector3, Normalise) {
 }
 
 TEST(Vector3, Rotate_Y) {
-//    GTEST_SKIP_("Not yet implemented");
     Vectorr testVector = Vectorr(0, 1, 0);
     testVector.rotate(0, PI, 0);
-    EXPECT_EQ(testVector, Vectorr(0  , 1, 0));
+    EXPECT_EQ(testVector, Vectorr(0, 1, 0));
 }
+
+TEST(Vector3, doubleMath) {
+    Vectorr testVector = Vectorr(1, 2, 3);
+    testVector = testVector * 2;
+    EXPECT_EQ(testVector, Vectorr(2, 4, 6));
+    testVector = testVector / 2;
+    EXPECT_EQ(testVector, Vectorr(1, 2, 3));
+    testVector = testVector + 2;
+    EXPECT_EQ(testVector, Vectorr(3, 4, 5));
+    testVector = testVector - 2;
+    EXPECT_EQ(testVector, Vectorr(1, 2, 3));
+}
+
+TEST(Vector3, VectorMath) {
+    Vectorr testVector = Vectorr(1, 2, 3);
+    Vectorr testVector2 = Vectorr(4, 5, 6);
+    testVector = testVector * testVector2;
+    EXPECT_EQ(testVector, Vectorr(4, 10, 18));
+    testVector = testVector / testVector2;
+    EXPECT_EQ(testVector, Vectorr(1, 2, 3));
+    testVector = testVector + testVector2;
+    EXPECT_EQ(testVector, Vectorr(5, 7, 9));
+    testVector = testVector - testVector2;
+    EXPECT_EQ(testVector, Vectorr(1, 2, 3));
+}
+
+TEST(Vector3, VectorMath_MagSq_DotProd_Scale) {
+    Vectorr testVector = Vectorr(1, 2, 3);
+    EXPECT_EQ((int)testVector.magnitude_squared(), 14);
+
+    testVector.scale(2);
+    EXPECT_EQ(testVector, Vectorr(2, 4, 6));
+    EXPECT_EQ(testVector.dotProduct(Vectorr(4, 5, 6)), 64);
+}
+
+
 
 #endif //GALAXYSIMULATION_VECTOR3_TEST_CC

@@ -48,12 +48,12 @@ TEST(Star, Consistant_HistoryRecords) {
     );
     star_list->emplace_back(testing_star);
 
-    testing_star->history_acceleration.emplace_back(Vectorr(1, 1, 1));
-    testing_star->history_velocity.emplace_back(Vectorr(1, 1, 1));
-    testing_star->history_position.emplace_back(Vectorr(1, 1, 1));
+    testing_star->history.emplace_back(
+            Vectorr(1, 2, 3),
+            Vectorr(4, 5, 6),
+            Vectorr(7, 8, 9)
+    );
 
-    bool tmp = testing_star->history_position.size() == testing_star->history_velocity.size();
-    tmp = tmp ? testing_star->history_position.size() == testing_star->history_acceleration.size() : false;
-    EXPECT_TRUE(tmp);
+    EXPECT_EQ(testing_star->history.size(), 2);
 }
 #endif //GALAXYSIMULATION_STAR_TEST_CC
