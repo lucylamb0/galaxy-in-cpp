@@ -41,7 +41,7 @@ if(SHOULD_USE_EXTERNALS)
         FetchContent_MakeAvailable(googletest)
     endif()
 
-    find_package(Matplot++ REQUIRED)
+#    find_package(Matplot++ REQUIRED)
 
 
 endif()
