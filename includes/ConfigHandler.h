@@ -14,7 +14,7 @@ public:
     int animation_speed = 5;
 
     struct RegionMatrix {
-        Vectorr region_divisions = Vectorr{0, 0, 0};
+        Vectorr region_divisions = Vectorr{1, 1, 1};
 
         // This is the amount the regions are scaled by
         // after stars regions are resized for the new region divisions
