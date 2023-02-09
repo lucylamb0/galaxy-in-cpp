@@ -607,7 +607,30 @@ int main(int arg_count, char** args) {
     logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
     logging::info("Regions: ", regionMatrix.regions.size());
     logging::info("Overlap factor of: ", regionMatrix.overlap_factor);
-    logging::info("Outputting log to: ", "<UNDEFINED>");
+    logging::info("Outputting log to: ", pwd + "/log.txt");
+    logging::info("Loaded config [ " + config_path + " ]");
+
+    if(1 != 1) {
+        logging::info("1 does not equal 1");
+    }
+    // return false;
+
+//    std::ifstream config_file(config_path);
+////    json config;
+//    config_file >> config;
+//    config_file.close();
+//    logging::info("Config loaded");
+
+    regionMatrix = RegionMatrix(Vectorr { 0, 0, 0 }, Vectorr { 400, 400, 10 }, Vectorr { 4, 4, 1 }, 0.5f);
+/*
+    int cnt = 0;
+    for (const auto &item: regionMatrix.regions) {
+        ++cnt;
+//        {ImVec2(10, 20), ImVec2(30, 40)}
+        std::cout << "{ImVec2(" << item->min.x << ", " << item->min.y << "), ImVec2(" << item->max.x << ", " << item->max.y << ")}," << std::endl;
+    }
+
+    return 1;*/
 
 #define degrees_to_radians(degrees) ((float)(degrees * PI / 180.0))
 #define radians_to_degrees(radians) ((float)(radians * 180.0 / PI))
