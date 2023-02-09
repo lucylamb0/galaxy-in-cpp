@@ -61,7 +61,7 @@ add_executable(GalaxySimulation
         data_parser.cpp data_parser.h
         data_exporter.cpp data_exporter.h
         Simulator.cpp Simulator.h star_generator.h includes/Random.h
-        Plotting.h source/RegionMatrix.cpp)
+        Plotting.h source/RegionMatrix.cpp includes/ConfigHandler.cpp includes/ConfigHandler.h)
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes)

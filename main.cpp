@@ -1,5 +1,6 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
+#include "ConfigHandler.h"
 #include <string>
 #include <chrono>
 #include "includes/Vector3.h"
@@ -7,8 +8,8 @@
 #include "includes.h"
 #include "includes/Region.h"
 
-#include "data_exporter.h"
-#include "data_parser.h"
+//#include "data_exporter.h"
+//#include "data_parser.h"
 
 #include "Simulator.h"
 
@@ -19,7 +20,7 @@
 // TODO: CLEAN UP THE CODE, lots of commented out sections that i don't know if it is needed or not
 // CODE USES PARSECS, SOLAR MASS, PC/YEAR and PC/YEAR^2
 std::vector<Star*> star_list = {};
-data_exporter ExportHandler = data_exporter(&star_list, "Stars_gaussian.test.dump.txt");
+//data_exporter ExportHandler = data_exporter(&star_list, "Stars_gaussian.test.dump.txt");
 
 // TODO: Maybe make smaller functions for this
 // this function generates stars and puts them into the star list and class
@@ -571,47 +572,36 @@ void star_generator_gaussian(
     std::cout << "galaxy mass: " << galaxy_mass << std::endl;
 
 }
+
+void star_generator_gaussian(Config::StarGenerator config, RegionMatrix* parent_region_matrix) {
+    star_generator_gaussian(
+            config.star_count,
+            config.mean_mass,
+            config.std_mass,
+            config.min_position,
+            config.max_position,
+            config.velocityAtOrigin,
+            config.variation_velocity,
+            config.variation_direction,
+            config.number_of_arms,
+            config.stars_per_arm,
+            config.angle_of_arms,
+            config.arm_width,
+            config.arm_height,
+            config.arm_length,
+            config.arm_offset,
+            parent_region_matrix,
+            config.gaussian_mean,
+            config.gaussian_std
+    );
+
+}
+
 RegionMatrix regionMatrix;
 
 int main(int arg_count, char** args) {
-    std::string data_set_path = "D:\\JET BRAINS\\galaxy-in-cpp/star_data.csv";
-    if (arg_count == 2) {
-        data_set_path = args[1];
-    }
-    if (arg_count > 4) {
-        data_set_path = args[1];
-
-        std::cout << "[ Data Set Path ]    [" << data_set_path << "]" << std::endl;
-
-        Vectorr startPosition = Vectorr(std::stof(args[2]), std::stof(args[3]), std::stof(args[4]));
-        std::cout << "[ Start Position X ] [" << startPosition.x << "]" << std::endl;
-        std::cout << "[ Start Position Y ] [" << startPosition.y << "]" << std::endl;
-        std::cout << "[ Start Position Z ] [" << startPosition.z << "]" << std::endl;
-
-        Vectorr endPosition = Vectorr(std::stof(args[5]), std::stof(args[6]), std::stof(args[7]));
-        std::cout << "[ End Position X ]   [" << endPosition.x << "]" << std::endl;
-        std::cout << "[ End Position Y ]   [" << endPosition.y << "]" << std::endl;
-        std::cout << "[ End Position Z ]   [" << endPosition.z << "]" << std::endl;
-
-        Vectorr divisions = Vectorr(std::stof(args[8]), std::stof(args[9]), std::stof(args[10]));
-        std::cout << "[ divisions X ]      [" << divisions.x << "]" << std::endl;
-        std::cout << "[ divisions Y ]      [" << divisions.y << "]" << std::endl;
-        std::cout << "[ divisions Z ]      [" << divisions.z << "]" << std::endl;
-
-        regionMatrix = RegionMatrix(
-                startPosition, // Start position
-                endPosition, // End position
-                divisions               // Amount of divisions on the z, y, z
-                // Overlap factor
-        );
-    } else {
-        regionMatrix = RegionMatrix(
-                Vectorr(-100000, -100000, -100000), // Start position
-                Vectorr(100000, 100000, 100000), // End position
-                Vectorr(10, 10, 10),               // Amount of divisions on the z, y, z
-                1.f         // Overlap factor
-        );
-    }
+    std::string pwd = std::filesystem::current_path().string();
+    std::string config_path = pwd + "/config.json";
 
     std::cout << "Hello, World!" << std::endl; // classic hello world of course <3
     logging::info("Hello, World! (FROM THE LOGGING FRAMEWORK)", "");
@@ -622,26 +612,27 @@ int main(int arg_count, char** args) {
 #define degrees_to_radians(degrees) ((float)(degrees * PI / 180.0))
 #define radians_to_degrees(radians) ((float)(radians * 180.0 / PI))
 
-    int number_of_stars = 75'000;
-    int number_of_stars_per_arm = 10;
-    float mean_mass = 10;
-    float std_mass = 0.1;
-    Vectorr min_position = Vectorr(-10, -10, -5);
-    Vectorr max_position = Vectorr(10, 10, 5);
-    Vectorr velocityAtOrigin = Vectorr(0.000002556727896654, 0.000002556727896654, 0.00000002);
-    Vectorr variation_velocity = Vectorr(0.00000001056727896654, 0.00000001056727896654, 0.00000000002);
-    long double variation_direction_x = 0.0174533;
-    long double variation_direction_y = 0.0174533;
+    Config config;
+    auto c = &config.star_generation;
+    c->star_count = 100000;
+    c->stars_per_arm = 1000;
+    c->mean_mass = 10;
+    c->std_mass = 0.1;
+    c->min_position = Vectorr(-10, -10, -10);
+    c->max_position = Vectorr(10, 10, 10);
+    c->velocityAtOrigin = Vectorr(0.000002556727896654, 0.000002556727896654, 0.00000002);
+    c->variation_velocity = Vectorr(0.00000001056727896654, 0.00000001056727896654, 0.00000000002);
+    c->variation_direction = Vectorr(0.0174533, 0.0174533);
 
-    int number_of_arms = 0;
-    std::vector<float> angle_of_arms = { };
-    float arm_width = 0.1;
-    float arm_length = 0.1;
-    float arm_height = 0.1;
-    float arm_offset = 0.1;
+    c->number_of_arms = 0;
+    c->angle_of_arms = { };
+    c->arm_width = 0.1;
+    c->arm_length = 0.1;
+    c->arm_height = 0.1;
+    c->arm_offset = 0.1;
 
-    Vectorr gaussian_mean = Vectorr(0, 0, 0);
-    Vectorr gaussian_std = Vectorr(0.2, 0.2, 0.2);
+    c->gaussian_mean = Vectorr(0, 0, 0);
+    c->gaussian_std = Vectorr(0.2, 0.2, 0.2);
 
 
 //    star_list.emplace_back(new Star(
@@ -664,42 +655,26 @@ int main(int arg_count, char** args) {
 //            0
 //    ));
 
-    star_generator_gaussian(
-            number_of_stars,
-            mean_mass,
-            std_mass,
-            min_position,
-            max_position,
-            velocityAtOrigin,
-            variation_velocity,
-            Vectorr(variation_direction_x, variation_direction_y),
-            number_of_arms,
-            number_of_stars_per_arm,
-            angle_of_arms,
-            arm_width,
-            arm_height,
-            arm_length,
-            arm_offset,
-            &regionMatrix,
-            gaussian_mean,
-            gaussian_std
-    );
+    star_generator_gaussian(config.star_generation, &regionMatrix);
 
     // dump the star list to a csv file
 //    data_exporter ExportHandler = data_exporter(&star_list);
 //    ExportHandler.start_dumping("\"Stars.test.dump.txt\"");
 
 
+    // Values to ensure NaN errors are not thrown
     Vectorr min = Vectorr(-1, -1, -1);
     Vectorr max = Vectorr(1, 1, 1);
 
     for (auto star: star_list)
         star->position.getBounds(min, max);
 
-    min.scale(1.01);
-    max.scale(1.01);
+    // Scale the stars to fit in the region matrix
+    // (this is done to ensure stars aren't directly on the edge of the region matrix)
+    min.scale(config.RegionMatrix.regions_scale_min_PFit);
+    max.scale(config.RegionMatrix.regions_scale_max_PFit);
 
-    regionMatrix = RegionMatrix(min, max, Vectorr(10, 10, 10));
+    regionMatrix = RegionMatrix(min, max, config.RegionMatrix.region_divisions, config.RegionMatrix.overlap_factor);
 
     logging::info("Assigning regions.", "");
 // converting data to meters (for now)

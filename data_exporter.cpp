@@ -5,10 +5,6 @@
 
 #include "data_exporter.h"
 
-
-void to_json(json& j, const Vectorr& v) {
-    j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
-}
 //void to_json(json& j, const Star* star) {
 //    j = json{
 //            { "id", star->id },
@@ -17,24 +13,19 @@ void to_json(json& j, const Vectorr& v) {
 //            { "history_acceleration", star->history_acceleration }
 //    };
 //}
-void to_json(json& j, const history_record_t history) {
-    j = json{
-            { "position", history.position },
-            { "velocity", history.velocity },
-            { "acceleration", history.acceleration }
-    };
-}
-void to_json(json& j, const Star* star) {
-    j = json{
-            { "id", star->id },
-            { "history", star->history }
-    };
-}
-void from_json(const json& j, Vectorr& v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
-}
+//void to_json(json& j, const history_record_t history) {
+//    j = json{
+//            { "position", history.position },
+//            { "velocity", history.velocity },
+//            { "acceleration", history.acceleration }
+//    };
+//}
+//void to_json(json& j, const Star* star) {
+//    j = json{
+//            { "id", star->id },
+//            { "history", star->history }
+//    };
+//}
 
 #define VEC(x) #x << "_x" << "," << #x << "_y" << "," << #x << "_z"
 

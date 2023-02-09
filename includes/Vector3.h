@@ -10,14 +10,16 @@
 #include <valarray>
 #include <sstream>
 
+#include "json.h"
+using json = nlohmann::json;
+
 #define Vectorr Vector_t<long double>
 template<typename TYPE>
 struct Vector_t {
     Vector_t() = default;
-    constexpr Vector_t(TYPE x, TYPE y) noexcept : x{ x }, y{ y } {}
+    constexpr Vector_t(TYPE x, TYPE y) noexcept : x{ x }, y{ y }, z( 0 ) {}
 
-    constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {
-    }
+    constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {}
 
     constexpr Vector_t(TYPE x, TYPE y, TYPE z, float scale_factor) noexcept : x{ x }, y{ y }, z{ z } {
         if(scale_factor != 0)
@@ -119,14 +121,6 @@ struct Vector_t {
     }
 
     constexpr Vector_t& operator/=(TYPE div) noexcept
-    {
-        x /= div;
-        y /= div;
-        z /= div;
-        return *this;
-    }
-
-    constexpr Vector_t& operator/(int div) noexcept
     {
         x /= div;
         y /= div;
@@ -244,5 +238,22 @@ struct Vector_t {
         z *= d;
     }
 };
+
+#pragma region Vector Serialization
+template<typename T>
+void to_json(json& j, const Vector_t<T> v) {
+    j = json{
+            { "x", v.x },
+            { "y", v.x },
+            { "z", v.x }
+    };
+}
+template<typename T>
+void from_json(const json& j, Vector_t<T> v) {
+    j.at("x").get_to(v.x);
+    j.at("y").get_to(v.y);
+    j.at("z").get_to(v.z);
+}
+#pragma endregion
 
 #endif //C_VERSION_Vector_t3_H

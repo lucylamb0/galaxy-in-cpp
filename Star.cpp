@@ -217,7 +217,7 @@ void Star::velocity_update() {
     this->history_tmp.velocity = this->velocity;
     this->history_tmp.acceleration = this->acceleration;
 
-//    this8->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
+//    this->history_velocity.emplace_back(this->velocity.x, this->velocity.y, this->velocity.z);
 //    this->history_acceleration.emplace_back(this->acceleration.x, this->acceleration.y, this->acceleration.z);
 }
 
