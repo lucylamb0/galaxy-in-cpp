@@ -75,7 +75,7 @@ public:
 
     void velocity_update();
 
-    void position_update();
+    void position_update(long double override_timestep = 0);
 
     bool is_static() {
         return this->flags & (int)STAR_FLAGS::STATIC;

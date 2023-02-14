@@ -28,7 +28,7 @@ TEST(DataExporter, Generic) {
     GTEST_SKIP();
 
     auto exporter = new data_exporter(star_list, "dump_test.csv");
-    exporter->start_dumping();
+    exporter->start_dumping("test.dump.csv");
     EXPECT_TRUE(1);
 }
 

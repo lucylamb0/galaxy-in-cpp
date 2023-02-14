@@ -81,10 +81,13 @@ if(SHOULD_USE_EXTERNALS)
     if(SHOULD_USE_GTEST)
         enable_testing()
         add_executable(Simulation_Tests
+                Star.cpp
+                Star.h
                 GTests/Vector3_Test.cc
                 GTests/Star_Test.cc
                 GTests/DataExporter_Test.cc
-        )
+                GTests/Simulation_Test.cc
+                )
         target_link_libraries(
                 Simulation_Tests
                 GTest::gtest_main
