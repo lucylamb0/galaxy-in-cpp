@@ -60,84 +60,72 @@ struct Vector_t {
         return a.x == b.x && a.y == b.y && a.z == b.z;
     }
 
-    friend constexpr auto operator!=(const Vector_t& a, const Vector_t& b) noexcept
-    {
+    friend constexpr auto operator!=(const Vector_t& a, const Vector_t& b) noexcept {
         return !(a == b);
     }
 
-    constexpr Vector_t& operator=(const TYPE array[3]) noexcept
-    {
+    constexpr Vector_t& operator=(const TYPE array[3]) noexcept {
         x = array[0];
         y = array[1];
         z = array[2];
         return *this;
     }
 
-    constexpr Vector_t& operator+=(const Vector_t& v) noexcept
-    {
+    constexpr Vector_t& operator+=(const Vector_t& v) noexcept {
         x += v.x;
         y += v.y;
         z += v.z;
         return *this;
     }
 
-    constexpr Vector_t& operator+=(TYPE f) noexcept
-    {
+    constexpr Vector_t& operator+=(TYPE f) noexcept {
         x += f;
         y += f;
         z += f;
         return *this;
     }
 
-    constexpr Vector_t& operator-=(const Vector_t& v) noexcept
-    {
+    constexpr Vector_t& operator-=(const Vector_t& v) noexcept {
         x -= v.x;
         y -= v.y;
         z -= v.z;
         return *this;
     }
 
-    constexpr Vector_t& operator-=(TYPE f) noexcept
-    {
+    constexpr Vector_t& operator-=(TYPE f) noexcept {
         x -= f;
         y -= f;
         z -= f;
         return *this;
     }
 
-    friend constexpr auto operator-(const Vector_t& a, const Vector_t& b) noexcept
-    {
+    friend constexpr auto operator-(const Vector_t& a, const Vector_t& b) noexcept {
         return Vector_t{ a.x - b.x, a.y - b.y, a.z - b.z };
     }
 
-    friend constexpr auto operator+(const Vector_t& a, const Vector_t& b) noexcept
-    {
+    friend constexpr auto operator+(const Vector_t& a, const Vector_t& b) noexcept {
         return Vector_t{ a.x + b.x, a.y + b.y, a.z + b.z };
     }
 
-    friend constexpr auto operator*(const Vector_t& a, const Vector_t& b) noexcept
-    {
+    friend constexpr auto operator*(const Vector_t& a, const Vector_t& b) noexcept {
         return Vector_t{ a.x * b.x, a.y * b.y, a.z * b.z };
     }
 
-    constexpr Vector_t& operator/=(TYPE div) noexcept
-    {
+    constexpr Vector_t& operator/=(TYPE div) noexcept {
         x /= div;
         y /= div;
         z /= div;
         return *this;
     }
 
-    constexpr Vector_t& operator/(TYPE div) noexcept
-    {
+    constexpr Vector_t& operator/(TYPE div) noexcept {
         x /= div;
         y /= div;
         z /= div;
         return *this;
     }
 
-    constexpr Vector_t& operator/(Vector_t v) noexcept
-    {
+    constexpr Vector_t& operator/(Vector_t v) noexcept {
         x /= v.x;
         y /= v.y;
         z /= v.z;
@@ -204,7 +192,7 @@ struct Vector_t {
         return (*this - v).length();
     }
 
-    TYPE x, y, z;
+    TYPE x = 0, y = 0, z = 0;
 
     // rotate Vector_t by angle (x angle = a, y angle = b, z angle = c)
     void rotate(TYPE a, TYPE b, TYPE c) {

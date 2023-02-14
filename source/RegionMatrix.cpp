@@ -1,9 +1,5 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2023, All Rights Reserved.
 
-//
-// Created by Conni Bilham on 24/01/2023.
-//
-
 #include <RegionMatrix.h>
 #include <Region.h>
 

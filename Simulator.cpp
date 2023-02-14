@@ -1,9 +1,5 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
-//
-// Created by Conni Bilham on 14/11/2022.
-//
-
 #include "Simulator.h"
 
 void Simulator::generateWorkQueue() {

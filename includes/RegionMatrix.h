@@ -1,9 +1,5 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
-//
-// Created by Conni Bilham on 27/10/2022.
-//
-
 #ifndef GALAXYSIMULATION_REGIONMATRIX_H
 #define GALAXYSIMULATION_REGIONMATRIX_H
 

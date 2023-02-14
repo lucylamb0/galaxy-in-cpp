@@ -7,8 +7,9 @@
 #include "Star.h"
 #include "includes.h"
 #include "includes/Region.h"
+#include "includes/ConfigStruct.h"
 
-//#include "data_exporter.h"
+#include "data_exporter.h"
 //#include "data_parser.h"
 
 #include "Simulator.h"
@@ -385,14 +386,14 @@ void star_generator_gaussian(
 
 }
 
-void star_generator_gaussian(Config::StarGenerator config, RegionMatrix* parent_region_matrix) {
+void star_generator_gaussian(ConfigStruct::StarGenerator config, RegionMatrix* parent_region_matrix) {
     star_generator_gaussian(
             config.star_count,
             config.mean_mass,
             config.std_mass,
             config.min_position,
             config.max_position,
-            config.velocityAtOrigin,
+            config.velocity_at_origin,
             config.variation_velocity,
             config.variation_direction,
             config.number_of_arms,
@@ -422,32 +423,34 @@ int main(int arg_count, char** args) {
     logging::info("Outputting log to: ", pwd + "/log.txt");
     logging::info("Loaded config [ " + config_path + " ]");
 
-    if(1 != 1) {
-        logging::info("1 does not equal 1");
+    json configJson;
+    // read a JSON file
+    if(!std::filesystem::exists(config_path)) {
+        logging::error("Couldnt find config file.");
+        std::ofstream o(pwd + "/config.json");
+        ConfigStruct conf;
+        json jsonNewConfig = conf;
+        o << std::setw(4) << jsonNewConfig << std::endl;
+        o.close();
+        return 1;
     }
-    // return false;
+    logging::info("Config exists.");
+    std::ifstream i(config_path);
+    i >> configJson;
+    i.close();
 
-//    std::ifstream config_file(config_path);
-////    json config;
-//    config_file >> config;
-//    config_file.close();
-//    logging::info("Config loaded");
+    ConfigStruct config_loaded = configJson;
+
+    logging::info("Config loaded");
+
+    // Print all json components
+
+
+    std::cout << std::setw(4) << config_loaded.version.major << std::endl;
 
     regionMatrix = RegionMatrix(Vectorr { 0, 0, 0 }, Vectorr { 400, 400, 10 }, Vectorr { 4, 4, 1 }, 0.5f);
-/*
-    int cnt = 0;
-    for (const auto &item: regionMatrix.regions) {
-        ++cnt;
-//        {ImVec2(10, 20), ImVec2(30, 40)}
-        std::cout << "{ImVec2(" << item->min.x << ", " << item->min.y << "), ImVec2(" << item->max.x << ", " << item->max.y << ")}," << std::endl;
-    }
 
-    return 1;*/
-
-#define degrees_to_radians(degrees) ((float)(degrees * PI / 180.0))
-#define radians_to_degrees(radians) ((float)(radians * 180.0 / PI))
-
-    Config config;
+    ConfigStruct config;
     auto c = &config.star_generation;
     c->star_count = 100000;
     c->stars_per_arm = 1000;
@@ -455,7 +458,7 @@ int main(int arg_count, char** args) {
     c->std_mass = 0.1;
     c->min_position = Vectorr(-10, -10, -10);
     c->max_position = Vectorr(10, 10, 10);
-    c->velocityAtOrigin = Vectorr(0.000002556727896654, 0.000002556727896654, 0.00000002);
+    c->velocity_at_origin = Vectorr(0.000002556727896654, 0.000002556727896654, 0.00000002);
     c->variation_velocity = Vectorr(0.00000001056727896654, 0.00000001056727896654, 0.00000000002);
     c->variation_direction = Vectorr(0.0174533, 0.0174533);
 
@@ -469,28 +472,50 @@ int main(int arg_count, char** args) {
     c->gaussian_mean = Vectorr(0, 0, 0);
     c->gaussian_std = Vectorr(0.2, 0.2, 0.2);
 
+    json jsonNewConfig = config;
 
-//    star_list.emplace_back(new Star(
-//            1,                                // ID
-//            Vectorr(1, 1, 1),    // Position
-//            Vectorr(0,  -2e-8, 0),    // Velocity
-//            Vectorr(0, 0, 0), // Acceleration
-//            3.00273e-6,
-//            &regionMatrix,       // Parent region matrix
-//            (int)STAR_FLAGS::STATIC
-//    ));
-//
-//    star_list.emplace_back(new Star(
-//            2,                                // ID
-//            Vectorr(1.2477e-8, 1, 1),    // Position
-//            Vectorr( 0, 2.02269032e-6, 0),    // Velocity
-//            Vectorr(0, 0, 0), // Acceleration
-//            3.69396868e-8,
-//            &regionMatrix,       // Parent region matrix
-//            0
-//    ));
+    std::ofstream o(pwd + "/config_new.json");
+    o << std::setw(4) << jsonNewConfig << std::endl;
+    o.close();
 
-    star_generator_gaussian(config.star_generation, &regionMatrix);
+    for (auto it = jsonNewConfig.begin(); it != jsonNewConfig.end(); ++it) {
+        std::cout << "- " << it.key() << ": ";
+        if (it.value().is_object() || it.value().is_array()) {
+            std::cout << std::endl;
+            for (auto inner_it = it.value().begin(); inner_it != it.value().end(); ++inner_it) {
+                std::cout << "  - " << inner_it.key() << ": " << inner_it.value() << std::endl;
+            }
+        } else {
+            std::cout << it.value() << std::endl;
+        }
+    }
+
+    // Earth
+    star_list.emplace_back(new Star(
+            1,                                // ID
+            Vectorr(1, 1, 1),    // Position
+//            Vectorr(-2e-8, 0, 0),    // Velocity
+            Vectorr(0, 0, 0), // Velocity
+            Vectorr(0, 0, 0), // Acceleration
+            5.97e+24,
+            &regionMatrix,       // Parent region matrix
+            0 //(int)STAR_FLAGS::STATIC
+    ));
+
+    // Moon
+    star_list.emplace_back(new Star(
+            2,                                // ID
+            Vectorr(0.4055e+6, 1, 1),    // Position
+//            Vectorr(4.055e+5, 1, 1),    // Position
+//            Vectorr( 1.02201e-6, 0, 0),    // Velocity
+            Vectorr( 1, 0, 0),    // Velocity
+            Vectorr(0, 0, 0), // Acceleration
+            7.34e+22 ,
+            &regionMatrix,       // Parent region matrix
+            0
+    ));
+
+//    star_generator_gaussian(config.star_generation, &regionMatrix);
 
     // dump the star list to a csv file
 //    data_exporter ExportHandler = data_exporter(&star_list);
@@ -506,13 +531,15 @@ int main(int arg_count, char** args) {
 
     // Scale the stars to fit in the region matrix
     // (this is done to ensure stars aren't directly on the edge of the region matrix)
-    min.scale(config.RegionMatrix.regions_scale_min_PFit);
-    max.scale(config.RegionMatrix.regions_scale_max_PFit);
+    min.scale(config.region_matrix.regions_scale_min_PFit);
+    max.scale(config.region_matrix.regions_scale_max_PFit);
 
-    regionMatrix = RegionMatrix(min, max, config.RegionMatrix.region_divisions, config.RegionMatrix.overlap_factor);
+    regionMatrix = RegionMatrix(min, max, config.region_matrix.region_divisions, config.region_matrix.overlap_factor);
 
     logging::info("Assigning regions.", "");
+
 // converting data to meters (for now)
+
     static unsigned long averageStarRegionCount = 0;
     for (auto star : star_list) {
         star->find_regions();
@@ -659,7 +686,6 @@ int main(int arg_count, char** args) {
                                      (averageStarRegionCount + star->regions_we_are_in.size()) / 2;
 
             if (star->id % 5000 == 0) {
-
                 auto progress = to_string(star->id) + "/" + to_string(star_list.size());
                 auto percent = to_string((int) ((float) star->id / (float) star_list.size() * 100));
                 auto message = "Progress " + percent + "% [" + progress + "] Stars, in an avrg of " +
@@ -674,14 +700,14 @@ int main(int arg_count, char** args) {
     }
 
     logging::info("Simulation Complete");
-    logging::info("Loading matplotlib");
 
+//    logging::info("Loading matplotlib");
 //    Plotting c;
 //    c.test(star_list);
-
 //    ExportHandler.start_dumping();
-//    data_exporter ExportHandler2 = data_exporter(&star_list);
-//    ExportHandler2.start_dumping(L"Stars_gaussian.test.dump.txt");
+
+    data_exporter ExportHandler2 = data_exporter(&star_list);
+    ExportHandler2.start_dumping("NEW_DATA.csv");
     return 0;
 }
 

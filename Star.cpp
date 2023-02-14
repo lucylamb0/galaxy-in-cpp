@@ -211,7 +211,7 @@ double Star::acceleration_update_region_com(bool clear_accel) {
 }
 
 void Star::velocity_update() {
-    if(this->is_static())
+    if(!this->is_static())
         this->velocity += this->acceleration * time_step;
 
     this->history_tmp.velocity = this->velocity;
@@ -222,7 +222,7 @@ void Star::velocity_update() {
 }
 
 void Star::position_update() {
-    if(this->is_static()) {
+    if(!this->is_static()) {
         this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
         this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
         this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
@@ -232,6 +232,5 @@ void Star::position_update() {
 
     this->history_tmp = history_record_t();
 
-//    this->history_position.emplace_back(this->position.x, this->position.y, this->position.z);
     this->regions_we_are_in.clear();
 }
