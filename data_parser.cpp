@@ -1,9 +1,5 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
 
-//
-// Created by Conni Bilham on 06/11/2022.
-//
-
 #include "data_parser.h"
 
 // Not really sure what this does, probably made by Conni

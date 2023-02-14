@@ -1,7 +1,18 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2023, All Rights Reserved.
 
-//
-// Created by Conni Bilham on 26/01/2023.
-//
-
 #include "ConfigHandler.h"
+
+void loadConfig(const char *config_name = "default") {
+
+}
+void loadConfig(int config_index) {
+
+}
+
+void saveConfig(const char *config_name) {
+
+}
+
+void listConfigs() {
+
+}

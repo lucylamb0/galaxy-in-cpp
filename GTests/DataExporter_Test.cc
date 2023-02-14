@@ -1,8 +1,4 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
-//
-//
-// Created by Conni Bilham on 11/11/2022.
-//
 
 #ifndef GALAXYSIMULATION_DATAEXPORTER_TEST_CC
 #define GALAXYSIMULATION_DATAEXPORTER_TEST_CC

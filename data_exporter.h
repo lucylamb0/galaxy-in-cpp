@@ -1,7 +1,4 @@
 // Copyright (c) Conni Bilham & Lucy Coward 2022, All Rights Reserved.
-//
-// Created by Conni Bilham on 07/11/2022.
-//
 
 #include "Star.h"
 #include "includes/logging.h"
@@ -30,7 +27,9 @@ public:
 
     void csv_full_dump_Star(Star star);
 
-    void start_dumping() {
+    void start_dumping(std::string path) {
+        file_path = path;
+
         logging::info("\n\nStarting to dump data");
         dump_csv();
         logging::info("Finished dumping data");

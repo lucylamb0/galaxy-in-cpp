@@ -18,6 +18,9 @@
 #include <fstream>
 #include <thread>
 
+#define degrees_to_radians(degrees) ((float)(degrees * PI / 180.0))
+#define radians_to_degrees(radians) ((float)(radians * 180.0 / PI))
+
 const long double PI = 3.14159265358979323846;
 const long double gravitationalConstant = 6.67408 * pow(10, -11);
 const long double gravitationalConstantParsec = 4.30091 * pow(10, -3);
@@ -29,18 +32,13 @@ const long double gravitationalConstantFinal = gravitationalConstantParsec * pow
 const long double solarMass = 1.98847 * pow(10, 30);
 const long double parsecsPerYear_to_metersPerSecond = parsec_to_km * 1000 / yearInSeconds;
 
-
-
 // Time frame the simulation will simulate
-const long double timeScale = 10; // In Years
+static long double timeScale = 365.f/365.f; // In Years
 // Amount of simulation frames to have
-const int simulationFrames = 10; // 1 week per cycle
+static long double simulationFrames = 365.f * 2; // 1 year per cycle
 
-
-
-// Internal usage
 // Time to pass per acceleration cycle
-const long double time_step = timeScale / simulationFrames;// this is the time step used in the calculations. It has units of years
+static long double time_step = timeScale / simulationFrames;// this is the time step used in the calculations. It has units of years
 //const long double time_step = 0.0027397260274 * 0.5;// this is the time step used in the calculations. It has units of years
 
 #endif //C_VERSION_INCLUDES_H
