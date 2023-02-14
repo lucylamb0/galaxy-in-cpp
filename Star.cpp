@@ -226,12 +226,9 @@ void Star::position_update(long double override_timestep) {
         time_step = override_timestep;
 
     if(!this->is_static()) {
-//        this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * time_step * std::pow(time_step, 2);
-//        this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * time_step * std::pow(time_step, 2);
-//        this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * time_step * std::pow(time_step, 2);
-        this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * std::pow(time_step, 2);
-        this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * std::pow(time_step, 2);
-        this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * std::pow(time_step, 2);
+        this->position.x += this->velocity.x * time_step - 0.5 * this->acceleration.x * (time_step * time_step);
+        this->position.y += this->velocity.y * time_step - 0.5 * this->acceleration.y * (time_step * time_step);
+        this->position.z += this->velocity.z * time_step - 0.5 * this->acceleration.z * (time_step * time_step);
     }
     this->history_tmp.position = this->position;
     this->history.emplace_back(this->history_tmp);
