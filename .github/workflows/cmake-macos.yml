@@ -1,0 +1,48 @@
+name: MacOS Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        os: [ macos-latest ]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          brew install cmake ccache
+
+      - name: Configure build
+        run: |
+          export CCACHE_BASEDIR="${HOME}/.ccache/$(date +%Y%m%d-%H%M%S)"
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          mkdir -p build
+          cd build
+          cmake ..
+
+      - name: Build project
+        run: |
+          cd build
+          make
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
+      - name: Cache ccache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.HOME }}/.ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-

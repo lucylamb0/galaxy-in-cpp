@@ -1,0 +1,73 @@
+name: Linux Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install cmake g++ ccache
+          if [ ! -d "build" ]; then
+            mkdir build
+          fi
+
+      - name: Configure build
+        run: |
+          export CCACHE_DIR="$HOME/.ccache"
+          export CC="ccache gcc"
+          export CXX="ccache g++"
+          mkdir -p build
+          cd build
+          cmake ..
+
+      - name: Main11
+        run: |
+          ls
+      - name: Main21
+        run: |
+          ls build
+      - name: Main31
+        run: |
+          ls $HOME/.ccache
+
+      - name: Build project
+        run: |
+          cd build
+          make
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
+      - name: Cache build artifacts
+        uses: actions/cache@v2
+        with:
+          path: |
+            build
+            $HOME/.ccache
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+      - name: Main1
+        run: |
+          ls
+      - name: Main2
+        run: |
+          ls build
+      - name: Main3
+        run: |
+          ls $HOME/.ccache

@@ -47,8 +47,6 @@ if(SHOULD_USE_EXTERNALS)
     endif()
 
 #    find_package(Matplot++ REQUIRED)
-
-
 endif()
 
 
@@ -87,7 +85,7 @@ if(SHOULD_USE_EXTERNALS)
                 GTests/Star_Test.cc
                 GTests/DataExporter_Test.cc
                 GTests/Simulation_Test.cc
-                )
+                GTests/Math_Test.cc)
         target_link_libraries(
                 Simulation_Tests
                 GTest::gtest_main
