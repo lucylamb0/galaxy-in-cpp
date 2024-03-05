@@ -77,32 +77,9 @@ public:
 
     void position_update(long double override_timestep = 0);
 
-    bool is_static() {
-        return this->flags & (int)STAR_FLAGS::STATIC;
-    }
+    bool is_static() const;
 
-    long double kinetic_energy(int history_index = -1, bool reverse = false) {
-        history_index = history_index - 1;
-
-        // Return the live value of the star
-        if(history_index == -1)
-            return (0.5 * this->mass) * this->velocity.magnitude_squared();
-        else {
-            history_index = reverse ? this->history.size() - history_index : history_index;
-
-            auto tmp_mass = 0.5 * this->mass;
-            auto tmp_velocity = this->history[history_index].velocity; // in ps/year
-
-//            logging::info("Velocity ps/year - ", tmp_velocity);
-            tmp_velocity = tmp_velocity * parsecsPerYear_to_metersPerSecond; // convert to m/s
-//            logging::info("Velocity m/s - ", tmp_velocity);
-
-            auto energy = tmp_mass * tmp_velocity.magnitude_squared(); // in J
-//            logging::info("Energy J - ", energy);
-
-            return energy;
-        }
-    }
+    long double kinetic_energy(int history_index = -1, bool reverse = false);
 };
 
 #endif //C_VERSION_STAR_H

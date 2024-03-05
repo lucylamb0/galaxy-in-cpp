@@ -180,7 +180,9 @@ double Star::acceleration_update_stars_in_region(bool clear_accel) {
             long double r_in_km = r * parsec_to_km;
             long double accel_from_star = (gravitationalConstantFinal * star->mass)/(pow(r_in_km, 2)); // Now gives acceleration in pc/year^2
 
-            this->acceleration += ((star->position - this->position) / r) * accel_from_star;
+            auto position_delta = star->position - this->position;
+            position_delta * r;
+            this->acceleration   += (position_delta / r) * accel_from_star;
         }
     }
     return std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::high_resolution_clock::now())-accelerationStartTime).count();
@@ -236,4 +238,30 @@ void Star::position_update(long double override_timestep) {
     this->history_tmp = history_record_t();
 
     this->regions_we_are_in.clear();
+}
+
+bool Star::is_static() const {
+  return this->flags & (int)STAR_FLAGS::STATIC;
+}
+
+long double Star::kinetic_energy(int history_index, bool reverse) {
+  history_index -= 1;
+
+  // Return the live value of the star
+  if(history_index == -1)
+    return (0.5 * this->mass) * this->velocity.magnitude_squared();
+
+  history_index = reverse ? this->history.size() - history_index : history_index;
+
+  auto tmp_mass = 0.5 * this->mass;
+  auto tmp_velocity = this->history[history_index].velocity; // in ps/year
+
+  //            logging::info("Velocity ps/year - ", tmp_velocity);
+  tmp_velocity = tmp_velocity * parsecsPerYear_to_metersPerSecond; // convert to m/s
+                                                   //            logging::info("Velocity m/s - ", tmp_velocity);
+
+  auto energy = tmp_mass * tmp_velocity.magnitude_squared(); // in J
+                             //               logging::info("Energy J - ", energy);
+
+  return energy;
 }
