@@ -6,7 +6,7 @@
 #include "Star.h"
 #include <logging.h>
 #include <Vector3.h>
-#include <matplot/matplot.h>
+//#include <matplot/matplot.h>
 
 //using namespace matplot;
 
@@ -32,61 +32,61 @@ class Plotting {
 
             y.push_back(total_kinetic_energy);
         }
-        matplot::plot(x, y);
+//        matplot::plot(x, y);
     }
 
 public:
-    void test(std::vector<Star*> star_list) {
-        auto f = figure<matplot::backend::gnuplot>(true);
-
-        std::vector<double> x = {};
-        std::vector<double> y = {};
-        std::vector<double> z = {};
-        std::vector<double> vx = {};
-        std::vector<double> vy = {};
-        std::vector<double> vz = {};
-        std::vector<double> time = {};
-        for (int i = 0; i <= star_list[0]->history.size(); ++i) {
-
-            for (auto star: star_list) {
-                star->velocity = star->velocity * parsecsPerYear_to_metersPerSecond;
-                ++i;
-                time.push_back(i);
-                x.push_back(star->history[i].position.x);
-                y.push_back(star->history[i].position.y);
-                z.push_back(star->history[i].position.z);
-            }
-        }
-// plot multiple graphs
-//        matplot::subplot(1, 2, 2);
-
-
-        matplot::subplot(3, 1, 0);
-        matplot::title("Y Position");
-        matplot::plot(time, y);
-
-        matplot::subplot(3, 1, 1);
-        matplot::title("X Position");
-        matplot::plot(time, x);
-
-        matplot::subplot(3, 1, 2);
-        matplot::title("Z Position");
-        matplot::plot(time, z);
-
-        matplot::show();
-
-
-//        matplot::subplot(1, 2, 1);
-//        draw_kinetic_energy(&star_list, 10);
-        matplot::show();
-
-
-
-//        plt::subplot(2, 2, 2);
-//        plt::plot(x, y);
-
-//        plt::show();
-    }
+//    void test(std::vector<Star*> star_list) {
+//        auto f = figure<matplot::backend::gnuplot>(true);
+//
+//        std::vector<double> x = {};
+//        std::vector<double> y = {};
+//        std::vector<double> z = {};
+//        std::vector<double> vx = {};
+//        std::vector<double> vy = {};
+//        std::vector<double> vz = {};
+//        std::vector<double> time = {};
+//        for (int i = 0; i <= star_list[0]->history.size(); ++i) {
+//
+//            for (auto star: star_list) {
+//                star->velocity = star->velocity * parsecsPerYear_to_metersPerSecond;
+//                ++i;
+//                time.push_back(i);
+//                x.push_back(star->history[i].position.x);
+//                y.push_back(star->history[i].position.y);
+//                z.push_back(star->history[i].position.z);
+//            }
+//        }
+//// plot multiple graphs
+////        matplot::subplot(1, 2, 2);
+//
+//
+//        matplot::subplot(3, 1, 0);
+//        matplot::title("Y Position");
+//        matplot::plot(time, y);
+//
+//        matplot::subplot(3, 1, 1);
+//        matplot::title("X Position");
+//        matplot::plot(time, x);
+//
+//        matplot::subplot(3, 1, 2);
+//        matplot::title("Z Position");
+//        matplot::plot(time, z);
+//
+//        matplot::show();
+//
+//
+////        matplot::subplot(1, 2, 1);
+////        draw_kinetic_energy(&star_list, 10);
+//        matplot::show();
+//
+//
+//
+////        plt::subplot(2, 2, 2);
+////        plt::plot(x, y);
+//
+////        plt::show();
+//    }
 };
 
 #endif //GALAXYSIMULATION_PLOTTING_H

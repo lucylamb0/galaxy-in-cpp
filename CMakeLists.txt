@@ -1,7 +1,5 @@
 ########### Flags ############################################################
-set(SHOULD_USE_EXTERNALS ON)
 set(SHOULD_USE_GTEST ON)
-set(SHOULD_USE_MATPLOTLIB_CPP ON)
 ##############################################################################
 
 cmake_minimum_required(VERSION 3.16)
@@ -32,26 +30,10 @@ else()
 endif()
 ######################################
 
-if(SHOULD_USE_EXTERNALS)
-    include(FetchContent)
-
-    if(SHOULD_USE_GTEST)
-        FetchContent_Declare(
-                googletest
-                # Specify the commit you depend on and update it regularly.
-                URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
-        )
-        # For Windows: Prevent overriding the parent project's compiler/linker settings
-        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-        FetchContent_MakeAvailable(googletest)
-    endif()
-
-#    find_package(Matplot++ REQUIRED)
-endif()
-
-
 find_package(Threads REQUIRED)
-add_executable(GalaxySimulation
+add_executable(
+        GalaxySimulation
+
         main.cpp
         Star.cpp Star.h
         includes.h
@@ -66,46 +48,14 @@ add_executable(GalaxySimulation
         star_generator.h
         includes/Random.h
 
-
-        includes/ConfigHandler.cpp includes/ConfigHandler.h
+        includes/ConfigHandler.h
 
         includes/ConfigStruct.h source/star_generator.cpp)
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes/external)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/includes/external)
 
-if(SHOULD_USE_EXTERNALS)
-    if(SHOULD_USE_GTEST)
-        enable_testing()
-        add_executable(Simulation_Tests
-                Star.cpp
-                Star.h
-                GTests/Vector3_Test.cc
-                GTests/Star_Test.cc
-                GTests/DataExporter_Test.cc
-                GTests/Simulation_Test.cc
-                GTests/Math_Test.cc)
-        target_link_libraries(
-                Simulation_Tests
-                GTest::gtest_main
-        )
+target_link_libraries(GalaxySimulation PUBLIC Threads::Threads)
 
-        include(GoogleTest)
-        gtest_discover_tests(Simulation_Tests)
-    endif()
-
-    if(SHOULD_USE_MATPLOTLIB_CPP)
-#        find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
-
-#        target_include_directories(GalaxySimulation PRIVATE ${Python3_INCLUDE_DIRS} includes includes/external/)
-
-        if(TARGET Threads::Threads)
-            target_link_libraries(GalaxySimulation PUBLIC Threads::Threads)
-        else()
-            target_link_libraries(GalaxySimulation PUBLIC)
-        endif()
-    endif()
-else()
-    target_link_libraries(GalaxySimulation PUBLIC Threads::Threads)
-endif()
+include(./GTests/CMakeLists.txt)

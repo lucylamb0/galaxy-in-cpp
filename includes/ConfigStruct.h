@@ -5,6 +5,7 @@
 
 #include <json.h>
 #include "Vector3.h"
+#include "logging.h"
 
 using json = nlohmann::json;
 
@@ -22,7 +23,7 @@ public:
     } client_settings;
 
     struct RegionMatrix {
-        Vectorr region_divisions = {1, 1, 1};
+        Vector_t<int> region_divisions = {1, 1, 1};
 
         // This is the amount the regions are scaled by
         // after stars regions are resized for the new region divisions
@@ -44,16 +45,23 @@ public:
         float mean_mass = 0;
         float std_mass = 0;
 
-        Vectorr min_position = Vectorr(0, 0, 0);
+        struct Global {
+        } global;
+        Vectorr min_position = Vectorr();
         Vectorr max_position = Vectorr();
 
+        struct Gaussian {
+
+        } gaussian;
         Vectorr velocity_at_origin = Vectorr();
         Vectorr variation_velocity = Vectorr();
         Vectorr variation_direction = Vectorr();
 
         std::vector<float> angle_of_arms = {};
+
         int number_of_arms = 0;
         int stars_per_arm = 0;
+
         float arm_width = 0;
         float arm_length = 0;
         float arm_height = 0;
@@ -119,7 +127,8 @@ static void to_json(json &j, const ConfigStruct::RegionMatrix &c) {
 }
 
 static void from_json(const json &j, ConfigStruct::RegionMatrix &c) {
-    c.region_divisions = j.at("region_divisions").get<Vectorr>();
+    // Print out region div
+    c.region_divisions = j.at("region_divisions").get<Vector_t<int>>();
     c.regions_scale_min_PFit = j.at("regions_scale_min_PFit").get<float>();
     c.regions_scale_max_PFit = j.at("regions_scale_max_PFit").get<float>();
     c.overlap_factor = j.at("overlap_factor").get<float>();
@@ -136,8 +145,8 @@ static void to_json(json &j, const ConfigStruct::StarGenerator &c) {
             {"star_count",          c.star_count},
             {"mean_mass",           c.mean_mass},
             {"std_mass",            c.std_mass},
-            {"min_position",        c.min_position},
-            {"max_position",        c.max_position},
+//            {"min_position",        c.},
+//            {"max_position",        c.max_position},
             {"velocity_at_origin",  c.velocity_at_origin},
             {"variation_velocity",  c.variation_velocity},
             {"variation_direction", c.variation_direction},
@@ -159,8 +168,8 @@ static void from_json(const json &j, ConfigStruct::StarGenerator &c) {
     c.star_count = j.at("star_count").get<int>();
     c.mean_mass = j.at("mean_mass").get<float>();
     c.std_mass = j.at("std_mass").get<float>();
-    c.min_position = j.at("min_position").get<Vectorr>();
-    c.max_position = j.at("max_position").get<Vectorr>();
+//    c.min_position = j.at("min_position").get<Vectorr>();
+//    c.cmax_position = j.at("max_position").get<Vectorr>();
     c.velocity_at_origin = j.at("velocity_at_origin").get<Vectorr>();
     c.variation_velocity = j.at("variation_velocity").get<Vectorr>();
     c.variation_direction = j.at("variation_direction").get<Vectorr>();
@@ -201,7 +210,7 @@ static void to_json(json &j, const ConfigStruct &c) {
             {"client_settings", c.client_settings},
             {"region_matrix",   c.region_matrix},
             {"star_generation", c.star_generation},
-            {"simulation", c.simulation },
+            {"simulation",      c.simulation },
     };
 }
 

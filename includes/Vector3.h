@@ -16,7 +16,11 @@ using json = nlohmann::json;
 #define Vectorr Vector_t<long double>
 template<typename TYPE>
 struct Vector_t {
+
+    TYPE x, y, z;
+
     Vector_t() = default;
+
     constexpr Vector_t(TYPE x, TYPE y) noexcept : x{ x }, y{ y }, z( 0 ) {}
 
     constexpr Vector_t(TYPE x, TYPE y, TYPE z) noexcept : x{ x }, y{ y }, z{ z } {}
@@ -26,7 +30,7 @@ struct Vector_t {
             this->scale(scale_factor);
     }
 
-    void getBounds(Vector_t<TYPE> &min, Vector_t<TYPE> &max) {
+    void getBounds(Vector_t<TYPE> min, Vector_t<TYPE> &max) {
         if(x > max.x) max.x = x;
         else if (x < min.x) min.x = x;
         if(y > max.y) max.y = y;
@@ -61,38 +65,38 @@ struct Vector_t {
     }
 
     friend constexpr auto operator!=(const Vector_t& a, const Vector_t& b) noexcept {
-        return !(a == b);
+        return a != b;
     }
 
-    constexpr Vector_t& operator=(const TYPE array[3]) noexcept {
+    constexpr auto& operator=(const TYPE array[3]) noexcept {
         x = array[0];
         y = array[1];
         z = array[2];
         return *this;
     }
 
-    constexpr Vector_t& operator+=(const Vector_t& v) noexcept {
+    constexpr auto& operator+=(const Vector_t& v) noexcept {
         x += v.x;
         y += v.y;
         z += v.z;
         return *this;
     }
 
-    constexpr Vector_t& operator+=(TYPE f) noexcept {
+    constexpr auto& operator+=(TYPE f) noexcept {
         x += f;
         y += f;
         z += f;
         return *this;
     }
 
-    constexpr Vector_t& operator-=(const Vector_t& v) noexcept {
+    constexpr auto& operator-=(const Vector_t& v) noexcept {
         x -= v.x;
         y -= v.y;
         z -= v.z;
         return *this;
     }
 
-    constexpr Vector_t& operator-=(TYPE f) noexcept {
+    constexpr auto& operator-=(TYPE f) noexcept {
         x -= f;
         y -= f;
         z -= f;
@@ -111,61 +115,57 @@ struct Vector_t {
         return Vector_t{ a.x * b.x, a.y * b.y, a.z * b.z };
     }
 
-    constexpr Vector_t& operator/=(TYPE div) noexcept {
+    constexpr auto& operator/=(TYPE div) noexcept {
         x /= div;
         y /= div;
         z /= div;
         return *this;
     }
 
-    constexpr Vector_t& operator/(TYPE div) noexcept {
-        x /= div;
-        y /= div;
-        z /= div;
+    constexpr auto operator/(TYPE v) noexcept {
+        x /= v;
+        y /= v;
+        z /= v;
         return *this;
     }
 
-    constexpr Vector_t& operator/(Vector_t v) noexcept {
-        x /= v.x;
-        y /= v.y;
-        z /= v.z;
+    constexpr auto operator*(TYPE mul) noexcept {
+        x *= mul;
+        y *= mul;
+        z *= mul;
         return *this;
     }
 
-    constexpr auto operator*(TYPE mul) const noexcept
-    {
-        return Vector_t{ x * mul, y * mul, z * mul };
+    constexpr auto operator-(TYPE sub) noexcept {
+        x -= sub;
+        y -= sub;
+        z -= sub;
+        return *this;
     }
 
-    constexpr auto operator-(TYPE sub) const noexcept
-    {
-        return Vector_t{ x - sub, y - sub, z - sub };
+    constexpr auto operator+(TYPE add) const noexcept {
+        x += add;
+        y += add;
+        z += add;
+        return *this;
     }
 
-    constexpr auto operator+(TYPE add) const noexcept
-    {
-        return Vector_t{ x + add, y + add, z + add };
-    }
-
-    Vector_t& normalize() noexcept
-    {
+    Vector_t& normalize() noexcept {
         x = std::isfinite(x) ? std::remainder(x, 360.0f) : 0.0f;
         y = std::isfinite(y) ? std::remainder(y, 360.0f) : 0.0f;
         z = std::isfinite(z) ? std::remainder(z, 360.0f) : 0.0f;
         return *this;
     }
 
-    auto abs() const noexcept
-    {
+    auto abs() const noexcept {
         return Vector_t{ std::abs(x), std::abs(y), std::abs(z) };
     }
 
-    auto length() const noexcept
-    {
+    auto length() const noexcept {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    // Sqrt of the sum of the squares of the components, squared
+    // Sqrt of the sum of the squares of the components, squaredx
     // (sqrt(x^2 + y^2 + z^2))^2
     auto magnitude_squared() const noexcept {
         auto tmp = length();
@@ -177,8 +177,7 @@ struct Vector_t {
         return (x * x) + (y * y) + (z * z);
     }
 
-    constexpr auto size() const noexcept
-    {
+    constexpr auto size() const noexcept {
         return x * y * z;
     }
 
@@ -191,8 +190,6 @@ struct Vector_t {
     {
         return (*this - v).length();
     }
-
-    TYPE x = 0, y = 0, z = 0;
 
     // rotate Vector_t by angle (x angle = a, y angle = b, z angle = c)
     void rotate(TYPE a, TYPE b, TYPE c) {
@@ -237,10 +234,10 @@ void to_json(json& j, const Vector_t<T> v) {
     };
 }
 template<typename T>
-void from_json(const json& j, Vector_t<T> v) {
-    j.at("x").get_to(v.x);
-    j.at("y").get_to(v.y);
-    j.at("z").get_to(v.z);
+void from_json(const json& j, Vector_t<T>& v) {
+    v.x = j.at("x").get<T>();
+    v.y = j.at("y").get<T>();
+    v.z = j.at("z").get<T>();
 }
 #pragma endregion
 
