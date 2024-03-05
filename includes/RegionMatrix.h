@@ -14,22 +14,22 @@ public:
     float overlap_factor{};
 
     std::vector<Region*> regions;
-    Vectorr step{}, overlap{}, divisions{}, simulationSpaceStart{}, simulationSpaceEnd = {};
-
+    Vectorr step{}, overlap{}, simulationSpaceStart{}, simulationSpaceEnd = {};
+    Vector_t<int> divisions{};
     RegionMatrix() = default;
 
-    RegionMatrix(Vectorr min, Vectorr max, Vectorr divisions, float overlap_factor = 0.0003f);
+    RegionMatrix(Vectorr min, Vectorr max, Vector_t<int> divisions, float overlap_factor = 0.0003f);
 
     void reset();
 
     void computeRegionComs();
 
-#ifdef WINDOWS_or_LINUX
-    ~RegionMatrix() {
-        for (const auto &item: this->regions) {
-            if(item) delete(item);
-        }
-    }
+#ifndef WINDOWS_or_LINUX
+//    ~RegionMatrix() {
+//        for (const auto &item: this->regions) {
+//            if(item) delete(item);
+//        }
+//    }
 #endif
 };
 

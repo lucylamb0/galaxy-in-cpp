@@ -3,14 +3,18 @@
 #include <RegionMatrix.h>
 #include <Region.h>
 
-RegionMatrix::RegionMatrix(Vector_t<long double> min, Vector_t<long double> max, Vector_t<long double> divisions,
+
+RegionMatrix::RegionMatrix(Vectorr min, Vectorr max, Vector_t<int> divisions,
                            float overlap_factor) :
         simulationSpaceStart(min), simulationSpaceEnd(max), divisions(divisions), overlap_factor(overlap_factor) {
     // Ensure we dont enter a value out of range
     assert(overlap_factor >= 0.f && overlap_factor <= 1.f);
     assert(divisions.x > 0 && divisions.y > 0 && divisions.z > 0);
 
-    step = (simulationSpaceEnd - simulationSpaceStart) / divisions;
+    step.x = (simulationSpaceEnd.x - simulationSpaceStart.x) / divisions.x;
+    step.y = (simulationSpaceEnd.y - simulationSpaceStart.y) / divisions.y;
+    step.z = (simulationSpaceEnd.z - simulationSpaceStart.z) / divisions.z;
+
     overlap = Vectorr(step.x * overlap_factor, step.y * overlap_factor, step.z * overlap_factor); // overlap between regions
 
     for (int i = 0; i < divisions.x; i++) {
